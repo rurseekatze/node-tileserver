@@ -54,20 +54,20 @@ condition[10] = "AND ((tags->'railway'='rail') OR (tags->'railway'='disused') OR
 
 // include necessary libraries
 logger.trace('Including KothicJS...');
-eval(fs.readFileSync(configuration.scriptdir+'kothic.js')+'');
-eval(fs.readFileSync(configuration.scriptdir+'renderer/path.js')+'');
-eval(fs.readFileSync(configuration.scriptdir+'renderer/line.js')+'');
-eval(fs.readFileSync(configuration.scriptdir+'renderer/polygon.js')+'');
-eval(fs.readFileSync(configuration.scriptdir+'renderer/shields.js')+'');
-eval(fs.readFileSync(configuration.scriptdir+'renderer/path.js')+'');
-eval(fs.readFileSync(configuration.scriptdir+'renderer/texticons.js')+'');
-eval(fs.readFileSync(configuration.scriptdir+'renderer/path.js')+'');
-eval(fs.readFileSync(configuration.scriptdir+'renderer/text.js')+'');
-eval(fs.readFileSync(configuration.scriptdir+'style/mapcss.js')+'');
-eval(fs.readFileSync(configuration.scriptdir+'style/style.js')+'');
-eval(fs.readFileSync(configuration.scriptdir+'utils/collisions.js')+'');
-eval(fs.readFileSync(configuration.scriptdir+'utils/geom.js')+'');
-eval(fs.readFileSync(configuration.scriptdir+'utils/collisions.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/kothic.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/path.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/line.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/polygon.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/shields.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/path.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/texticons.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/path.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/text.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/style/mapcss.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/style/style.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/utils/collisions.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/utils/geom.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/utils/collisions.js')+'');
 logger.trace('KothicJS loaded.');
 
 

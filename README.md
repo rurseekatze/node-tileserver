@@ -164,7 +164,7 @@ You can set various options to configure your tileserver:
 
  * `expiredtilesdir` Relative or absolute path to the list of expired tiles. _Default: `../../olm/import`_
 
- * `scriptdir` Relative or absolute path to the directory of the required scripts. _Default: `../js/`_
+ * `scriptdir` Relative or absolute path to the directory of the required scripts, usually `kothic-js/src`. _Default: `../js`_
 
  * `zoomOffset` Zoom offset. _Default: `0`_
 
