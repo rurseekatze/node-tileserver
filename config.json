@@ -17,5 +17,5 @@
 	"maxPrerender" : 8,
 	"maxCached" : 15,
 	"maxsockets" : 100,
-	"tileserverPort" : 9000,
+	"tileserverPort" : 9000
 }
