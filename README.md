@@ -166,6 +166,8 @@ You can set various options to configure your tileserver:
 
  * `scriptdir` Relative or absolute path to the directory of the required scripts, usually `kothic-js/src`. _Default: `../js`_
 
+ * `styledir` Relative or absolute path to the directory containing (compiled) MapCSS styles. _Default: `../styles`_
+
  * `zoomOffset` Zoom offset. _Default: `0`_
 
  * `minZoom` Lowest allowed zoomlevel for tiles. Change this value if you do not want to serve lowzoom tiles. _Default: `0`_

@@ -63,7 +63,7 @@ else
 
 	// include rendering styles
 	for (var i=0; i<configuration.styles.length; i++)
-		eval(fs.readFileSync('../styles/'+configuration.styles[i]+'.js')+'');
+		eval(fs.readFileSync(configuration.styledir+'/'+configuration.styles[i]+'.js')+'');
 
 
 	// handle exceptions

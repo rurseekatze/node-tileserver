@@ -6,6 +6,7 @@
 	"tiledir" : "../bitmap-tiles",
 	"expiredtilesdir" : "../../olm/import",
 	"scriptdir" : "../js",
+	"styledir" : "../styles",
 	"zoomOffset" : 0,
 	"minZoom" : 0,
 	"maxZoom" : 20,
