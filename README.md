@@ -152,39 +152,39 @@
 
 You can set various options to configure your tileserver:
 
- * __`tileSize`__ Size of tiles in pixels. Usually it is not necessary to change this value, but you can increase or decrease it for higher rendering performance or faster map generation. _Default: `256`_
+ * `tileSize` Size of tiles in pixels. Usually it is not necessary to change this value, but you can increase or decrease it for higher rendering performance or faster map generation. _Default: `256`_
 
- * __`prefix`__ The prefix used for osm2pgsql tables. Depends on the parameters you are using in osm2pgsql. _Default: `railmap`_
+ * `prefix` The prefix used for osm2pgsql tables. Depends on the parameters you are using in osm2pgsql. _Default: `railmap`_
 
- * __`db`__ The name of the used database. Depends on the parameters you are using in osm2pgsql. _Default: `railmap`_
+ * `db` The name of the used database. Depends on the parameters you are using in osm2pgsql. _Default: `railmap`_
 
- * __`vtiledir`__ Relative or absolute path to the vector tile directory. _Default: `../tiles`_
+ * `vtiledir` Relative or absolute path to the vector tile directory. _Default: `../tiles`_
 
- * __`expiredtilesdir`__ Relative or absolute path to the list of expired tiles. _Default: `../../olm/import`_
+ * `expiredtilesdir` Relative or absolute path to the list of expired tiles. _Default: `../../olm/import`_
 
- * __`scriptdir`__ Relative or absolute path to the directory of the required scripts. _Default: `../js/`_
+ * `scriptdir` Relative or absolute path to the directory of the required scripts. _Default: `../js/`_
 
- * __`zoomOffset`__ Zoom offset. _Default: `0`_
+ * `zoomOffset` Zoom offset. _Default: `0`_
 
- * __`minZoom`__ Lowest allowed zoomlevel for tiles. Change this value if you do not want to serve lowzoom tiles. _Default: `0`_
+ * `minZoom` Lowest allowed zoomlevel for tiles. Change this value if you do not want to serve lowzoom tiles. _Default: `0`_
 
- * __`maxZoom`__ Highest allowed zoomlevel for tiles. Change this value if you do not want to serve highzoom tiles. _Default: `20`_
+ * `maxZoom` Highest allowed zoomlevel for tiles. Change this value if you do not want to serve highzoom tiles. _Default: `20`_
 
- * __`styles`__ List of available rendering styles. Please add the filenames of rendering styles in the styles directory to this list. Note that `vector` is already in use for serving vector tiles. _Default: `standard, maxspeed, signals`_
+ * `styles` List of available rendering styles. Please add the filenames of rendering styles in the styles directory to this list. Note that `vector` is already in use for serving vector tiles. _Default: `standard, maxspeed, signals`_
 
- * __`intscalefactor`__ Scale factor. You do not need to change this value. _Default: `10000`_
+ * `intscalefactor` Scale factor. You do not need to change this value. _Default: `10000`_
 
- * __`geomcolumn`__ Name of the geometry column used in the database. You will not need to change this value. _Default: `way`_
+ * `geomcolumn` Name of the geometry column used in the database. You will not need to change this value. _Default: `way`_
 
- * __`pxtolerance`__ Pixel tolerance used for simplifying vector data. You do not need to change this value. _Default: `1.8`_
+ * `pxtolerance` Pixel tolerance used for simplifying vector data. You do not need to change this value. _Default: `1.8`_
 
- * __`maxPrerender`__ Highest zoomlevel in which tiles are prerendered in initial rendering run. Tiles in higher zoomlevels will be rendered just on request. Change this value to increase or decrease the load for your system. As higher the value, as more tiles have to be rendered. If your selected value is too low, tile requests will be slow, so you should find a value that balances system load and request times. _Default: `8`_
+ * `maxPrerender` Highest zoomlevel in which tiles are prerendered in initial rendering run. Tiles in higher zoomlevels will be rendered just on request. Change this value to increase or decrease the load for your system. As higher the value, as more tiles have to be rendered. If your selected value is too low, tile requests will be slow, so you should find a value that balances system load and request times. _Default: `8`_
 
- * __`maxCached`__ Highest zoomlevel in which tiles are cached. Tiles in higher zoomlevels will be rendered just on request and removed from the filesystem cache instead of rerendering if they are expired. Change this value to increase or decrease the load for your system. As higher the value, as more tiles have to be rerendered. If your selected value is too low, tile requests will be slow, so you should find a value that balances system load and request times. _Default: `15`_
+ * `maxCached` Highest zoomlevel in which tiles are cached. Tiles in higher zoomlevels will be rendered just on request and removed from the filesystem cache instead of rerendering if they are expired. Change this value to increase or decrease the load for your system. As higher the value, as more tiles have to be rerendered. If your selected value is too low, tile requests will be slow, so you should find a value that balances system load and request times. _Default: `15`_
 
- * __`maxsockets`__ Maximum number of concurring http connections. The optimal value depends on your environment (hardware, operating system, system settings, ...), so you should try some values to get the optimal performance. _Default: `100`_
+ * `maxsockets` Maximum number of concurring http connections. The optimal value depends on your environment (hardware, operating system, system settings, ...), so you should try some values to get the optimal performance. _Default: `100`_
 
- * __`tileserverPort`__ Port on which the tileserver is listening. Change this value if you have conflicts with other applications. _Default: `9000`_
+ * `tileserverPort` Port on which the tileserver is listening. Change this value if you have conflicts with other applications. _Default: `9000`_
 
 ## Run the server
 
