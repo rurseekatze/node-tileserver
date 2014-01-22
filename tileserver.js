@@ -1,8 +1,8 @@
 /*
-OpenRailwayMap Copyright (C) 2012 Alexander Matheisen
+node-tileserver Copyright (C) 2014 Alexander Matheisen
 This program comes with ABSOLUTELY NO WARRANTY.
 This is free software, and you are welcome to redistribute it under certain conditions.
-See http://wiki.openstreetmap.org/wiki/OpenRailwayMap for details.
+See https://github.com/rurseekatze/node-tileserver for details.
 */
 
 
