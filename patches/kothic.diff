@@ -1,0 +1,15 @@
+--- /home/alexander/Desktop/kothic.js
++++ /home/alexander/Projekte/OpenRailwayMap/orm-latest/js/kothic.js
+@@ -166,8 +166,10 @@
+         layerIds = ['_bg'].concat(layerIds);
+ 
+         for (i = 0; i < layerIds.length; i++) {
+-            queue = layersToRender[layerIds[i]];
+-
++			// begin modified by rurseekatze
++            //queue = layersToRender[layerIds[i]];
++            queue = layersToRender[layerIds[i]] || {};
++			// end modified by rurseekatze
+             if (queue.polygons) {
+                 for (j = 0, len = queue.polygons.length; j < len; j++) {
+                     Kothic.polygon.render(ctx, queue.polygons[j], queue.polygons[j + 1], ws, hs, granularity);

@@ -1,0 +1,74 @@
+--- /home/alexander/Desktop/kothic-leaflet.js
++++ /home/alexander/Projekte/OpenRailwayMap/orm-latest/js/kothic-leaflet.js
+@@ -1,7 +1,7 @@
+ L.TileLayer.Kothic = L.TileLayer.Canvas.extend({
+     options: {
+-        tileSize: 256 * 4,
+-        zoomOffset: 2,
++        tileSize: 256,
++        zoomOffset: 0,
+         minZoom: 2,
+         maxZoom: 22,
+         updateWhenIdle: true,
+@@ -41,13 +41,13 @@
+             delete layer._scripts[key];
+         }
+ 
+-        this._invertYAxe(data);
++		// modified by rurseekatze
++		// this._invertYAxe(data);
+ 
+         var styles = this.options.styles;
+ 
+         Kothic.render(canvas, data, zoom + zoomOffset, {
+             styles: styles,
+-            locales: ['be', 'ru', 'en'],
+             onRenderComplete: onRenderComplete
+         });
+ 
+@@ -69,9 +69,10 @@
+     },
+ 
+     enableStyle: function(name) {
+-        if (MapCSS.availableStyles.indexOf(name) >= 0 && this.options.styles.indexOf(name) < 0) {
++		// start modified by rurseekatze
++        if (this.options.styles.indexOf(name) == -1) {
++		// end modified by rurseekatze
+             this.options.styles.push(name);
+-            this.redraw();
+         }
+     },
+ 
+@@ -79,19 +80,26 @@
+         if (this.options.styles.indexOf(name) >= 0) {
+             var i = this.options.styles.indexOf(name);
+             this.options.styles.splice(i, 1);
+-            this.redraw();
+         }
+     },
+ 
++	// start modified by rurseekatze
+     redraw: function() {
+         MapCSS.invalidateCache();
+-        // TODO implement layer.redraw() in Leaflet
++
+         this._map.getPanes().tilePane.empty = false;
+-        if (this._map && this._map._container) {
+-            this._reset();
+-            this._update();
+-        }
++
++		if (this._map) {
++			this._reset({hard: true});
++			this._update();
++		}
++
++		for (var i in this._tiles) {
++			this._redrawTile(this._tiles[i]);
++		}
++		return this;
+     },
++	// end modified by rurseekatze
+ 
+     _invertYAxe: function(data) {
+         var type, coordinates, tileSize = data.granularity, i, j, k, l, feature;
