@@ -6,6 +6,11 @@ See https://github.com/rurseekatze/node-tileserver for details.
 */
 
 
+// load configuraion file
+var configuration = require('./config.json');
+
+
+// include necessary modules
 var cluster = require('cluster');
 var os = require('os');
 var rbush = require('rbush');
@@ -20,7 +25,7 @@ var touch = require("touch");
 
 
 // maximum count of concurrent http connections
-http.globalAgent.maxSockets = 100;
+http.globalAgent.maxSockets = configuration.maxsockets;
 
 
 var Canvas = require('canvas');
@@ -47,63 +52,29 @@ condition[9] = "AND ((tags->'usage'='main') OR (tags->'usage'='branch') OR (tags
 condition[10] = "AND ((tags->'railway'='rail') OR (tags->'railway'='disused') OR (tags->'railway'='abandoned') OR (tags->'railway'='proposed') OR (tags->'railway'='construction') OR (tags->'railway'='light_rail') OR (tags->'railway'='tram') OR (tags->'railway'='subway') OR (tags->'railway'='narrow_gauge') OR (tags->'railway'='station') OR (tags->'railway'='halt'))";
 
 
-// size of tiles in pixels
-var tileSize = 256;
-// relative or absolute path to the vector tile directory
-var vtiledir = "../tiles";
-// relative or absolute path to the bitmap tile directory
-var tiledir = "../bitmap-tiles";
-// path to the list of expired tiles
-var expiredtilesdir = "../../olm/import";
-// relative or absolute path to the directory of the required scripts
-var scriptdir = "../js/";
-// zoom offset
-var zoomOffset = 0;
-// minimal and maximal zoom level
-var minZoom = 2;
-var maxZoom = 19;
-// list of existing rendering styles
-var styles = new Array("standard", "maxspeed", "signals");
-// scale fector used for vector tiling
-var intscalefactor = 10000;
-// name of geometry column
-var geomcolumn = "way";
-// prefix of osm2pgsql tables
-var prefix = "railmap";
-// name of database
-var db = "railmap";
-// number of cpus
-var cpus = os.cpus().length;
-// pixel tolerance used for getting vector data
-var pxtolerance = 1.8;
-// highest zoomlevel in which tiles are prerendered in initial rendering
-var maxPrerender = 8;
-// highest zoomlevel in which tiles are cached; tiles in higher zoomlevels will just be removed from cache if expired
-var maxCached = 15;
-
-
 // include necessary libraries
 logger.trace('Including KothicJS...');
-eval(fs.readFileSync(scriptdir+'kothic.js')+'');
-eval(fs.readFileSync(scriptdir+'renderer/path.js')+'');
-eval(fs.readFileSync(scriptdir+'renderer/line.js')+'');
-eval(fs.readFileSync(scriptdir+'renderer/polygon.js')+'');
-eval(fs.readFileSync(scriptdir+'renderer/shields.js')+'');
-eval(fs.readFileSync(scriptdir+'renderer/path.js')+'');
-eval(fs.readFileSync(scriptdir+'renderer/texticons.js')+'');
-eval(fs.readFileSync(scriptdir+'renderer/path.js')+'');
-eval(fs.readFileSync(scriptdir+'renderer/text.js')+'');
-eval(fs.readFileSync(scriptdir+'style/mapcss.js')+'');
-eval(fs.readFileSync(scriptdir+'style/style.js')+'');
-eval(fs.readFileSync(scriptdir+'utils/collisions.js')+'');
-eval(fs.readFileSync(scriptdir+'utils/geom.js')+'');
-eval(fs.readFileSync(scriptdir+'utils/collisions.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'kothic.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'renderer/path.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'renderer/line.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'renderer/polygon.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'renderer/shields.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'renderer/path.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'renderer/texticons.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'renderer/path.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'renderer/text.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'style/mapcss.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'style/style.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'utils/collisions.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'utils/geom.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'utils/collisions.js')+'');
 logger.trace('KothicJS loaded.');
 
 
 // workaround to emulate browser properties
 var window = new Object;
 window.devicePixelRatio = 1;
+
 // workaround to emulate browser frame method
 window.requestAnimationFrame = (
 	function()
@@ -114,12 +85,16 @@ window.requestAnimationFrame = (
 		};
 	}
 )();
+
 // workaround to emulate dom functions
 var document = new Object;
 document.createElement = function()
 {
 	return new Canvas();
 }
+
+// number of cpus
+var cpus = os.cpus().length;
 
 
 // renders a certain tile and calls the callback with the ready-rendered canvas when finished
@@ -128,14 +103,14 @@ function renderTile(zoom, x, y, styleName, features, callback)
 	logger.debug('z'+zoom+'x'+x+'y'+y+' Rendering data...');
 
 	// start bitmap rendering
-	var canvas = new Canvas(tileSize, tileSize);
+	var canvas = new Canvas(configuration.tileSize, configuration.tileSize);
 	canvas.style = new Object();
 
 	MapCSS.invalidateCache();
 	MapCSS.availableStyles.length = 0;
 	MapCSS.availableStyles.push(styleName);
 
-	Kothic.render(canvas, features, parseInt(zoom)+zoomOffset,
+	Kothic.render(canvas, features, parseInt(zoom)+configuration.zoomOffset,
 	{
 		styles: MapCSS.availableStyles,
 		onRenderComplete: function()
@@ -158,9 +133,9 @@ function getVectorData(x, y, z, callback)
 	z = parseInt(z);
 	var bbox = bboxByTile(z+1, x, y);
 	var bbox_p = from4326To900913(bbox);
-	var zoom = z+zoomOffset;
+	var zoom = z+configuration.zoomOffset;
 
-	var connection = "postgres://postgres@localhost/railmap";
+	var connection = "postgres://postgres@localhost/"+configuration.database;
 	var client = new pg.Client(connection);
 
 	logger.debug('z'+z+'x'+x+'y'+y+' Connecting to database '+connection+'...');
@@ -207,7 +182,7 @@ function getVectorData(x, y, z, callback)
 						logger.debug('z'+z+'x'+x+'y'+y+' Vector tile contains no data.');
 					}
 			
-					content.granularity = intscalefactor;
+					content.granularity = configuration.intscalefactor;
 					content.bbox = bbox;
 					client.end();
 					invertYAxe(content);
@@ -232,7 +207,7 @@ function getJSONFeatures(rows)
 		// catch JSON parsing errors
 		try
 		{
-			var geojson = JSON.parse(rows[i][geomcolumn]);
+			var geojson = JSON.parse(rows[i][configuration.geomcolumn]);
 		}
 		catch (err)
 		{
@@ -262,7 +237,7 @@ function getJSONFeatures(rows)
 // stores a vector tile in the vector tile directory
 function saveVectorTile(data, x, y, z, callback)
 {
-	var filepath = vtiledir+'/'+z+'/'+x;
+	var filepath = configuration.vtiledir+'/'+z+'/'+x;
 	logger.debug('z'+z+'x'+x+'y'+y+' Creating path '+filepath+'...');
 	mkdirp(filepath, function(err)
 	{
@@ -305,24 +280,24 @@ function getDatabaseQuery(type, bbox, zoom)
 	{
 		return "\
 					SELECT\
-						ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_Intersection(way, SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913))), "+(-bbox[0])+", "+(-bbox[1])+", "+intscalefactor/(bbox[2]-bbox[0])+", "+intscalefactor/(bbox[3]-bbox[1])+"), 0) AS "+geomcolumn+",\
+						ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_Intersection(way, SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913))), "+(-bbox[0])+", "+(-bbox[1])+", "+configuration.intscalefactor/(bbox[2]-bbox[0])+", "+configuration.intscalefactor/(bbox[3]-bbox[1])+"), 0) AS "+configuration.geomcolumn+",\
 						hstore2json(CAST(hstore(tags) AS hstore)) AS tags,\
-						ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_PointOnSurface(way)), "+(-bbox[0])+", "+(-bbox[1])+", "+intscalefactor/(bbox[2]-bbox[0])+", "+intscalefactor/(bbox[3]-bbox[1])+"), 0) AS reprpoint\
+						ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_PointOnSurface(way)), "+(-bbox[0])+", "+(-bbox[1])+", "+configuration.intscalefactor/(bbox[2]-bbox[0])+", "+configuration.intscalefactor/(bbox[3]-bbox[1])+"), 0) AS reprpoint\
 					FROM\
 						(\
-							SELECT (ST_Dump(ST_Multi(ST_SimplifyPreserveTopology(ST_Buffer(way ,-"+pixelSizeAtZoom(zoom, pxtolerance)+"), "+pixelSizeAtZoom(zoom, pxtolerance)+")))).geom AS "+geomcolumn+", tags\
+							SELECT (ST_Dump(ST_Multi(ST_SimplifyPreserveTopology(ST_Buffer(way ,-"+pixelSizeAtZoom(zoom, configuration.pxtolerance)+"), "+pixelSizeAtZoom(zoom, configuration.pxtolerance)+")))).geom AS "+configuration.geomcolumn+", tags\
 							FROM\
 								(\
-									SELECT ST_Union(way) AS "+geomcolumn+", tags\
+									SELECT ST_Union(way) AS "+configuration.geomcolumn+", tags\
 									FROM\
 										(\
-											SELECT ST_Buffer(way, "+pixelSizeAtZoom(zoom, pxtolerance)+") AS "+geomcolumn+", CAST(tags AS text) AS tags\
-											FROM "+prefix+"_polygon\
-											WHERE way && SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) AND way_area > "+(Math.pow(pixelSizeAtZoom(zoom, pxtolerance), 2)/pxtolerance)+" "+cond+"\
+											SELECT ST_Buffer(way, "+pixelSizeAtZoom(zoom, configuration.pxtolerance)+") AS "+configuration.geomcolumn+", CAST(tags AS text) AS tags\
+											FROM "+configuration.prefix+"_polygon\
+											WHERE way && SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) AND way_area > "+(Math.pow(pixelSizeAtZoom(zoom, configuration.pxtolerance), 2)/configuration.pxtolerance)+" "+cond+"\
 										) p\
 									GROUP BY CAST(tags AS text)\
 								) p\
-							WHERE ST_Area(way) > "+Math.pow(pixelSizeAtZoom(zoom, pxtolerance), 2)+"\
+							WHERE ST_Area(way) > "+Math.pow(pixelSizeAtZoom(zoom, configuration.pxtolerance), 2)+"\
 							ORDER BY ST_Area(way)\
 						) p";
 	}
@@ -330,14 +305,14 @@ function getDatabaseQuery(type, bbox, zoom)
 	{
 		return "\
 					SELECT\
-						ST_AsGeoJSON(ST_TransScale(ST_Intersection(way, SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913)), "+(-bbox[0])+", "+(-bbox[1])+", "+(intscalefactor/(bbox[2]-bbox[0]))+", "+(intscalefactor/(bbox[3]-bbox[1]))+"), 0) AS "+geomcolumn+", hstore2json(CAST(hstore(tags) AS hstore)) as tags\
+						ST_AsGeoJSON(ST_TransScale(ST_Intersection(way, SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913)), "+(-bbox[0])+", "+(-bbox[1])+", "+(configuration.intscalefactor/(bbox[2]-bbox[0]))+", "+(configuration.intscalefactor/(bbox[3]-bbox[1]))+"), 0) AS "+configuration.geomcolumn+", hstore2json(CAST(hstore(tags) AS hstore)) as tags\
 					FROM\
 						(\
-							SELECT (ST_Dump(ST_Multi(ST_SimplifyPreserveTopology(ST_LineMerge(way), "+pixelSizeAtZoom(zoom, pxtolerance)+")))).geom AS "+geomcolumn+", tags\
+							SELECT (ST_Dump(ST_Multi(ST_SimplifyPreserveTopology(ST_LineMerge(way), "+pixelSizeAtZoom(zoom, configuration.pxtolerance)+")))).geom AS "+configuration.geomcolumn+", tags\
 							FROM\
 								(\
-									SELECT ST_Union(way) AS "+geomcolumn+", CAST(tags AS text)\
-									FROM "+prefix+"_line\
+									SELECT ST_Union(way) AS "+configuration.geomcolumn+", CAST(tags AS text)\
+									FROM "+configuration.prefix+"_line\
 									WHERE way && SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) "+cond+"\
 									GROUP BY CAST(tags AS text)\
 								) p\
@@ -346,8 +321,8 @@ function getDatabaseQuery(type, bbox, zoom)
 	else if (type == "point")
 	{
 		return "\
-					SELECT ST_AsGeoJSON(ST_TransScale(way, "+(-bbox[0])+", "+(-bbox[1])+", "+(intscalefactor/(bbox[2]-bbox[0]))+", "+(intscalefactor/(bbox[3]-bbox[1]))+"), 0) AS "+geomcolumn+", hstore2json(tags) AS tags\
-					FROM "+prefix+"_point\
+					SELECT ST_AsGeoJSON(ST_TransScale(way, "+(-bbox[0])+", "+(-bbox[1])+", "+(configuration.intscalefactor/(bbox[2]-bbox[0]))+", "+(configuration.intscalefactor/(bbox[3]-bbox[1]))+"), 0) AS "+configuration.geomcolumn+", hstore2json(tags) AS tags\
+					FROM "+configuration.prefix+"_point\
 					WHERE\
 			        way && SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) "+cond+"\
 					LIMIT 10000";
@@ -450,7 +425,7 @@ function from4326To900913(line)
 // returns the content of a vector tile as a string
 function readVectorTile(x, y, z, callback)
 {
-	var path = vtiledir+'/'+z+'/'+x+'/'+y+'.json';
+	var path = configuration.vtiledir+'/'+z+'/'+x+'/'+y+'.json';
 	logger.debug('z'+z+'x'+x+'y'+y+' Reading vector tile at path: '+path);
 	fs.readFile(path, function(err, data)
 	{
@@ -587,7 +562,7 @@ function childTiles(zoom, x, y)
 	var tiles = new Array();
 	var tilesize = 1;
 
-	for (var z=zoom+1; z<=maxZoom; z++)
+	for (var z=zoom+1; z<=configuration.maxZoom; z++)
 	{
 		x = x*2;
 		y = y*2;
@@ -612,7 +587,7 @@ function parentTiles(zoom, x, y)
 {
 	var tiles = new Array();
 
-	while (zoom > minZoom)
+	while (zoom > configuration.minZoom)
 	{
 		zoom--;
 		x = parseInt(x/2);
@@ -638,11 +613,11 @@ function queueElementExists(queue, element)
 // returns true if the tile was marked as expired, otherwise false is returned
 function isTileExpired(zoom, x, y)
 {
-	var filepath = vtiledir+'/'+zoom+'/'+x+'/'+y+'.json';
+	var filepath = configuration.vtiledir+'/'+zoom+'/'+x+'/'+y+'.json';
 
 	if (fs.existsSync(filepath))
 	{
-		var stats = fs.statSync(vtiledir+'/'+zoom+'/'+x+'/'+y+'.json');
+		var stats = fs.statSync(configuration.vtiledir+'/'+zoom+'/'+x+'/'+y+'.json');
 		return (stats.mtime.getFullYear() == "1970") ? true : false;
 	}
 	return false;
@@ -652,7 +627,7 @@ function isTileExpired(zoom, x, y)
 // marks a tile as expired
 function markTileExpired(zoom, x, y)
 {
-	var filepath = vtiledir+'/'+zoom+'/'+x+'/'+y+'.json';
+	var filepath = configuration.vtiledir+'/'+zoom+'/'+x+'/'+y+'.json';
 
 	if (fs.existsSync(filepath))
 		touch.sync(filepath, {time: new Date(10)});
@@ -735,12 +710,12 @@ function refreshExpiredTile(zoom, x, y, data, selectedStyle)
 {
 	var selectedStyle = selectedStyle || 0;
 
-	if (selectedStyle >= styles.length)
+	if (selectedStyle >= configuration.styles.length)
 		return;
 
 	logger.trace('z'+zoom+'x'+x+'y'+y+' MapCSS style loaded.');
-	var filepath = tiledir+'/'+styles[selectedStyle]+'/'+zoom+'/'+x;
-	renderTile(zoom, x, y, styles[selectedStyle], data, function(err, image)
+	var filepath = configuration.tiledir+'/'+configuration.styles[selectedStyle]+'/'+zoom+'/'+x;
+	renderTile(zoom, x, y, configuration.styles[selectedStyle], data, function(err, image)
 	{
 		if (err)
 		{
@@ -788,12 +763,12 @@ function removeBitmapTile(zoom, x, y, selectedStyle)
 {
 	var selectedStyle = selectedStyle || 0;
 
-	if (selectedStyle > styles.length)
+	if (selectedStyle > configuration.styles.length)
 		return;
 
-	var filepath = tiledir+'/'+styles[selectedStyle]+'/'+zoom+'/'+x+'/'+y+'.png';
+	var filepath = configuration.tiledir+'/'+configuration.styles[selectedStyle]+'/'+zoom+'/'+x+'/'+y+'.png';
 	logger.debug('Removing bitmap tile '+filepath+' ...');
-	fs.exists(expiredtilesdir+'/'+filename, function(exists)
+	fs.exists(configuration.expiredtilesdir+'/'+filename, function(exists)
 	{
 		if (exists)
 		{
@@ -815,12 +790,12 @@ function removeBitmapTile(zoom, x, y, selectedStyle)
 function expireTileList(filename, callback)
 {
 	logger.debug('Checking if list of expired tiles exists...');
-	fs.exists(expiredtilesdir+'/'+filename, function(exists)
+	fs.exists(configuration.expiredtilesdir+'/'+filename, function(exists)
 	{
 		if (exists)
 		{
 			logger.info('Reading list of expired tiles...');
-			var stream = byline(fs.createReadStream(expiredtilesdir+'/'+filename));
+			var stream = byline(fs.createReadStream(configuration.expiredtilesdir+'/'+filename));
 
 			stream.on('data', function(line)
 			{
@@ -831,7 +806,7 @@ function expireTileList(filename, callback)
 				// mark child tiles
 				var tileset = childTiles(tile[0], tile[1], tile[2]);
 				for (var tilesetIndex=0; tilesetIndex<tileset.length; tilesetIndex++)
-					if (tileset[tilesetIndex][0] <= maxZoom)
+					if (tileset[tilesetIndex][0] <= configuration.maxZoom)
 						expireTile(tileset[tilesetIndex][0], tileset[tilesetIndex][1], tileset[tilesetIndex][2]);
 
 				// mark parent tiles
@@ -867,12 +842,12 @@ function expireTileList(filename, callback)
 // marks a tile and all it's subtiles and parent tiles as expired or deletes them if necessary
 function expireTile(zoom, x, y)
 {
-	if (zoom <= maxCached)
+	if (zoom <= configuration.maxCached)
 		markTileExpired(zoom, x, y);
 	// remove all tiles higher than maxcached
 	else
 	{
-		var filepath = vtiledir+'/'+zoom+'/'+x+'/'+y+'.json';
+		var filepath = configuration.vtiledir+'/'+zoom+'/'+x+'/'+y+'.json';
 		logger.debug('Removing vector tile '+filepath+' ...');
 		fs.unlink(filepath, function(err)
 		{
@@ -890,7 +865,7 @@ function expireTile(zoom, x, y)
 // render all tiles on initial run
 function initQueue()
 {
-	var z = minZoom;
+	var z = configuration.minZoom;
 	var x = 0;
 	var y = -1;
 	var tilecount = Math.pow(2, z);
@@ -910,7 +885,7 @@ function initQueue()
 					x++;
 					y = 0;
 				}
-				else if (z < maxPrerender)
+				else if (z < configuration.maxPrerender)
 				{
 					z++;
 					tilecount = Math.pow(2, z);

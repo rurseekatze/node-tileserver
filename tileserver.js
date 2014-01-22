@@ -62,8 +62,8 @@ else
 	renderQueue();
 
 	// include rendering styles
-	for (var i=0; i<styles.length; i++)
-		eval(fs.readFileSync('../styles/'+styles[i]+'.js')+'');
+	for (var i=0; i<configuration.styles.length; i++)
+		eval(fs.readFileSync('../styles/'+configuration.styles[i]+'.js')+'');
 
 
 	// handle exceptions
@@ -124,7 +124,7 @@ else
 			{
 				logger.debug('Executing command init. Rendering all tiles on initial run.');
 				var listlength = 0;
-				for (var z = minZoom; z <= maxPrerender; z++)
+				for (var z = configuration.minZoom; z <= configuration.maxPrerender; z++)
 					listlength += Math.pow(Math.pow(2, z), 2);
 
 				response.writeHead(200, {'Content-Type': 'text/plain'});
@@ -150,7 +150,7 @@ else
 			var command = params[5];
 
 			// check validity of parameters
-			if (zoom == "" || !zoom.match(/^[0-9]+$/) || zoom < minZoom || zoom > maxZoom)
+			if (zoom == "" || !zoom.match(/^[0-9]+$/) || zoom < configuration.minZoom || zoom > configuration.maxZoom)
 			{
 				logger.info('z'+zoom+'x'+x+'y'+y+' Requested zoom level not valid. Aborting.');
 				response.writeHead(403, {'Content-Type': 'text/plain'});
@@ -171,7 +171,7 @@ else
 				response.end();
 				return;
 			}
-			if (styleName == "" || (styles.indexOf(styleName) == -1 && styleName != "vector"))
+			if (styleName == "" || (configuration.styles.indexOf(styleName) == -1 && styleName != "vector"))
 			{
 				logger.info('z'+zoom+'x'+x+'y'+y+' Requested rendering style '+styleName+' not valid. Aborting.');
 				response.writeHead(403, {'Content-Type': 'text/plain'});
@@ -243,7 +243,7 @@ else
 			else
 			{
 				logger.debug('z'+zoom+'x'+x+'y'+y+' Bitmap tile requested.');
-				fs.exists(tiledir+'/'+styleName+'/'+zoom+'/'+x+'/'+y+'.png', function(exists)
+				fs.exists(configuration.tiledir+'/'+styleName+'/'+zoom+'/'+x+'/'+y+'.png', function(exists)
 				{
 					// if tile is already rendered, return the cached image
 					if (exists && typeof command == "undefined")
@@ -256,7 +256,7 @@ else
 						}
 
 						logger.debug('z'+zoom+'x'+x+'y'+y+' Bitmap tile already rendered, returning cached data...');
-						fs.readFile(tiledir+'/'+styleName+'/'+zoom+'/'+x+'/'+y+'.png', function(err, data)
+						fs.readFile(configuration.tiledir+'/'+styleName+'/'+zoom+'/'+x+'/'+y+'.png', function(err, data)
 						{
 							if (err)
 							{
@@ -281,7 +281,7 @@ else
 						MapCSS.onImagesLoad = function()
 						{
 							logger.trace('z'+zoom+'x'+x+'y'+y+' MapCSS style successfully loaded.');
-							logger.debug('z'+zoom+'x'+x+'y'+y+' Trying to open vectortile at path: '+vtiledir+'/'+zoom+'/'+x+'/'+y+'.js');
+							logger.debug('z'+zoom+'x'+x+'y'+y+' Trying to open vectortile at path: '+configuration.vtiledir+'/'+zoom+'/'+x+'/'+y+'.js');
 							readVectorTile(x, y, zoom, function(err, data)
 							{
 								var onRenderEnd = function(err, image)
@@ -289,7 +289,7 @@ else
 									if (err)
 										logger.debug('z'+zoom+'x'+x+'y'+y+' Vectortile was empty.');
 
-									var filepath = tiledir+'/'+styleName+'/'+zoom+'/'+x;
+									var filepath = configuration.tiledir+'/'+styleName+'/'+zoom+'/'+x;
 									logger.debug('z'+zoom+'x'+x+'y'+y+' Rendering successful.');
 									logger.debug('z'+zoom+'x'+x+'y'+y+' Saving bitmap tile at path: '+filepath);
 									mkdirp(filepath, function(err)
@@ -409,6 +409,6 @@ else
 		}
 	}
 
-	http.createServer(onRequest).listen(9000);
+	http.createServer(onRequest).listen(configuration.tileserverPort);
 	logger.info('Worker has started.');
 }

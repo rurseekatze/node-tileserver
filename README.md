@@ -160,6 +160,8 @@ You can set various options to configure your tileserver:
 
  * `vtiledir` Relative or absolute path to the vector tile directory. _Default: `../tiles`_
 
+ * `tiledir` Relative or absolute path to the bitmap tile directory. _Default: `../bitmap-tiles`_
+
  * `expiredtilesdir` Relative or absolute path to the list of expired tiles. _Default: `../../olm/import`_
 
  * `scriptdir` Relative or absolute path to the directory of the required scripts. _Default: `../js/`_
