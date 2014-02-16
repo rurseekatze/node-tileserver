@@ -184,7 +184,9 @@ You can set various options to configure your tileserver:
 
  * `maxPrerender` Highest zoomlevel in which tiles are prerendered in initial rendering run. Tiles in higher zoomlevels will be rendered just on request. Change this value to increase or decrease the load for your system. As higher the value, as more tiles have to be rendered. If your selected value is too low, tile requests will be slow, so you should find a value that balances system load and request times. _Default: `8`_
 
- * `maxCached` Highest zoomlevel in which tiles are cached. Tiles in higher zoomlevels will be rendered just on request and removed from the filesystem cache instead of rerendering if they are expired. Change this value to increase or decrease the load for your system. As higher the value, as more tiles have to be rerendered. If your selected value is too low, tile requests will be slow, so you should find a value that balances system load and request times. _Default: `15`_
+ * `maxCached` Highest zoomlevel in which tiles are cached. Tiles in higher zoomlevels will be rendered just on request and removed from the filesystem cache instead of rerendering if they are expired. Change this value to increase or decrease the load for your system. As higher the value is, as more tiles have to be rerendered. If your selected value is too low, tile requests will be slow, so you should find a value that balances system load and request times. _Default: `16`_
+
+ * `minExpiring` Lowest zoomlevel in which tiles are only marked as expired if they are affected by an edit. Tiles in lower zoomlevels will be marked as expired only by a manual expiring (such as in an update script). Change this value to increase or decrease the load for your system. As lower the value is, as more tiles have to be rerendered. If your selected value is too high, too many not-affected tiles will be marked as expired, so you should find a value that balances system load and request times. _Default: `10`_
 
  * `maxsockets` Maximum number of concurring http connections. The optimal value depends on your environment (hardware, operating system, system settings, ...), so you should try some values to get the optimal performance. _Default: `100`_
 
@@ -208,7 +210,7 @@ You can set various options to configure your tileserver:
 
  Start the initial rendering:
 
-    $ curl "http://localhost:9000/init"
+    $ node init-rendering.js
 
 ## Usage
 
@@ -282,6 +284,14 @@ You can set various options to configure your tileserver:
     railmap.redraw();
     ...
 
+ There is also the possibility to force the rerendering of a single tile. Just add `/dirty` at the end of a tile URL. Example:
+
+    http://tiles.YOURDOMAIN.org/STYLENAME/z/x/y.png/dirty
+
+ or
+
+    http://tiles.YOURDOMAIN.org/vector/z/x/y.png/dirty
+
 ## Update database and tiles
 
  Use osm2pgsql to update your database. To rerender all expired tiles, you need a file that contains a list of expired tiles. Such a command could look like this:
@@ -294,15 +304,16 @@ You can set various options to configure your tileserver:
 
  Run
 
-    $ curl "http://localhost:9000/loadlist"
+    $ node expire-tiles.js path/to/expired_tiles
 
  to load the list of expired tiles and to mark all these tiles as expired. They will be rerendered on their next request or deleted from cache if they are highzoom tiles.
 
- By requesting
+ `Note:` It is not efficient to go through this list for all zoom levels, so by default only tiles zoom>=maxPrerender and zoom<=maxCached are marked as expired. For other zoomlevels you can mark all affected tiles by executing
 
-    $ curl "http://localhost:9000/status"
+    $ cd /path/to/your/vector/tiles
+    $ find <zoom> -exec touch -t 197001010000 {} \;
 
- you can get the current number of tiles in the queue.
+ You can also execute these commands to expire all tiles after a change of your stylesheet.
 
 ## References
 

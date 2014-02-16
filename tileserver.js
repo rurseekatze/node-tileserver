@@ -89,50 +89,6 @@ else
 			var pathname = url.parse(request.url).pathname;
 			logger.info('Request for '+pathname+' received.');
 
-			// request the current status
-			if (pathname == "/status")
-			{
-				logger.debug('Returning current rendering status.');
-				var listlength = queue.length || 0;
-				response.writeHead(200, {'Content-Type': 'text/plain'});
-				if (listlength == 0)
-					response.end("All tiles were refreshed.\n");
-				else
-					response.end("Tiles to render: "+listlength+"\n");
-				return;
-			}
-			// load list of expired tiles and mark tiles as expired
-			else if (pathname == "/loadlist")
-			{
-				expireTileList("expired_tiles", function(err)
-				{
-					if (err)
-					{
-						response.writeHead(500, {'Content-Type': 'text/plain'});
-						response.end("Tiles to render: "+listlength+"\n");
-					}
-					else
-					{
-						response.writeHead(200, {'Content-Type': 'text/plain'});
-						response.end("Tiles to render: "+listlength+"\n");
-					}
-					return;
-				});
-			}
-			// render all tiles on initial run
-			else if (command == "/init")
-			{
-				logger.debug('Executing command init. Rendering all tiles on initial run.');
-				var listlength = 0;
-				for (var z = configuration.minZoom; z <= configuration.maxPrerender; z++)
-					listlength += Math.pow(Math.pow(2, z), 2);
-
-				response.writeHead(200, {'Content-Type': 'text/plain'});
-				response.end("Will create "+parseInt(listlength/1000)+"k tiles as background daemon.\n");
-				logger.debug('Initial rendering of all tiles in the background.');
-				initQueue();
-			}
-
 			var params = pathname.split("/");
 			if (params.length < 5 || params.length > 6)
 			{
