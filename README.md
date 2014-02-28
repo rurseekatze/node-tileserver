@@ -2,7 +2,7 @@
 
  node-tileserver is a lightweight tileserver using [NodeJS](http://nodejs.org/). It can serve bitmap and vector tiles and is designed as a fast and easy-to-install tileserver for rendering OpenStreetMap data. It works perfectly with an osm2pgsql database and Leaflet and KothicJS on the client side.
 
- See the [OpenStreetMap Wiki](http://wiki.openstreetmap.org/wiki/Node-tileserver) or the [Github repository](https://github.com/rurseekatze/node-tileserver) for more information.
+ See the [OpenStreetMap Wiki](http://wiki.openstreetmap.org/wiki/Node-tileserver) or the [Github repository](https://github.com/rurseekatze/node-tileserver) for more information. http://www.matheisen.org/de/tileserver.rss
 
 ## Features
 
@@ -10,10 +10,11 @@
 * Serves vector tiles rendered on clientside by KothicJS
 * Uses KothicJS both as bitmap renderer on serverside and canvas renderer on clientside 
 * Filesystem caching mechanisms
+* Map styling with MapCSS
 * Support for tiles in multiple rendering styles
 * Designed to use a osm2pgsql hstore database containing OpenStreetMap data
 * Refresh tiles manually by GET requests
-* Rerender expired tiles with a background daemon
+* Rerender expired tiles automatically in the background
 * High performance that profits from the non-blocking I/O design of NodeJS
 * Easy to install on several operating systems, distributions and environments due to less dependencies
 
