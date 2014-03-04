@@ -128,6 +128,7 @@
 
  Apply some patches, otherwise some features will not work properly:
     $ patch src/kothic.js < ../patches/kothic.diff
+    $ patch src/style/style.js < ../patches/style.diff
     $ patch dist/kothic-leaflet.js < ../patches/kothic-leaflet.diff
 
  You need MapCSS converter to compile your MapCSS styles to javascript:
@@ -192,6 +193,8 @@ You can set various options to configure your tileserver:
  * `maxsockets` Maximum number of concurring http connections. The optimal value depends on your environment (hardware, operating system, system settings, ...), so you should try some values to get the optimal performance. _Default: `100`_
 
  * `tileserverPort` Port on which the tileserver is listening. Change this value if you have conflicts with other applications. _Default: `9000`_
+
+__Note:__ For some parameters it is also necessary to change the modify the options in kothic-leaflet.js!
 
 ## Run the server
 
@@ -309,12 +312,24 @@ You can set various options to configure your tileserver:
 
  to load the list of expired tiles and to mark all these tiles as expired. They will be rerendered on their next request or deleted from cache if they are highzoom tiles.
 
- `Note:` It is not efficient to go through this list for all zoom levels, so by default only tiles zoom>=maxPrerender and zoom<=maxCached are marked as expired. For other zoomlevels you can mark all affected tiles by executing
+ __Note:__ It is not efficient to go through this list for all zoom levels, so by default only tiles zoom>=maxPrerender and zoom<=maxCached are marked as expired. For other zoomlevels you can mark all affected tiles by executing
 
     $ cd /path/to/your/vector/tiles
     $ find <zoom> -exec touch -t 197001010000 {} \;
 
  You can also execute these commands to expire all tiles after a change of your stylesheet.
+
+## MapCSS extension
+
+ node-tileserver extends the used KothicJS renderer with a new MapCSS rule. Set
+
+    -x-ignore-layer: true;
+
+ to ignore the `layer=*` tag.
+
+ This can be useful for some purposes when you want to override the built-in layering of KothicJS.
+
+ __Example:__ You want to render maxspeeds by colouring each line dependent on the `maxspeed=*` tag. If lines are overlapping, ones with higher values should be drawn on the top of lines with lower values. Without `-x-ignore-layer`, it may happen that a line with a higher value of maxspeed is hidden by a line with a lower values of maxspeed, because the lowspeed way is a bridge and has a higher value of `layer=*`.
 
 ## References
 
