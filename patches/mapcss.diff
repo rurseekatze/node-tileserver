@@ -1,0 +1,89 @@
+--- /home/alexander/Desktop/mapcss.js
++++ /home/alexander/Projekte/OpenRailwayMap/orm-latest/js/style/mapcss.js
+@@ -1,3 +1,28 @@
++/*
++Copyright (c) 2011-2013, Darafei Praliaskouski, Vladimir Agafonkin, Maksim Gurtovenko
++All rights reserved.
++
++Redistribution and use in source and binary forms, with or without modification, are
++permitted provided that the following conditions are met:
++
++   1. Redistributions of source code must retain the above copyright notice, this list of
++      conditions and the following disclaimer.
++
++   2. Redistributions in binary form must reproduce the above copyright notice, this list
++      of conditions and the following disclaimer in the documentation and/or other materials
++	  provided with the distribution.
++
++THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
++EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
++MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
++COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
++EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
++HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
++TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
++SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++*/
++
+ 
+ var MapCSS = {
+     styles: {},
+@@ -116,18 +141,46 @@
+         return MapCSS.e_metric(arg);
+     },
+ 
++	// begin modified by rurseekatze: extended localizing so that captions made of more than one tag can be used
+     e_localize: function (tags, text) {
+-        var locales = MapCSS.locales, i, tag;
+-
+-        for (i = 0; i < locales.length; i++) {
+-            tag = text + ':' + locales[i];
+-            if (tags[tag]) {
+-                return tags[tag];
+-            }
+-        }
+-
+-        return tags[text];
+-    },
++        var locales = MapCSS.locales, i, j, tag;
++		var tagcombination = text;
++		var keys = tagcombination.split(" ");
++
++		// replace keys by localized keys if existing
++        for (j = 0; j < keys.length; j++) {
++		    for (i = 0; i < locales.length; i++) {
++		        tag = keys[j] + ':' + locales[i];
++		        if (tags[tag]) {
++					tagcombination = tagcombination.replace(tag, tags[tag]);
++		        }
++		    }
++		}
++
++		// replace keys by values
++        for (j = 0; j < keys.length; j++) {
++			if (tags[keys[j]]) {
++				tagcombination = tagcombination.replace(keys[j], tags[keys[j]]);
++			}
++			else {
++				tagcombination = tagcombination.replace(keys[j], "");
++			}
++		}
++
++		return tagcombination.trim();
++    },
++	// end modified by rurseekatze
++
++	// begin added by rurseekatze: added support for concat method in MapCSS styles
++	e_concat: function () {
++		var tagString = "";
++
++		for (var i = 0; i < arguments.length; i++)
++			tagString = tagString.concat(arguments[i]);
++
++		return tagString;
++	},
++	// end added by rurseekatze
+ 
+     loadStyle: function (style, restyle, sprite_images, external_images, presence_tags, value_tags) {
+         var i;
