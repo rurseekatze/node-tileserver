@@ -35,7 +35,7 @@
                  layerStyle === 'top' ? 10000 : -10000;
 +
 +			// added by rurseekatze: possibility to override layering
-+			layerId = (feature.style['-x-ignore-layer'] == 'true') ? 0 : layerId;
++			layerId = (feature.style['kothicjs-ignore-layer'] == 'true') ? 0 : layerId;
 +			// end added by rurseekatze
  
              layers[layerId] = layers[layerId] || [];
