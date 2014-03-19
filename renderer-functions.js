@@ -320,11 +320,13 @@ function getDatabaseQuery(type, bbox, zoom)
 	}
 	else if (type == "point")
 	{
+		var tolerance = pixelSizeAtZoom(zoom, configuration.tileBoundTolerance);
+
 		return "\
 					SELECT ST_AsGeoJSON(ST_TransScale(way, "+(-bbox[0])+", "+(-bbox[1])+", "+(configuration.intscalefactor/(bbox[2]-bbox[0]))+", "+(configuration.intscalefactor/(bbox[3]-bbox[1]))+"), 0) AS "+configuration.geomcolumn+", hstore2json(tags) AS tags\
 					FROM "+configuration.prefix+"_point\
 					WHERE\
-			        way && SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) "+cond+"\
+			        way && SetSRID('BOX3D("+(bbox[0]-tolerance)+" "+(bbox[1]-tolerance)+","+(bbox[2]+tolerance)+" "+(bbox[3]+tolerance)+")'::box3d, 900913) "+cond+"\
 					LIMIT 10000";
 	}
 }

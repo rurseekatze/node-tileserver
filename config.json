@@ -18,5 +18,6 @@
 	"maxCached" : 16,
 	"minExpiring" : 8,
 	"maxsockets" : 100,
-	"tileserverPort" : 9000
+	"tileserverPort" : 9000,
+	"tileBoundTolerance" : 20
 }

@@ -195,6 +195,8 @@ You can set various options to configure your tileserver:
 
  * `tileserverPort` Port on which the tileserver is listening. Change this value if you have conflicts with other applications. _Default: `9000`_
 
+ * `tileBoundTolerance` Extend the bounding box of the requested data by this number of pixels to avoid cutted icons at tile bounds. _Default: `20`_
+
 __Note:__ For some parameters it is also necessary to change the modify the options in kothic-leaflet.js!
 
 ## Run the server
