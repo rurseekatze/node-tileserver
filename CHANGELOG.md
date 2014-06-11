@@ -2,6 +2,12 @@
 
 (all changes without author notice are by [@rurseekatze](https://github.com/rurseekatze)
 
+## 0.3 (11.06.2014)
+
+ * Refactoring
+ * Code cleanup
+ * Minor bugfixes
+
 ## 0.2 (16.02.2014)
 
  * Moved tile expiring to separate script

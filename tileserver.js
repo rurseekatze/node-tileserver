@@ -6,8 +6,27 @@ See https://github.com/rurseekatze/node-tileserver for details.
 */
 
 
-// configuring logging
-var log4js = require('log4js');
+// include necessary modules
+cluster = require('cluster');
+os = require('os');
+rbush = require('rbush');
+assert = require('assert');
+http = require("http");
+url = require("url");
+mkdirp = require('mkdirp');
+pg = require('pg');
+toobusy = require('toobusy');
+byline = require('byline');
+touch = require("touch");
+Canvas = require('canvas');
+events = require('events');
+log4js = require('log4js');
+fs = require('graceful-fs');
+
+// load configuraion file
+configuration = require('./config.json');
+
+// configure logging
 log4js.configure(
 {
 	appenders:
@@ -33,13 +52,18 @@ log4js.configure(
 		}
 	]
 });
-var logger = log4js.getLogger();
+logger = log4js.getLogger();
 logger.setLevel('TRACE');
 
+// load classes
+Tile = require('./tile.js');
+Tilequeue = require('./queue.js');
 
-// load node.js modules and functions
-var fs = require('graceful-fs');
-eval(fs.readFileSync('renderer-functions.js')+'');
+// number of cpus
+var cpus = os.cpus().length;
+
+// maximum count of concurrent http connections
+http.globalAgent.maxSockets = configuration.maxsockets;
 
 
 // fork workers
@@ -57,14 +81,9 @@ if (cluster.isMaster)
 else
 {
 	// rendering queue for expired tiles
-	var queue = [];
+	queue = new Tilequeue();
 	// continuosly render the queue in the background
-	renderQueue();
-
-	// include rendering styles
-	for (var i=0; i<configuration.styles.length; i++)
-		eval(fs.readFileSync(configuration.styledir+'/'+configuration.styles[i]+'.js')+'');
-
+	queue.render();
 
 	// handle exceptions
 	process.on('uncaughtException', function(err)
@@ -74,14 +93,14 @@ else
 		process.exit(1);
 	});
 
-
 	function onRequest(request, response)
 	{
 		if (toobusy())
 		{
-			logger.info('z'+zoom+'x'+x+'y'+y+' Server too busy. Aborting.');
+			logger.info('Server too busy. Aborting.');
 			response.writeHead(503, {'Content-Type': 'text/plain'});
 			response.end();
+			tile = null;
 			return;
 		}
 		else
@@ -96,269 +115,218 @@ else
 				logger.info('URL format of '+pathname+' not valid. Aborting.');
 				response.writeHead(400, {'Content-Type': 'text/plain'});
 				response.end();
+				tile = null;
 				return;
 			}
 
-			var styleName = params[1];
-			var zoom = params[2];
-			var x = params[3];
-			var y = params[4].replace(".png", "").replace(".js", "");
+			var tile = new Tile(params[2], params[3], params[4].replace(".png", "").replace(".js", ""), params[1]);
 			var command = params[5];
 
 			// check validity of parameters
-			if (zoom == "" || !zoom.match(/^[0-9]+$/) || zoom < configuration.minZoom || zoom > configuration.maxZoom)
+			if (tile.z < configuration.minZoom || tile.z > configuration.maxZoom)
 			{
-				logger.info('z'+zoom+'x'+x+'y'+y+' Requested zoom level not valid. Aborting.');
+				tile.info('Requested zoom level not valid. Aborting.');
 				response.writeHead(403, {'Content-Type': 'text/plain'});
 				response.end();
+				tile = null;
 				return;
 			}
-			if (x == "" || !x.match(/^[0-9]+$/))
+			if (tile.style == "" || (configuration.styles.indexOf(tile.style) == -1 && tile.style != "vector"))
 			{
-				logger.info('z'+zoom+'x'+x+'y'+y+' Requested x not valid. Aborting.');
+				tile.info('Requested rendering style '+tile.style+' not valid. Aborting.');
 				response.writeHead(403, {'Content-Type': 'text/plain'});
 				response.end();
-				return;
-			}
-			if (y == "" || !y.match(/^[0-9]+$/))
-			{
-				logger.info('z'+zoom+'x'+x+'y'+y+' Requested y not valid. Aborting.');
-				response.writeHead(403, {'Content-Type': 'text/plain'});
-				response.end();
-				return;
-			}
-			if (styleName == "" || (configuration.styles.indexOf(styleName) == -1 && styleName != "vector"))
-			{
-				logger.info('z'+zoom+'x'+x+'y'+y+' Requested rendering style '+styleName+' not valid. Aborting.');
-				response.writeHead(403, {'Content-Type': 'text/plain'});
-				response.end();
+				tile = null;
 				return;
 			}
 			if (command != "dirty" && typeof command != "undefined")
 			{
-				logger.info('z'+zoom+'x'+x+'y'+y+' Requested command '+command+' not valid. Aborting.');
+				tile.info('Requested command '+command+' not valid. Aborting.');
 				response.writeHead(403, {'Content-Type': 'text/plain'});
 				response.end();
+				tile = null;
 				return;
 			}
 
-
 			// handle requests for vector tiles
-			if (styleName == "vector")
+			if (tile.style == "vector")
 			{
-				logger.debug('z'+zoom+'x'+x+'y'+y+' Vector tile requested.');
-				readVectorTile(x, y, zoom, function(err, data)
+				tile.debug('Vector tile requested.');
+				tile.readVectorData(function(err, data)
 				{
 					if (err || command == "dirty")
 					{
 						if (err)
-							logger.debug('z'+zoom+'x'+x+'y'+y+' Vectortile not cached, needs to be created...');
+							tile.debug('Vectortile not cached, needs to be created...');
 						if (command == "dirty")
-							logger.debug('z'+zoom+'x'+x+'y'+y+' Vectortile dirty, needs to be refreshed...');
+							tile.debug('Vectortile dirty, needs to be refreshed...');
 
-						getVectorData(x, y, zoom, function(err, data)
+						tile.getVectorData(function(err, data)
 						{
 							if (err)
 							{
-								logger.warn('z'+zoom+'x'+x+'y'+y+' Vectortile could not be created. Aborting.');
+								tile.warn('Vectortile could not be created. Aborting.');
 								response.writeHead(500, {'Content-Type': 'application/javascript'});
 								response.end();
+								tile = null;
 								return;
 							}
-							logger.debug('z'+zoom+'x'+x+'y'+y+' Vector tile created successfully, saving vector tile...');
+							tile.debug('Vector tile created successfully, saving vector tile...');
 							var jsondata = JSON.stringify(data);
-							saveVectorTile(jsondata, x, y, zoom, function(err)
+							tile.saveVectorData(function(err)
 							{
 								if (err)
-									logger.warn('z'+zoom+'x'+x+'y'+y+' Vector tile could not be saved.');
+									tile.warn('Vector tile could not be saved.');
 
-								logger.debug('z'+zoom+'x'+x+'y'+y+' Returning vector tile...');
+								tile.debug('Returning vector tile...');
 								response.writeHead(200, {'Content-Type': 'application/javascript'});
-								response.end(getVectorDataString(jsondata, x, y, zoom));
-								logger.debug('z'+zoom+'x'+x+'y'+y+' Finished request.');
+								response.end(tile.getDataString());
+								tile.debug('Finished request.');
+								tile = null;
+								return;
 							});
 						});
 					}
 					else
 					{
 						// check if tile is expired and add it to the queue if necessary
-						if (isTileExpired(zoom, x, y))
+						if (tile.isExpired())
 						{
-							addTileToQueue(zoom, x, y);
-							logger.debug('z'+zoom+'x'+x+'y'+y+' Tile expired, added it to the queue...');
+							queue.add(tile);
+							tile.debug('Tile expired, added it to the queue...');
 						}
 
-						logger.debug('z'+zoom+'x'+x+'y'+y+' Returning vector tile...');
+						tile.debug('Returning vector tile...');
 						response.writeHead(200, {'Content-Type': 'application/javascript'});
-						response.end(getVectorDataString(JSON.stringify(data), x, y, zoom));
-						logger.debug('z'+zoom+'x'+x+'y'+y+' Finished request.');
+						response.end(tile.getDataString());
+						tile.debug('Finished request.');
+						tile = null;
+						return;
 					}
 				});
 			}
 			// handle requests for bitmap tiles
 			else
 			{
-				logger.debug('z'+zoom+'x'+x+'y'+y+' Bitmap tile requested.');
-				fs.exists(configuration.tiledir+'/'+styleName+'/'+zoom+'/'+x+'/'+y+'.png', function(exists)
+				tile.debug('Bitmap tile requested.');
+				tile.bitmapIsCached(function(exists)
 				{
 					// if tile is already rendered, return the cached image
 					if (exists && typeof command == "undefined")
 					{
 						// check if tile is expired and add it to the queue if necessary
-						if (isTileExpired(zoom, x, y))
+						if (tile.isExpired())
 						{
-							addTileToQueue(zoom, x, y);
-							logger.debug('z'+zoom+'x'+x+'y'+y+' Tile expired, added it to the queue...');
+							queue.add(tile);
+							tile.debug('Tile expired, added it to the queue...');
 						}
 
-						logger.debug('z'+zoom+'x'+x+'y'+y+' Bitmap tile already rendered, returning cached data...');
-						fs.readFile(configuration.tiledir+'/'+styleName+'/'+zoom+'/'+x+'/'+y+'.png', function(err, data)
+						tile.debug('Bitmap tile already rendered, returning cached data...');
+						tile.readBitmapData(function(err, data)
 						{
 							if (err)
 							{
-								logger.warn('z'+zoom+'x'+x+'y'+y+' Cannot read cached bitmap tile. Returning status 500.');
+								tile.warn('Cannot read cached bitmap tile. Returning status 500.');
 								response.writeHead(500, {'Content-Type': 'text/plain'});
 								response.end();
+								tile = null;
 								return;
 							}
 
-							logger.trace('z'+zoom+'x'+x+'y'+y+' Returning bitmap tile...');
+							tile.trace('Returning bitmap tile...');
 							response.writeHead(200, {'Content-Type': 'image/png'});
 							response.end(data);
-							logger.debug('z'+zoom+'x'+x+'y'+y+' Bitmap tile returned.');
-							logger.debug('z'+zoom+'x'+x+'y'+y+' Finished request.');
+							tile.debug('Bitmap tile returned.');
+							tile.debug('Finished request.');
+							tile = null;
+							return;
 						});
 					}
 					// otherwise render the tile
 					else
 					{
-						logger.debug('z'+zoom+'x'+x+'y'+y+' Bitmap tile not cached...');
-						// get vector tile when map icons were loaded
-						MapCSS.onImagesLoad = function()
+						tile.debug('Bitmap tile not cached...');
+
+						tile.trace('MapCSS style successfully loaded.');
+						tile.readVectorData(function(err, data)
 						{
-							logger.trace('z'+zoom+'x'+x+'y'+y+' MapCSS style successfully loaded.');
-							logger.debug('z'+zoom+'x'+x+'y'+y+' Trying to open vectortile at path: '+configuration.vtiledir+'/'+zoom+'/'+x+'/'+y+'.js');
-							readVectorTile(x, y, zoom, function(err, data)
+							if (err || command == "dirty")
 							{
-								var onRenderEnd = function(err, image)
+								if (err)
+									tile.debug('Vectortile not cached, needs to be created...');
+								if (command == "dirty")
+									tile.debug('Vectortile dirty, needs to be refreshed...');
+
+								tile.getVectorData(function(err, data)
 								{
 									if (err)
-										logger.debug('z'+zoom+'x'+x+'y'+y+' Vectortile was empty.');
-
-									var filepath = configuration.tiledir+'/'+styleName+'/'+zoom+'/'+x;
-									logger.debug('z'+zoom+'x'+x+'y'+y+' Rendering successful.');
-									logger.debug('z'+zoom+'x'+x+'y'+y+' Saving bitmap tile at path: '+filepath);
-									mkdirp(filepath, function(err)
 									{
-										logger.trace('z'+zoom+'x'+x+'y'+y+' Creating path '+filepath+'...');
+										tile.warn('Vectortile could not be created. Aborting.');
+										response.writeHead(500, {'Content-Type': 'text/plain'});
+										response.end();
+										tile = null;
+										return;
+									}
+									tile.debug('Vector tile created successfully, saving vector tile...');
+									tile.saveVectorData(function(err)
+									{
 										if (err)
-										{
-											logger.error('z'+zoom+'x'+x+'y'+y+' Cannot create path: '+filepath);
-											response.writeHead(500, {'Content-Type': 'text/plain'});
-											response.end();
-											return;
-										}
+											tile.warn('Vector tile could not be saved.');
 
-										if (image == null)
+										tile.debug('Rendering bitmap tile with style '+tile.style);
+										tile.render(function(err, image)
 										{
-											logger.debug('z'+zoom+'x'+x+'y'+y+' Bitmap tile empty.');
-
-											// return empty tile
-											fs.readFile('emptytile.png', function(err, data)
+											if (err)
+												tile.debug('Vectortile was empty.');
+											tile.saveBitmapData(image, function(err)
 											{
 												if (err)
 												{
-													logger.warn('z'+zoom+'x'+x+'y'+y+' Could not read empty bitmap tile. Returning status 500.');
 													response.writeHead(500, {'Content-Type': 'text/plain'});
 													response.end();
+													tile.debug('Empty bitmap tile was responded to the request.');
+													tile.debug('Finished request.');
+													tile = null;
 													return;
 												}
 
-												fs.writeFile(filepath+'/'+y+'.png', data, {mode: 0777}, function(err)
-												{
-													if (!err)
-														logger.debug('z'+zoom+'x'+x+'y'+y+' Empty bitmap tile was stored.');
-													else
-														logger.debug('z'+zoom+'x'+x+'y'+y+' Could not save empty bitmap file.');
+												tile.trace('Responding bitmap data...');
+												var stream = image.createPNGStream();
+												response.writeHead(200, {'Content-Type': 'image/png'});
 
-													response.writeHead(200, {'Content-Type': 'image/png'});
-													response.end(data);
-													logger.debug('z'+zoom+'x'+x+'y'+y+' Empty bitmap tile was responded to the request.');
-													logger.debug('z'+zoom+'x'+x+'y'+y+' Finished request.');
+												// write PNG data stream
+												stream.on('data', function(data)
+												{
+													response.write(data);
+												});
+
+												// PNG data stream ended
+												stream.on('end', function()
+												{
+													response.end();
+													tile.debug('Bitmap tile was responded to the request.');
+													tile.debug('Finished request.');
+													tile = null;
+													return;
 												});
 											});
-										}
-										else
-										{
-											logger.trace('z'+zoom+'x'+x+'y'+y+' Bitmap tile not empty. Responding bitmap data...');
-											var out = fs.createWriteStream(filepath+'/'+y+'.png', {mode: 0777});
-											var stream = image.createPNGStream();
-											response.writeHead(200, {'Content-Type': 'image/png'});
-
-											// write PNG data stream
-											stream.on('data', function(data)
-											{
-												out.write(data);
-												response.write(data);
-											});
-
-											// PNG data stream ended
-											stream.on('end', function()
-											{
-												out.end();
-												response.end();
-												logger.debug('z'+zoom+'x'+x+'y'+y+' Bitmap tile was stored.');
-												logger.debug('z'+zoom+'x'+x+'y'+y+' Bitmap tile was responded to the request.');
-												logger.debug('z'+zoom+'x'+x+'y'+y+' Finished request.');
-											});
-										}
-									});
-								};
-
-								if (err || command == "dirty")
-								{
-									if (err)
-										logger.debug('z'+zoom+'x'+x+'y'+y+' Vectortile not cached, needs to be created...');
-									if (command == "dirty")
-										logger.debug('z'+zoom+'x'+x+'y'+y+' Vectortile dirty, needs to be refreshed...');
-
-									getVectorData(x, y, zoom, function(err, data)
-									{
-										if (err)
-										{
-											logger.warn('z'+zoom+'x'+x+'y'+y+' Vectortile could not be created. Aborting.');
-											response.writeHead(500, {'Content-Type': 'text/plain'});
-											response.end();
-											return;
-										}
-										logger.debug('z'+zoom+'x'+x+'y'+y+' Vector tile created successfully, saving vector tile...');
-										saveVectorTile(JSON.stringify(data), x, y, zoom, function(err)
-										{
-											if (err)
-												logger.warn('z'+zoom+'x'+x+'y'+y+' Vector tile could not be saved.');
-
-											logger.debug('z'+zoom+'x'+x+'y'+y+' Rendering bitmap tile with style '+styleName);
-											renderTile(zoom, x, y, styleName, data, onRenderEnd);
 										});
 									});
-								}
-								else
+								});
+							}
+							else
+							{
+								// check if tile is expired and add it to the queue if necessary
+								if (tile.isExpired())
 								{
-									// check if tile is expired and add it to the queue if necessary
-									if (isTileExpired(zoom, x, y))
-									{
-										addTileToQueue(zoom, x, y);
-										logger.debug('z'+zoom+'x'+x+'y'+y+' Tile expired, added it to the queue...');
-									}
-
-									logger.debug('z'+zoom+'x'+x+'y'+y+' Rendering bitmap tile with style '+styleName);
-									renderTile(zoom, x, y, styleName, data, onRenderEnd);
+									queue.add(tile);
+									tile.debug('Tile expired, added it to the queue...');
 								}
-							});
-						};
-						// load map icons
-						logger.trace('z'+zoom+'x'+x+'y'+y+' Loading MapCSS style '+styleName);
-						MapCSS.preloadSpriteImage(styleName, "../styles/"+styleName+".png");
+
+								tile.debug('Rendering bitmap tile with style '+tile.style);
+								tile.render(onRenderEnd);
+							}
+						});
 					}
 				});
 			}

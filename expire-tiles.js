@@ -9,7 +9,6 @@ See https://github.com/rurseekatze/node-tileserver for details.
 // load configuraion file
 var configuration = require('./config.json');
 
-
 // include necessary modules
 var fs = require('graceful-fs');
 var cluster = require('cluster');
@@ -47,19 +46,26 @@ function expireTileList(filename, callback)
 
 		stream.on('data', function(line)
 		{
-			var tile = line.toString().split("/");
+			var param = line.toString().split("/");
+			var tile = new Tile(param[0], param[1], param[2]);
 
-			expireTile(tile[0], tile[1], tile[2]);
+			tile.expire();
 
 			// mark child tiles
-			var tileset = childTiles(tile[0], tile[1], tile[2]);
+			var tileset = tile.getChildren();
 			for (var tilesetIndex=0; tilesetIndex<tileset.length; tilesetIndex++)
-				expireTile(tileset[tilesetIndex][0], tileset[tilesetIndex][1], tileset[tilesetIndex][2]);
+			{
+				tileset[tilesetIndex].expire();
+				tileset[tilesetIndex] = null;
+			}
 
 			// mark parent tiles
-			var parentTileset = parentTiles(tile[0], tile[1], tile[2]);
+			var parentTileset = tile.getParents();
 			for (var parentIndex=0; parentIndex<parentTileset.length; parentIndex++)
-				expireTile(parentTileset[parentIndex][0], parentTileset[parentIndex][1], parentTileset[parentIndex][2]);
+			{
+				parentTileset[parentIndex].expire();
+				parentTileset[parentIndex] = null;
+			}
 		});
 
 		stream.on('end', function(line)
@@ -88,122 +94,4 @@ function expireTileList(filename, callback)
 			callback(true);
 		});
 	}
-}
-
-
-// removes all rendering styles of a bitmap tile from the cache
-function removeBitmapTile(zoom, x, y, selectedStyle)
-{
-	var selectedStyle = selectedStyle || 0;
-
-	if (selectedStyle > configuration.styles.length)
-		return;
-
-	var filepath = configuration.tiledir+'/'+configuration.styles[selectedStyle]+'/'+zoom+'/'+x+'/'+y+'.png';
-	if (fs.existsSync(filepath))
-	{
-		fs.unlinkSync(filepath);
-		removeBitmapTile(zoom, x, y, selectedStyle);
-	}
-}
-
-
-// marks a tile and all it's subtiles and parent tiles as expired or deletes them if necessary
-function expireTile(zoom, x, y)
-{
-	if (parseInt(zoom) <= configuration.maxCached)
-		markTileExpired(zoom, x, y);
-	// remove all tiles higher than maxcached
-	else
-	{
-		var filepath = configuration.vtiledir+'/'+zoom+'/'+x+'/'+y+'.json';
-		if (fs.existsSync(filepath))
-		{
-			fs.unlinkSync(filepath);
-			removeBitmapTile(zoom, x, y);
-		}
-	}
-}
-
-
-// marks a tile as expired
-function markTileExpired(zoom, x, y)
-{
-	//var filepath = configuration.vtiledir+'/'+zoom+'/'+x+'/'+y+'.json';
-	var filepath = '/home/www/sites/194.245.35.149/site/orm/tiles/'+zoom+'/'+x+'/'+y+'.json';
-
-	if (fs.existsSync(filepath))
-		touch.sync(filepath, {time: new Date(10)});
-}
-
-
-// returns a list of all subtiles of a certain tile
-function childTiles(zoom, x, y)
-{
-	zoom = parseInt(zoom);
-	x = parseInt(x);
-	y = parseInt(y);
-
-	var tiles = new Array();
-	var tilesize = 1;
-
-	for (var z=zoom+1; z<=configuration.maxCached; z++)
-	{
-		x = x*2;
-		y = y*2;
-		tilesize = tilesize*2;
-
-		for (var i=x; i<(x+tilesize); i++)
-		{
-			for (var j=y; j<(y+tilesize); j++)
-				tiles.push(new Array(z, i, j));
-
-			j -= tilesize;
-		}
-
-		i -= tilesize;
-	}
-
-	return tiles;
-}
-
-
-// returns a list of all tiles in lower zoomlevels that contain a certain tile
-function parentTiles(zoom, x, y)
-{
-	zoom = parseInt(zoom);
-	x = parseInt(x);
-	y = parseInt(y);
-
-	var tiles = new Array();
-
-	while (zoom >= configuration.minExpiring)
-	{
-		zoom--;
-		x = parseInt(x/2);
-		y = parseInt(y/2);
-		tiles.push(new Array(zoom, x, y));
-	}
-
-	return tiles;
-}
-
-
-// returns the subtiles of a certain tile
-function subTiles(zoom, x, y)
-{
-	zoom = parseInt(zoom);
-	x = parseInt(x);
-	y = parseInt(y);
-
-	x = x*2;
-	y = y*2;
-	zoom++;
-
-	return new Array(
-		new Array(zoom, x, y),
-		new Array(zoom, x+1, y),
-		new Array(zoom, x, y+1),
-		new Array(zoom, x+1, y+1)
-	);
 }

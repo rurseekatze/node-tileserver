@@ -6,8 +6,24 @@ See https://github.com/rurseekatze/node-tileserver for details.
 */
 
 
-// configuring logging
+// include necessary modules
+var cluster = require('cluster');
+var os = require('os');
+var rbush = require('rbush');
+var assert = require('assert');
+var http = require("http");
+var url = require("url");
+var mkdirp = require('mkdirp');
+var pg = require('pg');
+var toobusy = require('toobusy');
+var byline = require('byline');
+var touch = require("touch");
+var Canvas = require('canvas');
+var events = require('events');
 var log4js = require('log4js');
+var fs = require('graceful-fs');
+
+// configure logging
 log4js.configure(
 {
 	appenders:
@@ -36,9 +52,14 @@ log4js.configure(
 var logger = log4js.getLogger();
 logger.setLevel('TRACE');
 
+// load configuraion file
+var configuration = require('./config.json');
 
-var fs = require('graceful-fs');
-eval(fs.readFileSync('renderer-functions.js')+'');
+// load classes
+eval(fs.readFileSync('tile.js')+'');
+
+// maximum count of concurrent http connections
+http.globalAgent.maxSockets = configuration.maxsockets;
 
 
 // calculate amount of tiles to render
@@ -46,7 +67,7 @@ var listlength = 0;
 for (var z = configuration.minZoom; z <= configuration.maxPrerender; z++)
 	listlength += Math.pow(Math.pow(2, z), 2);
 
-response.end("Initial rendering of "+parseInt(listlength/1000)+"k tiles in the background. This process can take some time.");
+logger.info("Initial rendering of "+parseInt(listlength/1000)+"k tiles in the background. This process can take some time.");
 
 // render all tiles
 var z = configuration.minZoom;
@@ -81,8 +102,29 @@ var initTileFinished = function renderNextTileInit()
 				return;
 			}
 		}
-		var tile = new Array(z, x, y);
-		renderQueueElement(tile);
+
+		var tile = new Tile(z, x, y);
+		tile.getVectorData(function(err, data)
+		{
+			tile.debug('Creating tile...');
+			if (err)
+			{
+				this.eventEmitter.emit('tileFinished');
+				return;
+			}
+
+			tile.saveVectorData(function(err)
+			{
+				if (err)
+				{
+					this.eventEmitter.emit('tileFinished');
+					return;
+				}
+
+				tile.rerenderBitmap();
+				this.eventEmitter.emit('tileFinished');
+			});
+		});
 	}
 	else
 	{
