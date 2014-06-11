@@ -23,6 +23,10 @@ var events = require('events');
 var log4js = require('log4js');
 var fs = require('graceful-fs');
 
+// load classes
+var Tile = require('./tile.js');
+var Tilequeue = require('./queue.js');
+
 // configure logging
 log4js.configure(
 {

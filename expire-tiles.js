@@ -6,20 +6,56 @@ See https://github.com/rurseekatze/node-tileserver for details.
 */
 
 
-// load configuraion file
-var configuration = require('./config.json');
-
 // include necessary modules
-var fs = require('graceful-fs');
-var cluster = require('cluster');
-var os = require('os');
-var assert = require('assert');
-var http = require("http");
-var url = require("url");
-var mkdirp = require('mkdirp');
-var byline = require('byline');
-var touch = require("touch");
+os = require('os');
+rbush = require('rbush');
+assert = require('assert');
+url = require("url");
+mkdirp = require('mkdirp');
+pg = require('pg');
+toobusy = require('toobusy');
+byline = require('byline');
+touch = require("touch");
+Canvas = require('canvas');
+events = require('events');
+log4js = require('log4js');
+fs = require('graceful-fs');
 
+// load configuraion file
+configuration = require('./config.json');
+
+// configure logging
+log4js.configure(
+{
+	appenders:
+	[
+		{
+			"type": "logLevelFilter",
+			"level": "ERROR",
+			"appender":
+			{
+				"type": "file",
+				"filename": 'expiring.log', 
+				'maxLogSize': 20480,
+				'backups': 0
+			}
+		},
+		{
+			"type": "logLevelFilter",
+			"level": "INFO",
+			"appender":
+			{
+				"type": "console"
+			}
+		}
+	]
+});
+logger = log4js.getLogger();
+logger.setLevel('TRACE');
+
+// load classes
+Tile = require('./tile.js');
+Tilequeue = require('./queue.js');
 
 if (process.argv[2] && process.argv[2].length > 0 && fs.existsSync(process.argv[2]))
 {
