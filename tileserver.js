@@ -80,11 +80,6 @@ if (cluster.isMaster)
 // start tile server instance
 else
 {
-	// rendering queue for expired tiles
-	queue = new Tilequeue();
-	// continuosly render the queue in the background
-	queue.render();
-
 	// handle exceptions
 	process.on('uncaughtException', function(err)
 	{
@@ -92,6 +87,11 @@ else
 		logger.fatal(err.message);
 		process.exit(1);
 	});
+
+	// rendering queue for expired tiles
+	queue = new Tilequeue();
+	// continuosly render the queue in the background
+	queue.render();
 
 	function onRequest(request, response)
 	{
@@ -190,11 +190,14 @@ else
 					else
 					{
 						// check if tile is expired and add it to the queue if necessary
-						if (tile.isExpired())
+						tile.isExpired(function(expired)
 						{
-							queue.add(tile);
-							tile.debug('Tile expired, added it to the queue...');
-						}
+							if (expired)
+							{
+								queue.add(tile);
+								tile.debug('Tile expired, added it to the queue...');
+							}
+						});
 
 						tile.debug('Returning vector tile...');
 						response.writeHead(200, {'Content-Type': 'application/javascript'});
@@ -214,13 +217,6 @@ else
 					// if tile is already rendered, return the cached image
 					if (exists && typeof command == "undefined")
 					{
-						// check if tile is expired and add it to the queue if necessary
-						if (tile.isExpired())
-						{
-							queue.add(tile);
-							tile.debug('Tile expired, added it to the queue...');
-						}
-
 						tile.debug('Bitmap tile already rendered, returning cached data...');
 						tile.readBitmapData(function(err, data)
 						{
@@ -238,8 +234,18 @@ else
 							response.end(data);
 							tile.debug('Bitmap tile returned.');
 							tile.debug('Finished request.');
-							tile = null;
-							return;
+
+							// check if tile is expired and add it to the queue if necessary
+							tile.isExpired(function(expired)
+							{
+								if (expired)
+								{
+									queue.add(tile);
+									tile.debug('Tile expired, added it to the queue...');
+								}
+								tile = null;
+								return;
+							});
 						});
 					}
 					// otherwise render the tile
@@ -317,14 +323,53 @@ else
 							else
 							{
 								// check if tile is expired and add it to the queue if necessary
-								if (tile.isExpired())
+								tile.isExpired(function(expired)
 								{
-									queue.add(tile);
-									tile.debug('Tile expired, added it to the queue...');
-								}
+									if (expired)
+									{
+										queue.add(tile);
+										tile.debug('Tile expired, added it to the queue...');
+									}
+								});
 
 								tile.debug('Rendering bitmap tile with style '+tile.style);
-								tile.render(onRenderEnd);
+								tile.render(function(err, image)
+								{
+									if (err)
+										tile.debug('Vectortile was empty.');
+									tile.saveBitmapData(image, function(err)
+									{
+										if (err)
+										{
+											response.writeHead(500, {'Content-Type': 'text/plain'});
+											response.end();
+											tile.debug('Empty bitmap tile was responded to the request.');
+											tile.debug('Finished request.');
+											tile = null;
+											return;
+										}
+
+										tile.trace('Responding bitmap data...');
+										var stream = image.createPNGStream();
+										response.writeHead(200, {'Content-Type': 'image/png'});
+
+										// write PNG data stream
+										stream.on('data', function(data)
+										{
+											response.write(data);
+										});
+
+										// PNG data stream ended
+										stream.on('end', function()
+										{
+											response.end();
+											tile.debug('Bitmap tile was responded to the request.');
+											tile.debug('Finished request.');
+											tile = null;
+											return;
+										});
+									});
+								});
 							}
 						});
 					}
