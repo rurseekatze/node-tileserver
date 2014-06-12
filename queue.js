@@ -10,6 +10,13 @@ Tilequeue = function()
 {
 	this.queue = [];
 	this.eventEmitter = new events.EventEmitter();
+	this.cpus = os.cpus().length;
+
+	var self = this;
+	this.eventEmitter.on('tileFinished', function()
+	{
+		self.renderNextTile();
+	});
 };
 
 Tilequeue.prototype =
@@ -39,8 +46,6 @@ Tilequeue.prototype =
 	// render all tiles that are in the queue
 	render: function()
 	{
-		var self = this;
-		this.eventEmitter.on('tileFinished', function(){self.renderNextTile;});
 		this.eventEmitter.emit('tileFinished');
 	},
 
@@ -50,7 +55,7 @@ Tilequeue.prototype =
 		if (this.queue.length > 0)
 		{
 			logger.debug('Checking system load...');
-			if (os.loadavg()[0] <= cpus+1)
+			if (os.loadavg()[0] <= this.cpus+1)
 			{
 				logger.debug('Rendering next tile in the queue...');
 				this.renderTile();
@@ -66,15 +71,16 @@ Tilequeue.prototype =
 	// render a tile
 	renderTile: function()
 	{
-		info('Rendering tile from the queue.');
-		var tile = queue.shift();
-		debug('Getting vector data...');
+		logger.info('Rendering tile from the queue.');
+		var tile = this.queue.shift();
+		tile.debug('Getting vector data...');
+		var self = this;
 		tile.getVectorData(function(err, data)
 		{
 			if (err)
 			{
 				tile.info('Vectortile could not be created. Aborting.');
-				this.eventEmitter.emit('tileFinished');
+				self.eventEmitter.emit('tileFinished');
 				return;
 			}
 
@@ -84,15 +90,15 @@ Tilequeue.prototype =
 				if (err)
 				{
 					tile.warn('Vector tile could not be saved. Returning.');
-					this.eventEmitter.emit('tileFinished');
+					self.eventEmitter.emit('tileFinished');
 					return;
 				}
 
 				tile.debug('Vector tile saved, rendering bitmap tile...');
 				tile.rerenderBitmap();
 				// remove tile from queue and render next tile if every style was rendered
-				debug('Finished. Getting the next tile from the queue...');
-				this.eventEmitter.emit('tileFinished');
+				tile.debug('Finished. Getting the next tile from the queue...');
+				self.eventEmitter.emit('tileFinished');
 			});
 		});
 	},
@@ -100,9 +106,10 @@ Tilequeue.prototype =
 	// waits sec seconds before continuing to render the tiles from the queue
 	wait: function(sec)
 	{
+		var self = this;
 		setTimeout(function()
 		{
-			this.eventEmitter.emit('tileFinished');
+			self.eventEmitter.emit('tileFinished');
 		}, sec*1000);
 	}
 };
