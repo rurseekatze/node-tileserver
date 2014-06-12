@@ -243,16 +243,28 @@ Tile.prototype =
 	},
 
 	// returns true if the tile was marked as expired, otherwise false is returned
-	isExpired: function()
+	isExpired: function(callback)
 	{
 		var filepath = configuration.vtiledir+'/'+this.z+'/'+this.x+'/'+this.y+'.json';
 
-		if (fs.existsSync(filepath))
+		fs.exists(filepath, function(exists)
 		{
-			var stats = fs.statSync(filepath);
-			return (stats.mtime.getFullYear() == "1970") ? true : false;
-		}
-		return false;
+			if (!exists)
+			{
+				return process.nextTick(function()
+				{
+					callback(exists);
+				});
+			}
+
+			fs.stat(filepath, function(err, stats)
+			{
+				return process.nextTick(function()
+				{
+					callback((stats.mtime.getFullYear() == "1970") ? true : false);
+				});
+			});
+		});
 	},
 
 	// marks a tile and all it's subtiles and parent tiles as expired or deletes them if necessary
@@ -426,10 +438,12 @@ Tile.prototype =
 		if (selectedStyle >= configuration.styles.length)
 			return;
 
+		this.style = configuration.styles[selectedStyle];
+
 		this.trace('MapCSS style loaded.');
-		var filepath = configuration.tiledir+'/'+configuration.styles[selectedStyle]+'/'+this.z+'/'+this.x;
+		var filepath = configuration.tiledir+'/'+this.style+'/'+this.z+'/'+this.x;
 		var self = this;
-		this.render(configuration.styles[selectedStyle], function(err, image)
+		this.render(function(err, image)
 		{
 			if (err)
 			{
