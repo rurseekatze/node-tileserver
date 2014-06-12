@@ -90,8 +90,6 @@ else
 
 	// rendering queue for expired tiles
 	queue = new Tilequeue();
-	// continuosly render the queue in the background
-	queue.render();
 
 	function onRequest(request, response)
 	{

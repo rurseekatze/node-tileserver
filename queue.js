@@ -26,10 +26,10 @@ Tilequeue.prototype =
 	{
 		if (!this.elementExists(tile))
 		{
-			// restart rendering when queue gets filled again
-			if (this.queue.length == 0)
-				this.eventEmitter.emit('tileFinished');
 			this.queue.push(tile);
+			// restart rendering when queue gets filled again
+			if (this.queue.length == 1)
+				this.eventEmitter.emit('tileFinished');
 		}
 	},
 
@@ -41,12 +41,6 @@ Tilequeue.prototype =
 				return true;
 
 		return false;
-	},
-
-	// render all tiles that are in the queue
-	render: function()
-	{
-		this.eventEmitter.emit('tileFinished');
 	},
 
 	// removes a tile from the queue if rendered and renders the next tile
