@@ -62,13 +62,22 @@ if (process.argv[2] && process.argv[2].length > 0 && fs.existsSync(process.argv[
 	expireTileList(process.argv[2], function(err)
 	{
 		if (err)
+		{
 			console.log('Some problems occurred.');
+			process.exit(1);
+		}
 		else
+		{
 			console.log('Finished.');
+			process.exit(code=0);
+		}
 	});
 }
 else
+{
 	console.log('Given filename invalid or file cannot be found.');
+	process.exit(code=0);
+}
 
 
 // load an osm2pgsql list of expired tiles and marks all tiles as expired
