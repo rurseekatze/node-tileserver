@@ -7,25 +7,23 @@ See https://github.com/rurseekatze/node-tileserver for details.
 
 
 // include necessary modules
-var cluster = require('cluster');
-var os = require('os');
-var rbush = require('rbush');
-var assert = require('assert');
-var http = require("http");
-var url = require("url");
-var mkdirp = require('mkdirp');
-var pg = require('pg');
-var toobusy = require('toobusy');
-var byline = require('byline');
-var touch = require("touch");
-var Canvas = require('canvas');
-var events = require('events');
-var log4js = require('log4js');
-var fs = require('graceful-fs');
+os = require('os');
+rbush = require('rbush');
+assert = require('assert');
+http = require("http");
+url = require("url");
+mkdirp = require('mkdirp');
+pg = require('pg');
+toobusy = require('toobusy');
+byline = require('byline');
+touch = require("touch");
+Canvas = require('canvas');
+events = require('events');
+log4js = require('log4js');
+fs = require('graceful-fs');
 
-// load classes
-var Tile = require('./tile.js');
-var Tilequeue = require('./queue.js');
+// load configuraion file
+configuration = require('./config.json');
 
 // configure logging
 log4js.configure(
@@ -53,17 +51,16 @@ log4js.configure(
 		}
 	]
 });
-var logger = log4js.getLogger();
+logger = log4js.getLogger();
 logger.setLevel('TRACE');
 
-// load configuraion file
-var configuration = require('./config.json');
-
 // load classes
-eval(fs.readFileSync('tile.js')+'');
+Tile = require('./tile.js');
 
-// maximum count of concurrent http connections
-http.globalAgent.maxSockets = configuration.maxsockets;
+// number of cpus
+cpus = os.cpus().length;
+
+var eventEmitter = new events.EventEmitter();
 
 
 // calculate amount of tiles to render
@@ -80,7 +77,7 @@ var y = -1;
 var tilecount = Math.pow(2, z);
 
 // removes a tile from the queue if rendered and renders the next tile
-var initTileFinished = function renderNextTileInit()
+eventEmitter.on('tileFinished', function()
 {
 	if (os.loadavg()[0] <= cpus+1)
 	{
@@ -96,6 +93,7 @@ var initTileFinished = function renderNextTileInit()
 			else if (z < configuration.maxPrerender)
 			{
 				z++;
+				logger.info('Rendering zoom level '+z);
 				tilecount = Math.pow(2, z);
 				x = 0;
 				y = 0;
@@ -103,7 +101,7 @@ var initTileFinished = function renderNextTileInit()
 			else
 			{
 				logger.info('All tiles rendered. Finished.');
-				return;
+				process.exit(code=0);
 			}
 		}
 
@@ -113,7 +111,7 @@ var initTileFinished = function renderNextTileInit()
 			tile.debug('Creating tile...');
 			if (err)
 			{
-				this.eventEmitter.emit('tileFinished');
+				eventEmitter.emit('tileFinished');
 				return;
 			}
 
@@ -121,12 +119,12 @@ var initTileFinished = function renderNextTileInit()
 			{
 				if (err)
 				{
-					this.eventEmitter.emit('tileFinished');
+					eventEmitter.emit('tileFinished');
 					return;
 				}
 
 				tile.rerenderBitmap();
-				this.eventEmitter.emit('tileFinished');
+				eventEmitter.emit('tileFinished');
 			});
 		});
 	}
@@ -138,7 +136,7 @@ var initTileFinished = function renderNextTileInit()
 			eventEmitter.emit('tileFinished');
 		}, 5000);
 	}
-}
-eventEmitter.on('tileFinished', initTileFinished);
+});
 
+logger.info('Rendering zoom level '+z);
 eventEmitter.emit('tileFinished');
