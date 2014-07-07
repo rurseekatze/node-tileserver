@@ -7,21 +7,21 @@ See https://github.com/rurseekatze/node-tileserver for details.
 
 
 // include necessary modules
-cluster = require('cluster');
-os = require('os');
-rbush = require('rbush');
-assert = require('assert');
-http = require("http");
-url = require("url");
-mkdirp = require('mkdirp');
-pg = require('pg');
-toobusy = require('toobusy');
-byline = require('byline');
-touch = require("touch");
-Canvas = require('canvas');
-events = require('events');
-log4js = require('log4js');
-fs = require('graceful-fs');
+var heapdump = require('heapdump');
+var cluster = require('cluster');
+var os = require('os');
+var rbush = require('rbush');
+var assert = require('assert');
+var http = require("http");
+var url = require("url");
+var mkdirp = require('mkdirp');
+var toobusy = require('toobusy');
+var byline = require('byline');
+var touch = require("touch");
+var Canvas = require('canvas');
+var events = require('events');
+var log4js = require('log4js');
+var fs = require('graceful-fs');
 
 // load configuraion file
 configuration = require('./config.json');
@@ -84,7 +84,7 @@ else
 	process.on('uncaughtException', function(err)
 	{
 		logger.fatal('An uncaughtException occurred:');
-		logger.fatal(err.message);
+		logger.fatal(err);
 		process.exit(1);
 	});
 
@@ -98,7 +98,6 @@ else
 			logger.info('Server too busy. Aborting.');
 			response.writeHead(503, {'Content-Type': 'text/plain'});
 			response.end();
-			tile = null;
 			return;
 		}
 		else
@@ -113,7 +112,6 @@ else
 				logger.info('URL format of '+pathname+' not valid. Aborting.');
 				response.writeHead(400, {'Content-Type': 'text/plain'});
 				response.end();
-				tile = null;
 				return;
 			}
 
@@ -126,6 +124,7 @@ else
 				tile.info('Requested zoom level not valid. Aborting.');
 				response.writeHead(403, {'Content-Type': 'text/plain'});
 				response.end();
+				tile.destroy();
 				tile = null;
 				return;
 			}
@@ -134,6 +133,7 @@ else
 				tile.info('Requested rendering style '+tile.style+' not valid. Aborting.');
 				response.writeHead(403, {'Content-Type': 'text/plain'});
 				response.end();
+				tile.destroy();
 				tile = null;
 				return;
 			}
@@ -142,6 +142,7 @@ else
 				tile.info('Requested command '+command+' not valid. Aborting.');
 				response.writeHead(403, {'Content-Type': 'text/plain'});
 				response.end();
+				tile.destroy();
 				tile = null;
 				return;
 			}
@@ -152,7 +153,7 @@ else
 				tile.debug('Vector tile requested.');
 				tile.readVectorData(function(err, data)
 				{
-					if (err || command == "dirty")
+					if (err || command == "dirty" || command == "compress")
 					{
 						if (err)
 							tile.debug('Vectortile not cached, needs to be created...');
@@ -166,10 +167,12 @@ else
 								tile.warn('Vectortile could not be created. Aborting.');
 								response.writeHead(500, {'Content-Type': 'application/javascript'});
 								response.end();
+								tile.destroy();
 								tile = null;
 								return;
 							}
 							tile.debug('Vector tile created successfully, saving vector tile...');
+
 							var jsondata = JSON.stringify(data);
 							tile.saveVectorData(function(err)
 							{
@@ -180,6 +183,7 @@ else
 								response.writeHead(200, {'Content-Type': 'application/javascript'});
 								response.end(tile.getDataString());
 								tile.debug('Finished request.');
+								tile.destroy();
 								tile = null;
 								return;
 							});
@@ -201,6 +205,7 @@ else
 						response.writeHead(200, {'Content-Type': 'application/javascript'});
 						response.end(tile.getDataString());
 						tile.debug('Finished request.');
+						tile.destroy();
 						tile = null;
 						return;
 					}
@@ -223,6 +228,7 @@ else
 								tile.warn('Cannot read cached bitmap tile. Returning status 500.');
 								response.writeHead(500, {'Content-Type': 'text/plain'});
 								response.end();
+								tile.destroy();
 								tile = null;
 								return;
 							}
@@ -241,6 +247,7 @@ else
 									queue.add(tile);
 									tile.debug('Tile expired, added it to the queue...');
 								}
+								tile.destroy();
 								tile = null;
 								return;
 							});
@@ -268,6 +275,7 @@ else
 										tile.warn('Vectortile could not be created. Aborting.');
 										response.writeHead(500, {'Content-Type': 'text/plain'});
 										response.end();
+										tile.destroy();
 										tile = null;
 										return;
 									}
@@ -290,6 +298,7 @@ else
 													response.end();
 													tile.debug('Empty bitmap tile was responded to the request.');
 													tile.debug('Finished request.');
+													tile.destroy();
 													tile = null;
 													return;
 												}
@@ -310,6 +319,7 @@ else
 													response.end();
 													tile.debug('Bitmap tile was responded to the request.');
 													tile.debug('Finished request.');
+													tile.destroy();
 													tile = null;
 													return;
 												});
@@ -325,8 +335,8 @@ else
 								{
 									if (expired)
 									{
-										queue.add(tile);
 										tile.debug('Tile expired, added it to the queue...');
+										queue.add(tile);
 									}
 								});
 
@@ -343,6 +353,7 @@ else
 											response.end();
 											tile.debug('Empty bitmap tile was responded to the request.');
 											tile.debug('Finished request.');
+											tile.destroy();
 											tile = null;
 											return;
 										}
@@ -363,6 +374,7 @@ else
 											response.end();
 											tile.debug('Bitmap tile was responded to the request.');
 											tile.debug('Finished request.');
+											tile.destroy();
 											tile = null;
 											return;
 										});

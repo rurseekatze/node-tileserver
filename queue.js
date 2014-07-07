@@ -6,6 +6,23 @@ See https://github.com/rurseekatze/node-tileserver for details.
 */
 
 
+// include necessary modules
+var cluster = require('cluster');
+var os = require('os');
+var rbush = require('rbush');
+var assert = require('assert');
+var url = require("url");
+var mkdirp = require('mkdirp');
+var pg = require('pg');
+var toobusy = require('toobusy');
+var byline = require('byline');
+var touch = require("touch");
+var Canvas = require('canvas');
+var events = require('events');
+var log4js = require('log4js');
+var fs = require('graceful-fs');
+
+
 Tilequeue = function()
 {
 	this.queue = [];
@@ -30,6 +47,7 @@ Tilequeue.prototype =
 			// restart rendering when queue gets filled again
 			if (this.queue.length == 1)
 				this.eventEmitter.emit('tileFinished');
+			logger.info(this.queue.length+" tiles in the queue.");
 		}
 	},
 
@@ -67,13 +85,19 @@ Tilequeue.prototype =
 	{
 		logger.info('Rendering tile from the queue.');
 		var tile = this.queue.shift();
-		tile.debug('Getting vector data...');
+
+		if (!tile)
+			return;
+
+		logger.debug('Getting vector data...');
 		var self = this;
 		tile.getVectorData(function(err, data)
 		{
 			if (err)
 			{
 				tile.info('Vectortile could not be created. Aborting.');
+				tile.destroy();
+				tile = null;
 				self.eventEmitter.emit('tileFinished');
 				return;
 			}
@@ -84,6 +108,8 @@ Tilequeue.prototype =
 				if (err)
 				{
 					tile.warn('Vector tile could not be saved. Returning.');
+					tile.destroy();
+					tile = null;
 					self.eventEmitter.emit('tileFinished');
 					return;
 				}
@@ -92,6 +118,8 @@ Tilequeue.prototype =
 				tile.rerenderBitmap();
 				// remove tile from queue and render next tile if every style was rendered
 				tile.debug('Finished. Getting the next tile from the queue...');
+				tile.destroy();
+				tile = null;
 				self.eventEmitter.emit('tileFinished');
 			});
 		});

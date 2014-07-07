@@ -6,6 +6,69 @@ See https://github.com/rurseekatze/node-tileserver for details.
 */
 
 
+// include necessary modules
+var cluster = require('cluster');
+var os = require('os');
+var rbush = require('rbush');
+var assert = require('assert');
+var url = require("url");
+var mkdirp = require('mkdirp');
+var pg = require('pg');
+var toobusy = require('toobusy');
+var byline = require('byline');
+var touch = require("touch");
+var Canvas = require('canvas');
+var events = require('events');
+var log4js = require('log4js');
+var fs = require('graceful-fs');
+
+// workaround to emulate browser properties
+var window = new Object;
+window.devicePixelRatio = 1;
+
+Image = Canvas.Image;
+
+// workaround to emulate browser frame method
+window.requestAnimationFrame = (
+	function()
+	{
+		return function(callback)
+		{
+			callback();
+		};
+	}
+)();
+
+// workaround to emulate dom functions
+var document = new Object;
+document.createElement = function()
+{
+	return new Canvas();
+}
+
+// include necessary libraries
+logger.trace('Including KothicJS...');
+eval(fs.readFileSync(configuration.scriptdir+'/kothic.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/path.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/line.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/polygon.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/shields.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/path.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/texticons.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/path.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/renderer/text.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/style/mapcss.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/style/style.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/utils/collisions.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/utils/geom.js')+'');
+eval(fs.readFileSync(configuration.scriptdir+'/utils/collisions.js')+'');
+logger.trace('KothicJS loaded.');
+
+// include rendering styles
+for (var i=0; i<configuration.styles.length; i++)
+	eval(fs.readFileSync(configuration.styledir+'/'+configuration.styles[i]+'.js')+'');
+
+
 Tile = function(zoom, x, y, style)
 {
 	this.z = parseInt(zoom) || 0;
@@ -13,54 +76,6 @@ Tile = function(zoom, x, y, style)
 	this.y = parseInt(y) || 0;
 	this.data = null;
 	this.style = style || "vector";
-
-	// include necessary libraries
-	logger.trace('Including KothicJS...');
-	eval(fs.readFileSync(configuration.scriptdir+'/kothic.js')+'');
-	eval(fs.readFileSync(configuration.scriptdir+'/renderer/path.js')+'');
-	eval(fs.readFileSync(configuration.scriptdir+'/renderer/line.js')+'');
-	eval(fs.readFileSync(configuration.scriptdir+'/renderer/polygon.js')+'');
-	eval(fs.readFileSync(configuration.scriptdir+'/renderer/shields.js')+'');
-	eval(fs.readFileSync(configuration.scriptdir+'/renderer/path.js')+'');
-	eval(fs.readFileSync(configuration.scriptdir+'/renderer/texticons.js')+'');
-	eval(fs.readFileSync(configuration.scriptdir+'/renderer/path.js')+'');
-	eval(fs.readFileSync(configuration.scriptdir+'/renderer/text.js')+'');
-	eval(fs.readFileSync(configuration.scriptdir+'/style/mapcss.js')+'');
-	eval(fs.readFileSync(configuration.scriptdir+'/style/style.js')+'');
-	eval(fs.readFileSync(configuration.scriptdir+'/utils/collisions.js')+'');
-	eval(fs.readFileSync(configuration.scriptdir+'/utils/geom.js')+'');
-	eval(fs.readFileSync(configuration.scriptdir+'/utils/collisions.js')+'');
-	this.MapCSS = MapCSS;
-	this.Kothic = Kothic;
-	logger.trace('KothicJS loaded.');
-
-	// include rendering styles
-	for (var i=0; i<configuration.styles.length; i++)
-		eval(fs.readFileSync(configuration.styledir+'/'+configuration.styles[i]+'.js')+'');
-
-	Image = Canvas.Image;
-
-	// workaround to emulate browser properties
-	var window = new Object;
-	window.devicePixelRatio = 1;
-
-	// workaround to emulate browser frame method
-	window.requestAnimationFrame = (
-		function()
-		{
-			return function(callback)
-			{
-				callback();
-			};
-		}
-	)();
-
-	// workaround to emulate dom functions
-	var document = new Object;
-	document.createElement = function()
-	{
-		return new Canvas();
-	}
 };
 
 Tile.prototype =
@@ -196,7 +211,7 @@ Tile.prototype =
 	{
 		var self = this;
 		// get vector tile when map icons were loaded
-		this.MapCSS.onImagesLoad = function()
+		MapCSS.onImagesLoad = function()
 		{
 			self.debug('Rendering data...');
 
@@ -204,13 +219,13 @@ Tile.prototype =
 			var canvas = new Canvas(configuration.tileSize, configuration.tileSize);
 			canvas.style = new Object();
 
-			self.MapCSS.invalidateCache();
-			self.MapCSS.availableStyles.length = 0;
-			self.MapCSS.availableStyles.push(self.style);
+			MapCSS.invalidateCache();
+			MapCSS.availableStyles.length = 0;
+			MapCSS.availableStyles.push(self.style);
 
-			self.Kothic.render(canvas, self.data, self.z+configuration.zoomOffset,
+			Kothic.render(canvas, self.data, self.z+configuration.zoomOffset,
 			{
-				styles: self.MapCSS.availableStyles,
+				styles: MapCSS.availableStyles,
 				onRenderComplete: function()
 				{
 					self.debug('Finished rendering bitmap tile.');
@@ -223,7 +238,7 @@ Tile.prototype =
 		};
 		// load map icons
 		this.trace('Loading MapCSS style '+this.style);
-		this.MapCSS.preloadSpriteImage(this.style, configuration.styledir+"/"+this.style+".png");
+		MapCSS.preloadSpriteImage(this.style, configuration.styledir+"/"+this.style+".png");
 	},
 
 	// removes all rendering styles of a bitmap tile from the cache
@@ -801,6 +816,12 @@ Tile.prototype =
 				callback(exists);
 			});
 		});
+	},
+
+	// destroys the object
+	destroy: function()
+	{
+		self = null;
 	}
 };
 
