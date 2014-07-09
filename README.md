@@ -127,6 +127,7 @@
     $ cd kothic-js
 
  Apply some patches, otherwise some features will not work properly:
+
     $ patch src/kothic.js < ../patches/kothic.diff
     $ patch src/style/style.js < ../patches/style.diff
     $ patch dist/kothic-leaflet.js < ../patches/kothic-leaflet.diff
