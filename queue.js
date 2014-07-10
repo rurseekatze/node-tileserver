@@ -87,7 +87,10 @@ Tilequeue.prototype =
 		var tile = this.queue.shift();
 
 		if (!tile)
+		{
+			this.eventEmitter.emit('tileFinished');
 			return;
+		}
 
 		logger.debug('Getting vector data...');
 		var self = this;
