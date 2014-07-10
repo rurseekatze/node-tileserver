@@ -36,6 +36,9 @@
     $ git clone https://github.com/rurseekatze/node-tileserver.git
     $ cd node-tileserver
 
+ Not that this is the current developing stage, which may contain bugs and can lead to crashes.
+ Therefore it is recommended to download a [stable version](https://github.com/rurseekatze/node-tileserver/releases).
+
  After that you can install all necessary NodeJS modules with npm:
 
     $ npm install canvas@1.0.4
