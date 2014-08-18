@@ -6,17 +6,17 @@
 
 ## Features
 
-* Serves tiles bitmap tiles usable in Leaflet or OpenLayers
-* Serves vector tiles rendered on clientside by KothicJS
-* Uses KothicJS both as bitmap renderer on serverside and canvas renderer on clientside 
-* Filesystem caching mechanisms
-* Map styling with MapCSS
-* Support for tiles in multiple rendering styles
-* Designed to use a osm2pgsql hstore database containing OpenStreetMap data
-* Refresh tiles manually by GET requests
-* Rerender expired tiles automatically in the background
-* High performance that profits from the non-blocking I/O design of NodeJS
-* Easy to install on several operating systems, distributions and environments due to less dependencies
+ * Serves tiles bitmap tiles usable in Leaflet or OpenLayers
+ * Serves vector tiles rendered on clientside by KothicJS
+ * Uses KothicJS both as bitmap renderer on serverside and canvas renderer on clientside 
+ * Filesystem caching mechanisms
+ * Map styling with MapCSS
+ * Support for tiles in multiple rendering styles
+ * Designed to use a osm2pgsql hstore database containing OpenStreetMap data
+ * Refresh tiles manually by GET requests
+ * Rerender expired tiles automatically in the background
+ * High performance that profits from the non-blocking I/O design of NodeJS
+ * Easy to install on several operating systems, distributions and environments due to less dependencies
 
 ## Authors
 
@@ -41,7 +41,7 @@
 
  After that you can install all necessary NodeJS modules with npm:
 
-    $ npm install canvas@1.0.4
+    $ npm install canvas
     $ npm install rbush
     $ npm install mkdirp
     $ npm install pg
@@ -122,20 +122,6 @@
 
  Have a look at an [example toolchain](https://github.com/rurseekatze/OpenRailwayMap/blob/master/import/import.sh) for an example of using osm2pgsql with filtered data.
 
- If you want to use vector tiles for client-side rendering, you have to install KothicJS and do some modifications. If you just want to use bitmap tiles, you can skip the next steps.
-
- Clone the KothicJS repository:
-
-    $ git clone https://github.com/kothic/kothic-js.git
-    $ cd kothic-js
-
- Apply some patches, otherwise some features will not work properly:
-
-    $ patch src/kothic.js < ../patches/kothic.diff
-    $ patch src/style/style.js < ../patches/style.diff
-    $ patch dist/kothic-leaflet.js < ../patches/kothic-leaflet.diff
-    $ patch style/mapcss.js < ../patches/mapcss.diff
-
  You need MapCSS converter to compile your MapCSS styles to javascript:
 
     $ wget https://raw2.github.com/kothic/kothic-js-mapcss/master/scripts/mapcss_converter.py
@@ -150,6 +136,8 @@
  Go to your styles directory and compile all your MapCSS styles in one run (you have to do this after every change of your stylesheets):
 
     $ for stylefile in *.mapcss ; do python mapcss_converter.py --mapcss "$stylefile" --icons-path . ; done
+
+ Note that you have to recompile the stylesheets every time you change the MapCSS files to apply the changes. It is also necessary to restart the tileserver to reload the stylesheets.
 
  You need a proxy that routes incoming requests. It is recommended to use a NodeJS proxy like [this](https://github.com/rurseekatze/OpenRailwayMap/blob/master/proxy.js), especially if you are running another webserver like Apache parallel to NodeJS. Remember to change the domains in the script and the configuration of your parallel running webservers. The NodeJS proxy listens on port 80 while parallel webservers should listen on 8080.
 
@@ -171,7 +159,7 @@ You can set various options to configure your tileserver:
 
  * `expiredtilesdir` Relative or absolute path to the list of expired tiles. _Default: `../../olm/import`_
 
- * `scriptdir` Relative or absolute path to the directory of the required scripts, usually `kothic-js/src`. _Default: `../js`_
+ * `scriptdir` Relative or absolute path to the directory of the required scripts, usually the `kothic` directory included in this repository. _Default: `../js`_
 
  * `styledir` Relative or absolute path to the directory containing (compiled) MapCSS styles. _Default: `../styles`_
 
@@ -260,7 +248,7 @@ __Note:__ For some parameters it is also necessary to change the modify the opti
 
  __Leaflet example:__
 
- Include all javascript files from kothic-js/src and kothic-js/dist and your compiled MapCSS styles into your website.
+ Include all javascript files from kothic/src and kothic/dist and your compiled MapCSS styles into your website.
 
     ...
     map = L.map('mapFrame');
@@ -359,3 +347,5 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
+
+__The files in the `kothic` directory are published under other licenses. See the header of each file for more information.__
