@@ -61,12 +61,15 @@ eval(fs.readFileSync(configuration.scriptdir+'/style/mapcss.js')+'');
 eval(fs.readFileSync(configuration.scriptdir+'/style/style.js')+'');
 eval(fs.readFileSync(configuration.scriptdir+'/utils/collisions.js')+'');
 eval(fs.readFileSync(configuration.scriptdir+'/utils/geom.js')+'');
-eval(fs.readFileSync(configuration.scriptdir+'/utils/collisions.js')+'');
 logger.trace('KothicJS loaded.');
+
 
 // include rendering styles
 for (var i=0; i<configuration.styles.length; i++)
+{
 	eval(fs.readFileSync(configuration.styledir+'/'+configuration.styles[i]+'.js')+'');
+	MapCSS.preloadSpriteImage(configuration.styles[i], configuration.styledir+"/"+configuration.styles[i]+".png");
+}
 
 
 Tile = function(zoom, x, y, style)
@@ -180,10 +183,12 @@ Tile.prototype =
 					try
 					{
 						self.data = JSON.parse(data);
+						data = null;
 						callback(err, self.data);
 					}
 					catch (err)
 					{
+						data = null;
 						self.data = null;
 						callback(err, null);
 					}
@@ -209,36 +214,25 @@ Tile.prototype =
 	// renders a certain tile and calls the callback with the ready-rendered canvas when finished
 	render: function(callback)
 	{
+		this.debug('Rendering data...');
+
+		// start bitmap rendering
+		var canvas = new Canvas(configuration.tileSize, configuration.tileSize);
+		canvas.style = new Object();
+		MapCSS.invalidateCache();
 		var self = this;
-		// get vector tile when map icons were loaded
-		MapCSS.onImagesLoad = function()
+		Kothic.render(canvas, this.data, this.z+configuration.zoomOffset,
 		{
-			self.debug('Rendering data...');
-
-			// start bitmap rendering
-			var canvas = new Canvas(configuration.tileSize, configuration.tileSize);
-			canvas.style = new Object();
-
-			MapCSS.invalidateCache();
-			MapCSS.availableStyles.length = 0;
-			MapCSS.availableStyles.push(self.style);
-
-			Kothic.render(canvas, self.data, self.z+configuration.zoomOffset,
+			styles: [this.style],
+			onRenderComplete: function()
 			{
-				styles: MapCSS.availableStyles,
-				onRenderComplete: function()
+				self.debug('Finished rendering bitmap tile.');
+				return process.nextTick(function()
 				{
-					self.debug('Finished rendering bitmap tile.');
-					return process.nextTick(function()
-					{
-						callback(false, canvas);
-					});
-				}
-			});
-		};
-		// load map icons
-		this.trace('Loading MapCSS style '+this.style);
-		MapCSS.preloadSpriteImage(this.style, configuration.styledir+"/"+this.style+".png");
+					callback(false, canvas);
+				});
+			}
+		});
 	},
 
 	// removes all rendering styles of a bitmap tile from the cache
@@ -379,7 +373,6 @@ Tile.prototype =
 	{
 		var bbox = this.getBbox();
 		var bbox_p = this.from4326To900913(bbox);
-		var zoom = this.z+configuration.zoomOffset;
 
 		var connection = "postgres://postgres@localhost/"+configuration.database;
 		var client = new pg.Client(connection);
@@ -399,47 +392,32 @@ Tile.prototype =
 			else
 				self.debug('Connected to database.');
 
-			// request polygons
-			var query = self.getDatabaseQuery("polygon", bbox_p, zoom);
-			self.trace('Requesting polygons...');
-			client.query(query, function(err, polygons)
+			// request data
+			self.trace('Requesting data...');
+			client.query(self.getDatabaseQuery(bbox_p), function(err, results)
 			{
-				var features = self.getJSONFeatures(polygons);
-				// request lines
-				var query = self.getDatabaseQuery("line", bbox_p, zoom);
-				self.trace('Requesting lines...');
-				client.query(query, function(err, lines)
+				var content = new Object();
+				content.features = new Array();
+
+				self.trace('All database queries finished, generating JSON data object.');
+				content.features = self.getJSONFeatures(results);
+
+				// catch tiles without data
+				if (!content.features)
 				{
-					features = features.concat(self.getJSONFeatures(lines));
-					// request points
-					var query = self.getDatabaseQuery("point", bbox_p, zoom);
-					self.trace('Requesting points...');
-					client.query(query, function(err, points)
-					{
-						var content = new Object();
-						content.features = new Array();
+					content.features = new Array();
+					self.debug('Vector tile contains no data.');
+				}
 
-						self.trace('All database queries finished, generating JSON data object.');
-						content.features = features.concat(self.getJSONFeatures(points));
-
-						// catch tiles without data
-						if (!content.features)
-						{
-							content.features = new Array();
-							self.debug('Vector tile contains no data.');
-						}
-		
-						content.granularity = configuration.intscalefactor;
-						content.bbox = bbox;
-						client.end();
-						self.invertYAxe(content);
-						self.debug('Generated vector data.');
-						return process.nextTick(function()
-						{
-							self.data = content;
-							callback(false, content);
-						});
-					});
+				content.granularity = configuration.intscalefactor;
+				content.bbox = bbox;
+				client.end();
+				self.invertYAxe(content);
+				self.data = content;
+				self.debug('Generated vector data.');
+				return process.nextTick(function()
+				{
+					callback(false, content);
 				});
 			});
 		});
@@ -464,6 +442,8 @@ Tile.prototype =
 			{
 				self.warn('Bitmap tile could not be rendered. Returning.');
 				self.rerenderBitmap(selectedStyle+1);
+				self = null;
+				image = null;
 				return;
 			}
 
@@ -475,6 +455,8 @@ Tile.prototype =
 				{
 					self.error('Cannot create path '+filepath+'. Returning.');
 					self.rerenderBitmap(selectedStyle+1);
+					self = null;
+					image = null;
 					return;
 				}
 
@@ -494,6 +476,10 @@ Tile.prototype =
 					out.end();
 					self.debug('Bitmap tile was saved.');
 					self.rerenderBitmap(selectedStyle+1);
+					self = null;
+					image = null;
+					stream = null;
+					out = null;
 					return;
 				});
 			});
@@ -508,65 +494,59 @@ Tile.prototype =
 	},
 
 	// returns a database sql query string
-	getDatabaseQuery: function(type, bbox)
+	getDatabaseQuery: function(bbox)
 	{
-		var cond = configuration.filterconditions[this.z] || "";
-
-		if (type == "polygon")
-		{
-			var buffer = this.pixelSizeAtZoom(configuration.pxtolerance);
+		var zoom = this.z+configuration.zoomOffset;
+		var cond = configuration.filterconditions[zoom] || "";
+		var buffer = this.pixelSizeAtZoom(configuration.pxtolerance);
+		var tolerance = this.pixelSizeAtZoom(configuration.tileBoundTolerance);
 
 			return "\
 						SELECT\
-							ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_Intersection(way, SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913))), "+(-bbox[0])+", "+(-bbox[1])+", "+configuration.intscalefactor/(bbox[2]-bbox[0])+", "+configuration.intscalefactor/(bbox[3]-bbox[1])+"), 0) AS "+configuration.geomcolumn+",\
+							ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_Intersection("+configuration.geomcolumn+", SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913))), "+(-bbox[0])+", "+(-bbox[1])+", "+configuration.intscalefactor/(bbox[2]-bbox[0])+", "+configuration.intscalefactor/(bbox[3]-bbox[1])+"), 0) AS "+configuration.geomcolumn+",\
 							hstore2json(CAST(hstore(tags) AS hstore)) AS tags,\
-							ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_PointOnSurface(way)), "+(-bbox[0])+", "+(-bbox[1])+", "+configuration.intscalefactor/(bbox[2]-bbox[0])+", "+configuration.intscalefactor/(bbox[3]-bbox[1])+"), 0) AS reprpoint\
+							ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_PointOnSurface("+configuration.geomcolumn+")), "+(-bbox[0])+", "+(-bbox[1])+", "+configuration.intscalefactor/(bbox[2]-bbox[0])+", "+configuration.intscalefactor/(bbox[3]-bbox[1])+"), 0) AS reprpoint\
 						FROM\
 							(\
-								SELECT (ST_Dump(ST_Multi(ST_SimplifyPreserveTopology(ST_Buffer(way ,-"+buffer+"), "+buffer+")))).geom AS "+configuration.geomcolumn+", tags\
+								SELECT (ST_Dump(ST_Multi(ST_SimplifyPreserveTopology(ST_Buffer("+configuration.geomcolumn+" ,-"+buffer+"), "+buffer+")))).geom AS "+configuration.geomcolumn+", tags\
 								FROM\
 									(\
-										SELECT ST_Union(way) AS "+configuration.geomcolumn+", tags\
+										SELECT ST_Union("+configuration.geomcolumn+") AS "+configuration.geomcolumn+", tags\
 										FROM\
 											(\
-												SELECT ST_Buffer(way, "+buffer+") AS "+configuration.geomcolumn+", CAST(tags AS text) AS tags\
+												SELECT ST_Buffer("+configuration.geomcolumn+", "+buffer+") AS "+configuration.geomcolumn+", CAST(tags AS text) AS tags\
 												FROM "+configuration.prefix+"_polygon\
-												WHERE way && SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) AND way_area > "+(Math.pow(buffer, 2)/configuration.pxtolerance)+" "+cond+"\
+												WHERE "+configuration.geomcolumn+" && SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) AND way_area > "+(Math.pow(buffer, 2)/configuration.pxtolerance)+" "+cond+"\
 											) p\
 										GROUP BY CAST(tags AS text)\
 									) p\
-								WHERE ST_Area(way) > "+Math.pow(buffer, 2)+"\
-								ORDER BY ST_Area(way)\
-							) p";
-		}
-		else if (type == "line")
-		{
-			return "\
+								WHERE ST_Area("+configuration.geomcolumn+") > "+Math.pow(buffer, 2)+"\
+								ORDER BY ST_Area("+configuration.geomcolumn+")\
+							) p\
+						UNION\
 						SELECT\
-							ST_AsGeoJSON(ST_TransScale(ST_Intersection(way, SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913)), "+(-bbox[0])+", "+(-bbox[1])+", "+(configuration.intscalefactor/(bbox[2]-bbox[0]))+", "+(configuration.intscalefactor/(bbox[3]-bbox[1]))+"), 0) AS "+configuration.geomcolumn+", hstore2json(CAST(hstore(tags) AS hstore)) as tags\
+							ST_AsGeoJSON(ST_TransScale(ST_Intersection("+configuration.geomcolumn+", SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913)), "+(-bbox[0])+", "+(-bbox[1])+", "+(configuration.intscalefactor/(bbox[2]-bbox[0]))+", "+(configuration.intscalefactor/(bbox[3]-bbox[1]))+"), 0) AS "+configuration.geomcolumn+",\
+							hstore2json(CAST(hstore(tags) AS hstore)) as tags,\
+							Null AS reprpoint\
 						FROM\
 							(\
-								SELECT (ST_Dump(ST_Multi(ST_SimplifyPreserveTopology(ST_LineMerge(way), "+this.pixelSizeAtZoom(configuration.pxtolerance)+")))).geom AS "+configuration.geomcolumn+", tags\
+								SELECT (ST_Dump(ST_Multi(ST_SimplifyPreserveTopology(ST_LineMerge("+configuration.geomcolumn+"), "+this.pixelSizeAtZoom(configuration.pxtolerance)+")))).geom AS "+configuration.geomcolumn+", tags\
 								FROM\
 									(\
-										SELECT ST_Union(way) AS "+configuration.geomcolumn+", CAST(tags AS text)\
+										SELECT ST_Union("+configuration.geomcolumn+") AS "+configuration.geomcolumn+", CAST(tags AS text)\
 										FROM "+configuration.prefix+"_line\
-										WHERE way && SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) "+cond+"\
+										WHERE "+configuration.geomcolumn+" && SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) "+cond+"\
 										GROUP BY CAST(tags AS text)\
 									) p\
-							) p";
-		}
-		else if (type == "point")
-		{
-			var tolerance = this.pixelSizeAtZoom(configuration.tileBoundTolerance);
-
-			return "\
-						SELECT ST_AsGeoJSON(ST_TransScale(way, "+(-bbox[0])+", "+(-bbox[1])+", "+(configuration.intscalefactor/(bbox[2]-bbox[0]))+", "+(configuration.intscalefactor/(bbox[3]-bbox[1]))+"), 0) AS "+configuration.geomcolumn+", hstore2json(tags) AS tags\
+							) p\
+						UNION\
+						SELECT ST_AsGeoJSON(ST_TransScale("+configuration.geomcolumn+", "+(-bbox[0])+", "+(-bbox[1])+", "+(configuration.intscalefactor/(bbox[2]-bbox[0]))+", "+(configuration.intscalefactor/(bbox[3]-bbox[1]))+"), 0) AS "+configuration.geomcolumn+",\
+						hstore2json(tags) AS tags,\
+						Null AS reprpoint\
 						FROM "+configuration.prefix+"_point\
 						WHERE\
-						way && SetSRID('BOX3D("+(bbox[0]-tolerance)+" "+(bbox[1]-tolerance)+","+(bbox[2]+tolerance)+" "+(bbox[3]+tolerance)+")'::box3d, 900913) "+cond+"\
+						"+configuration.geomcolumn+" && SetSRID('BOX3D("+(bbox[0]-tolerance)+" "+(bbox[1]-tolerance)+","+(bbox[2]+tolerance)+" "+(bbox[3]+tolerance)+")'::box3d, 900913) "+cond+"\
 						LIMIT 10000";
-		}
 	},
 
 	// equivalent of tanh in PHP
@@ -796,6 +776,8 @@ Tile.prototype =
 				stream.on('end', function()
 				{
 					out.end();
+					image = null;
+					stream = null;
 					self.debug('Bitmap tile was stored.');
 					return process.nextTick(function()
 					{
