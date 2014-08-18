@@ -7,14 +7,12 @@ See https://github.com/rurseekatze/node-tileserver for details.
 
 
 // include necessary modules
-var heapdump = require('heapdump');
 var cluster = require('cluster');
 var os = require('os');
 var rbush = require('rbush');
 var assert = require('assert');
 var http = require("http");
 var url = require("url");
-var mkdirp = require('mkdirp');
 var toobusy = require('toobusy');
 var byline = require('byline');
 var touch = require("touch");
@@ -44,7 +42,7 @@ log4js.configure(
 		},
 		{
 			"type": "logLevelFilter",
-			"level": "INFO",
+			"level": "WARN",
 			"appender":
 			{
 				"type": "console"
@@ -52,8 +50,9 @@ log4js.configure(
 		}
 	]
 });
+
 logger = log4js.getLogger();
-logger.setLevel('TRACE');
+logger.setLevel('INFO');
 
 // load classes
 Tile = require('./tile.js');
@@ -73,6 +72,7 @@ if (cluster.isMaster)
 		cluster.fork();
 	cluster.on("exit", function(worker, code, signal)
 	{
+		logger.fatal("WORKER STOPPED");
 		cluster.fork();
 	});
 	logger.info('Master has started.');
@@ -195,10 +195,7 @@ else
 						tile.isExpired(function(expired)
 						{
 							if (expired)
-							{
 								queue.add(tile);
-								tile.debug('Tile expired, added it to the queue...');
-							}
 						});
 
 						tile.debug('Returning vector tile...');
@@ -243,10 +240,8 @@ else
 							tile.isExpired(function(expired)
 							{
 								if (expired)
-								{
 									queue.add(tile);
-									tile.debug('Tile expired, added it to the queue...');
-								}
+
 								tile.destroy();
 								tile = null;
 								return;
@@ -334,49 +329,46 @@ else
 								tile.isExpired(function(expired)
 								{
 									if (expired)
-									{
-										tile.debug('Tile expired, added it to the queue...');
 										queue.add(tile);
-									}
-								});
 
-								tile.debug('Rendering bitmap tile with style '+tile.style);
-								tile.render(function(err, image)
-								{
-									if (err)
-										tile.debug('Vectortile was empty.');
-									tile.saveBitmapData(image, function(err)
+									tile.debug('Rendering bitmap tile with style '+tile.style);
+									tile.render(function(err, image)
 									{
 										if (err)
+											tile.debug('Vectortile was empty.');
+										tile.saveBitmapData(image, function(err)
 										{
-											response.writeHead(500, {'Content-Type': 'text/plain'});
-											response.end();
-											tile.debug('Empty bitmap tile was responded to the request.');
-											tile.debug('Finished request.');
-											tile.destroy();
-											tile = null;
-											return;
-										}
+											if (err)
+											{
+												response.writeHead(500, {'Content-Type': 'text/plain'});
+												response.end();
+												tile.debug('Empty bitmap tile was responded to the request.');
+												tile.debug('Finished request.');
+												tile.destroy();
+												tile = null;
+												return;
+											}
 
-										tile.trace('Responding bitmap data...');
-										var stream = image.createPNGStream();
-										response.writeHead(200, {'Content-Type': 'image/png'});
+											tile.trace('Responding bitmap data...');
+											var stream = image.createPNGStream();
+											response.writeHead(200, {'Content-Type': 'image/png'});
 
-										// write PNG data stream
-										stream.on('data', function(data)
-										{
-											response.write(data);
-										});
+											// write PNG data stream
+											stream.on('data', function(data)
+											{
+												response.write(data);
+											});
 
-										// PNG data stream ended
-										stream.on('end', function()
-										{
-											response.end();
-											tile.debug('Bitmap tile was responded to the request.');
-											tile.debug('Finished request.');
-											tile.destroy();
-											tile = null;
-											return;
+											// PNG data stream ended
+											stream.on('end', function()
+											{
+												response.end();
+												tile.debug('Bitmap tile was responded to the request.');
+												tile.debug('Finished request.');
+												tile.destroy();
+												tile = null;
+												return;
+											});
 										});
 									});
 								});

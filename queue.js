@@ -12,7 +12,6 @@ var os = require('os');
 var rbush = require('rbush');
 var assert = require('assert');
 var url = require("url");
-var mkdirp = require('mkdirp');
 var pg = require('pg');
 var toobusy = require('toobusy');
 var byline = require('byline');
@@ -75,7 +74,12 @@ Tilequeue.prototype =
 			else
 			{
 				logger.info('System load too high, will retry after 5 seconds...');
-				this.wait(5);
+
+				var self = this;
+				setTimeout(function()
+				{
+					self.eventEmitter.emit('tileFinished');
+				}, 5*1000);
 			}
 		}
 	},
@@ -126,16 +130,6 @@ Tilequeue.prototype =
 				self.eventEmitter.emit('tileFinished');
 			});
 		});
-	},
-
-	// waits sec seconds before continuing to render the tiles from the queue
-	wait: function(sec)
-	{
-		var self = this;
-		setTimeout(function()
-		{
-			self.eventEmitter.emit('tileFinished');
-		}, sec*1000);
 	}
 };
 
