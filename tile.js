@@ -374,7 +374,10 @@ Tile.prototype =
 		var bbox = this.getBbox();
 		var bbox_p = this.from4326To900913(bbox);
 
-		var connection = "postgres://"+configuration.username+":"+configuration.password+"@localhost/"+configuration.database;
+		if (configuration.password == "")
+			var connection = "postgres://"+configuration.username+"@localhost/"+configuration.database;
+		else
+			var connection = "postgres://"+configuration.username+":"+configuration.password+"@localhost/"+configuration.database;
 		var client = new pg.Client(connection);
 
 		this.debug('Connecting to database '+connection+'...');
