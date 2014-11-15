@@ -374,7 +374,7 @@ Tile.prototype =
 		var bbox = this.getBbox();
 		var bbox_p = this.from4326To900913(bbox);
 
-		var connection = "postgres://postgres@localhost/"+configuration.database;
+		var connection = "postgres://"+configuration.username+":"+configuration.password+"@localhost/"+configuration.database;
 		var client = new pg.Client(connection);
 
 		this.debug('Connecting to database '+connection+'...');
@@ -503,7 +503,7 @@ Tile.prototype =
 
 			return "\
 						SELECT\
-							ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_Intersection("+configuration.geomcolumn+", SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913))), "+(-bbox[0])+", "+(-bbox[1])+", "+configuration.intscalefactor/(bbox[2]-bbox[0])+", "+configuration.intscalefactor/(bbox[3]-bbox[1])+"), 0) AS "+configuration.geomcolumn+",\
+							ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_Intersection("+configuration.geomcolumn+", ST_SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913))), "+(-bbox[0])+", "+(-bbox[1])+", "+configuration.intscalefactor/(bbox[2]-bbox[0])+", "+configuration.intscalefactor/(bbox[3]-bbox[1])+"), 0) AS "+configuration.geomcolumn+",\
 							hstore2json(CAST(hstore(tags) AS hstore)) AS tags,\
 							ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_PointOnSurface("+configuration.geomcolumn+")), "+(-bbox[0])+", "+(-bbox[1])+", "+configuration.intscalefactor/(bbox[2]-bbox[0])+", "+configuration.intscalefactor/(bbox[3]-bbox[1])+"), 0) AS reprpoint\
 						FROM\
@@ -516,7 +516,7 @@ Tile.prototype =
 											(\
 												SELECT ST_Buffer("+configuration.geomcolumn+", "+buffer+") AS "+configuration.geomcolumn+", CAST(tags AS text) AS tags\
 												FROM "+configuration.prefix+"_polygon\
-												WHERE "+configuration.geomcolumn+" && SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) AND way_area > "+(Math.pow(buffer, 2)/configuration.pxtolerance)+" "+cond+"\
+												WHERE "+configuration.geomcolumn+" && ST_SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) AND way_area > "+(Math.pow(buffer, 2)/configuration.pxtolerance)+" "+cond+"\
 											) p\
 										GROUP BY CAST(tags AS text)\
 									) p\
@@ -525,7 +525,7 @@ Tile.prototype =
 							) p\
 						UNION\
 						SELECT\
-							ST_AsGeoJSON(ST_TransScale(ST_Intersection("+configuration.geomcolumn+", SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913)), "+(-bbox[0])+", "+(-bbox[1])+", "+(configuration.intscalefactor/(bbox[2]-bbox[0]))+", "+(configuration.intscalefactor/(bbox[3]-bbox[1]))+"), 0) AS "+configuration.geomcolumn+",\
+							ST_AsGeoJSON(ST_TransScale(ST_Intersection("+configuration.geomcolumn+", ST_SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913)), "+(-bbox[0])+", "+(-bbox[1])+", "+(configuration.intscalefactor/(bbox[2]-bbox[0]))+", "+(configuration.intscalefactor/(bbox[3]-bbox[1]))+"), 0) AS "+configuration.geomcolumn+",\
 							hstore2json(CAST(hstore(tags) AS hstore)) as tags,\
 							Null AS reprpoint\
 						FROM\
@@ -535,7 +535,7 @@ Tile.prototype =
 									(\
 										SELECT ST_Union("+configuration.geomcolumn+") AS "+configuration.geomcolumn+", CAST(tags AS text)\
 										FROM "+configuration.prefix+"_line\
-										WHERE "+configuration.geomcolumn+" && SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) "+cond+"\
+										WHERE "+configuration.geomcolumn+" && ST_SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) "+cond+"\
 										GROUP BY CAST(tags AS text)\
 									) p\
 							) p\
@@ -545,7 +545,7 @@ Tile.prototype =
 						Null AS reprpoint\
 						FROM "+configuration.prefix+"_point\
 						WHERE\
-						"+configuration.geomcolumn+" && SetSRID('BOX3D("+(bbox[0]-tolerance)+" "+(bbox[1]-tolerance)+","+(bbox[2]+tolerance)+" "+(bbox[3]+tolerance)+")'::box3d, 900913) "+cond+"\
+						"+configuration.geomcolumn+" && ST_SetSRID('BOX3D("+(bbox[0]-tolerance)+" "+(bbox[1]-tolerance)+","+(bbox[2]+tolerance)+" "+(bbox[3]+tolerance)+")'::box3d, 900913) "+cond+"\
 						LIMIT 10000";
 	},
 

@@ -2,6 +2,8 @@
 	"tileSize" : 256,
 	"prefix" : "railmap",
 	"database" : "railmap",
+	"username" : "railmap",
+	"password" : "railmap",
 	"vtiledir" : "/home/www/sites/194.245.35.149/site/orm/tiles",
 	"tiledir" : "/home/www/sites/194.245.35.149/site/orm/bitmap-tiles",
 	"expiredtilesdir" : "/home/www/sites/194.245.35.149/site/olm/import",
