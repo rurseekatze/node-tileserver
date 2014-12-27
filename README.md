@@ -151,7 +151,11 @@ You can set various options to configure your tileserver:
 
  * `prefix` The prefix used for osm2pgsql tables. Depends on the parameters you are using in osm2pgsql. _Default: `railmap`_
 
- * `db` The name of the used database. Depends on the parameters you are using in osm2pgsql. _Default: `railmap`_
+ * `database` The name of the used database. Depends on the parameters you are using in osm2pgsql. _Default: `railmap`_
+
+ * `username` The username to be used for database requests. Depends on the parameters you are using in osm2pgsql. _Default: `postgres`_
+
+ * `password` The password to be used for database requests. The value can be empty. Depends on the parameters you are using in osm2pgsql. _Default: `<empty>`_
 
  * `vtiledir` Relative or absolute path to the vector tile directory. _Default: `../tiles`_
 
