@@ -341,4 +341,4 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
 
-__The files in the `kothic` directory are published under other licenses. See the header of each file for more information.__
+__The file `mapcss_converter.py` and the files in the `mapcss_parser` and `kothic` directories are published under other licenses. See the header of each file for more information.__
