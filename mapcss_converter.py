@@ -147,6 +147,13 @@ def selector_as_js(self):
     else:
         return "%s == %s" % (subject_property, wrap_key(self.subject))
 
+def isNumeric(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
 def condition_check_as_js(self):
     k = wrap_key(self.key).strip("'\"")
     v = wrap_key(self.value).strip("'\"")
@@ -155,6 +162,8 @@ def condition_check_as_js(self):
         return "%s.test(tags['%s'])" % (v, k)
     elif self.sign == '!~':
         return "!(%s.test(tags['%s']))" % (v, k)
+    elif isNumeric(v):
+        return "tags['%s'] %s %s" % (k, CHECK_OPERATORS[self.sign], v)
     else:
         return "tags['%s'] %s '%s'" % (k, CHECK_OPERATORS[self.sign], v)
 
