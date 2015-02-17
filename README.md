@@ -124,12 +124,12 @@
 
  Now you can begin to write your own rendering styles. node-tileserver processes rendering styles written in MapCSS. Have a look at the following websites for an introduction, examples and specifications:
 
-* [JOSM MapCSS Implementation](https://josm.openstreetmap.de/wiki/Help/Styles/MapCSSImplementation)
-* [JOSM MapCSS Tutorial](https://josm.openstreetmap.de/wiki/Help/Styles/MapCSSTutorial)
-* [MapCSS Website](http://www.mapcss.org/)
-* [MapCSS in OSM Wiki](http://wiki.openstreetmap.org/wiki/MapCSS)
+ * [JOSM MapCSS Implementation](https://josm.openstreetmap.de/wiki/Help/Styles/MapCSSImplementation)
+ * [JOSM MapCSS Tutorial](https://josm.openstreetmap.de/wiki/Help/Styles/MapCSSTutorial)
+ * [MapCSS Website](http://www.mapcss.org/)
+ * [MapCSS in OSM Wiki](http://wiki.openstreetmap.org/wiki/MapCSS)
 
- You need MapCSS converter to compile your MapCSS styles to JavaScript. Go to your styles directory and compile all your MapCSS styles in one run (you have to do this after every change of your stylesheets):
+You need MapCSS converter to compile your MapCSS styles to JavaScript. Go to your styles directory and compile all your MapCSS styles in one run (you have to do this after every change of your stylesheets):
 
     $ for stylefile in *.mapcss ; do python mapcss_converter.py --mapcss "$stylefile" --icons-path . ; done
 
