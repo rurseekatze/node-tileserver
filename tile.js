@@ -254,24 +254,11 @@ Tile.prototype =
 	// returns true if the tile was marked as expired, otherwise false is returned
 	isExpired: function(callback)
 	{
-		var filepath = configuration.vtiledir+'/'+this.z+'/'+this.x+'/'+this.y+'.json';
-
-		fs.exists(filepath, function(exists)
+		this.getModifyTime(function(err, mtime)
 		{
-			if (!exists)
+			return process.nextTick(function()
 			{
-				return process.nextTick(function()
-				{
-					callback(exists);
-				});
-			}
-
-			fs.stat(filepath, function(err, stats)
-			{
-				return process.nextTick(function()
-				{
-					callback((stats.mtime.getFullYear() == "1970") ? true : false);
-				});
+				callback((!err && mtime.getFullYear() == "1970") ? true : false);
 			});
 		});
 	},
@@ -301,6 +288,37 @@ Tile.prototype =
 
 		if (fs.existsSync(filepath))
 			touch.sync(filepath, {time: new Date(10)});
+	},
+
+	// return the timestamp of last modification of a tile
+	getModifyTime: function(callback)
+	{
+		var filepath = configuration.vtiledir+'/'+this.z+'/'+this.x+'/'+this.y+'.json';
+
+		fs.exists(filepath, function(exists)
+		{
+			if (!exists)
+			{
+				return process.nextTick(function()
+				{
+					callback(!exists);
+				});
+			}
+
+			fs.stat(filepath, function(err, stats)
+			{
+				if (err || typeof stats == undefined)
+					return process.nextTick(function()
+					{
+						callback(err);
+					});
+
+				return process.nextTick(function()
+				{
+					callback(err, stats.mtime);
+				});
+			});
+		});
 	},
 
 	// returns a list of all tiles in lower zoomlevels that contain a certain tile
