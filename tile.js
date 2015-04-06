@@ -706,8 +706,11 @@ Tile.prototype =
 
 			try
 			{
-				if (geojson.reprpoint)
-					geojson.reprpoint = JSON.parse(data.rows[i].reprpoint.coordinates);
+				if (data.rows[i].reprpoint)
+				{
+					var reprpoint = JSON.parse(data.rows[i].reprpoint);
+					geojson.reprpoint = reprpoint.coordinates;
+				}
 				geojson.properties = JSON.parse(data.rows[i].tags);
 			}
 			catch (err)
