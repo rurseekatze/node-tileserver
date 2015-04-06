@@ -32,13 +32,15 @@ Tilerequest = function(request, response)
 	this.response = response;
 
 	this.pathname = url.parse(this.request.url).pathname;
-	this.params = this.pathname.split("/");
+	this.params = this.pathname.split('/');
 
-	this.tile = new Tile(this.params[2], this.params[3], this.params[4].replace(".png", "").replace(".js", ""), this.params[1]);
-	this.queue = queue;
-	this.command = this.params[5];
-	// if no caching header was sent, use date before unix timestamp 0 to force a full request
-	this.requestModified = (this.request.headers["if-modified-since"] != null) ? new Date(this.request.headers["if-modified-since"]) : new Date("Wed, 31 Dec 1969 23:59:00 GMT");
+	if (this.params[1] == 'favicon.ico')
+	{
+		logger.info('Request for favicon.ico received. Aborting');
+		this.response.writeHead(400, {'Content-Type': 'text/plain'});
+		this.response.end();
+		return;
+	}
 
 	logger.info('Request for '+this.pathname+' received.');
 
@@ -50,6 +52,12 @@ Tilerequest = function(request, response)
 		this.response.end();
 		return;
 	}
+
+	this.tile = new Tile(this.params[2], this.params[3], this.params[4].replace(/\.png|\.js/g, ""), this.params[1]);
+	this.queue = queue;
+	this.command = this.params[5];
+	// if no caching header was sent, use date before unix timestamp 0 to force a full request
+	this.requestModified = (this.request.headers["if-modified-since"] != null) ? new Date(this.request.headers["if-modified-since"]) : new Date("Wed, 31 Dec 1969 23:59:00 GMT");
 
 	// check validity of parameters
 	if (this.tile.z < configuration.minZoom || this.tile.z > configuration.maxZoom)
@@ -87,7 +95,8 @@ Tilerequest.prototype =
 	// generic method for handling a tile request
 	getTile: function()
 	{
-		this.requestHandler.getTile();
+		if (this.requestHandler)
+			this.requestHandler.getTile();
 	},
 
 	// sends a 500 error response
