@@ -32,7 +32,6 @@ BitmapTilerequest = function(self)
 	this.requestModified = self.requestModified;
 };
 
-// TODO (<unix elapse for a day> + lastupdate) - Date.now()
 BitmapTilerequest.prototype =
 {
 	// serves a vector tile

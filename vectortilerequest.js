@@ -32,7 +32,6 @@ VectorTilerequest = function(self)
 	this.requestModified = self.requestModified;
 };
 
-// TODO (<unix elapse for a day> + lastupdate) - Date.now()
 VectorTilerequest.prototype =
 {
 	// serves a vector tile
