@@ -1,0 +1,30 @@
+{
+  "name": "node-tileserver",
+  "version": "0.3.0",
+  "description": "node-tileserver is a lightweight tileserver using NodeJS. It can serve bitmap and vector tiles and is designed as a fast and easy-to-install tileserver for rendering OpenStreetMap data. It works perfectly with an osm2pgsql database and Leaflet and KothicJS on the client side.",
+  "main": "bitmaptilerequest.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rurseekatze/node-tileserver"
+  },
+  "author": "Alexander Matheisen",
+  "license": "GPLv3+",
+  "bugs": {
+    "url": "https://github.com/rurseekatze/node-tileserver/issues"
+  },
+  "dependencies": {
+    "byline": "^4.2.1",
+    "canvas": "^1.2.2",
+    "graceful-fs": "^3.0.6",
+    "http-proxy": "^1.11.1",
+    "log4js": "^0.6.24",
+    "mkdirp": "^0.5.0",
+    "pg": "^4.3.0",
+    "rbush": "^1.4.0",
+    "toobusy": "^0.2.4",
+    "touch": "0.0.3"
+  }
+}
