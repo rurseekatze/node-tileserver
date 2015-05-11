@@ -41,16 +41,7 @@
 
  After that you can install all necessary NodeJS modules with npm:
 
-    $ npm install canvas
-    $ npm install rbush
-    $ npm install mkdirp
-    $ npm install pg
-    $ npm install byline
-    $ npm install graceful-fs
-    $ npm install http-proxy
-    $ npm install log4js
-    $ npm install toobusy
-    $ npm install touch
+    $ npm install
 
  Now you need osm2pgsql:
 
