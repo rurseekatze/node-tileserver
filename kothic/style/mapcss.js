@@ -141,7 +141,6 @@ var MapCSS = {
         return MapCSS.e_metric(arg);
     },
 
-	// begin modified by rurseekatze: extended localizing so that captions made of more than one tag can be used
     e_localize: function (tags, text) {
         var locales = MapCSS.locales, i, j, tag;
 		var tagcombination = text;
@@ -169,9 +168,7 @@ var MapCSS = {
 
 		return tagcombination.trim();
     },
-	// end modified by rurseekatze
 
-	// begin added by rurseekatze: added support for concat method in MapCSS styles
 	e_concat: function () {
 		var tagString = "";
 
@@ -180,7 +177,15 @@ var MapCSS = {
 
 		return tagString;
 	},
-	// end added by rurseekatze
+
+	e_join: function () {
+		var tagString = "";
+
+		for (var i = 1; i < arguments.length; i++)
+			tagString = tagString.concat(arguments[0]).concat(arguments[i]);
+
+		return tagString.substr(arguments[0].length);
+	},
 
     loadStyle: function (style, restyle, sprite_images, external_images, presence_tags, value_tags) {
         var i;
