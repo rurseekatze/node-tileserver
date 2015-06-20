@@ -17,6 +17,7 @@
  * Rerender expired tiles automatically in the background
  * High performance that profits from the non-blocking I/O design of NodeJS
  * Easy to install on several operating systems, distributions and environments due to less dependencies
+ * Renders bitmap tiles in "retina" quality ([Supersampling](https://en.wikipedia.org/wiki/Supersampling))
 
 ## Authors
 
@@ -133,7 +134,7 @@ You need MapCSS converter to compile your MapCSS styles to JavaScript. Go to you
 
 You can set various options to configure your tileserver:
 
- * `tileSize` Size of tiles in pixels. Usually it is not necessary to change this value, but you can increase or decrease it for higher rendering performance or faster map generation. _Default: `256`_
+ * `tileSize` Size of tiles in pixels. Usually it is not necessary to change this value, but you can increase or decrease it for higher rendering performance or faster map generation. Consider that the bitmap tiles are rendered in "retina" quality, so the actual tile size is twice as high ([Supersampling](https://en.wikipedia.org/wiki/Supersampling)). _Default: `256`_
 
  * `prefix` The prefix used for osm2pgsql tables. Depends on the parameters you are using in osm2pgsql. _Default: `railmap`_
 
