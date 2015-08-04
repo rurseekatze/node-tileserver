@@ -129,6 +129,16 @@ Tile.prototype =
 	// stores a vector tile in the vector tile directory
 	saveVectorData: function(callback)
 	{
+		// don't cache tiles in zoom levels higher than maxCached
+		if (this.z > configuration.maxCached)
+		{
+			this.debug('Tile of this zoom level is not cached.');
+			return process.nextTick(function()
+			{
+				callback(false);
+			});
+		}
+
 		var filepath = configuration.vtiledir+'/'+this.z+'/'+this.x+'/';
 		var file = this.y+'.json';
 
@@ -738,6 +748,16 @@ Tile.prototype =
 	// stores a bitmap tile in the bitmap tile directory
 	saveBitmapData: function(image, callback)
 	{
+		// don't cache tiles in zoom levels higher than maxCached
+		if (this.z > configuration.maxCached)
+		{
+			this.debug('Tile of this zoom level is not cached.');
+			return process.nextTick(function()
+			{
+				callback(false);
+			});
+		}
+
 		var self = this;
 		var filepath = configuration.tiledir+'/'+this.style+'/'+this.z+'/'+this.x;
 		this.debug('Rendering successful.');
