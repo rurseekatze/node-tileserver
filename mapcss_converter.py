@@ -284,7 +284,7 @@ def style_statement_as_js(self, subpart):
             add_vtag(self.value)
             return "            s_%s[%s] = MapCSS.e_localize(tags, %s);" % (subpart, k, val)
     else:
-        if self.key in ('icon-image', 'fill-image'):
+        if not isinstance(self.value, ast.Eval) and self.key in ('icon-image', 'fill-image'):
             images.add(self.value)
         return "            s_%s[%s] = %s;" % (subpart, k, val)
 
