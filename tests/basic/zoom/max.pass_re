@@ -1,1 +1,1 @@
-\(+type == 'way'\)? && \(?zoom <= 15\)+ {.*s_default\['z-index'\] = 1000[^}]*}.*presence_tags = \[[ \t]*\].*value_tags = \[[ \t]*\]
+\(+zoom <= 15\)? && \(?type == 'way'\)+ {.*s_default\['z-index'\] = 1000[^}]*}.*presence_tags = \[\].*value_tags = \[\]
