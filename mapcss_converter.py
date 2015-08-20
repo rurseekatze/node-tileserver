@@ -126,7 +126,7 @@ def rule_as_js(self):
     for action in self.actions:
         actions_js.append(action.as_js(selector.subpart))
 
-    return """\n        if (%s) %s""" % (" || ".join(selectors_js), "".join(actions_js))
+    return """\n        if (%s) %s""" % (" || \n            ".join(selectors_js), "".join(actions_js))
 
 def selector_as_js(self):
     criteria = " && ".join(map(lambda x: x.as_js(), self.criteria))
