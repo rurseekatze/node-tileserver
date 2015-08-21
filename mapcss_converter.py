@@ -351,7 +351,7 @@ if __name__ == "__main__":
 
     parser.add_option("-s", "--output-sprite",
         dest="sprite",
-        help="Filename of generated CSS sprite. If not specified, [stylename].png will be uesed")
+        help="Filename of generated CSS sprite. If not specified, [stylename].png will be used")
 
     (options, args) = parser.parse_args()
 
