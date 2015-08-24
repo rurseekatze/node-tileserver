@@ -73,7 +73,12 @@ Kothic.texticons = {
                     letterWidth = textWidth / text.length,
                     collisionWidth = textWidth,
                     collisionHeight = letterWidth * 2.5,
-                    offset = style['text-offset'] || 0;
+                    offsetX = style['text-offset-x'] || 0,
+                    // TODO direcion of y-offset is reverse in JOSM
+                    offsetY = style['text-offset'] || style['text-offset-y'] || 0;
+
+            if (style['-x-kothicjs-ignore-text-offset-x'] === 'true')
+                offsetX = 0;
 
             var halo = (style.hasOwnProperty('text-halo-radius'));
 
@@ -87,17 +92,17 @@ Kothic.texticons = {
 
             if (feature.type === 'Polygon' || feature.type === 'Point') {
                 if ((style['text-allow-overlap'] !== 'true') &&
-                        collides.checkPointWH([point[0], point[1] + offset], collisionWidth, collisionHeight, feature.kothicId)) {
+                        collides.checkPointWH([point[0] + offsetX, point[1] + offsetY], collisionWidth, collisionHeight, feature.kothicId)) {
                     return;
                 }
 
                 if (halo) {
-                    ctx.strokeText(text, point[0], point[1] + offset);
+                    ctx.strokeText(text, point[0] + offsetX, point[1] + offsetY);
                 }
-                ctx.fillText(text, point[0], point[1] + offset);
+                ctx.fillText(text, point[0] + offsetX, point[1] + offsetY);
 
                 var padding = style['-x-kot-min-distance'] || 20;
-                collides.addPointWH([point[0], point[1] + offset], collisionWidth, collisionHeight, padding, feature.kothicId);
+                collides.addPointWH([point[0] + offsetX, point[1] + offsetY], collisionWidth, collisionHeight, padding, feature.kothicId);
 
             } else if (feature.type === 'LineString') {
 
