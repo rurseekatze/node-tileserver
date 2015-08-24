@@ -187,6 +187,30 @@ var MapCSS = {
 		return tagString.substr(arguments[0].length);
 	},
 
+	e_equal: function (arga, argb) {
+		return (arga == argb);
+	},
+
+	e_notequal: function (arga, argb) {
+		return (arga != argb);
+	},
+
+	e_greater: function (arga, argb) {
+		return (arga > argb);
+	},
+
+	e_greater_equal: function (arga, argb) {
+		return (arga >= argb);
+	},
+
+	e_less: function (arga, argb) {
+		return (arga < argb);
+	},
+
+	e_less_equal: function (arga, argb) {
+		return (arga <= argb);
+	},
+
     loadStyle: function (style, restyle, sprite_images, external_images, presence_tags, value_tags) {
         var i;
         sprite_images = sprite_images || [];
