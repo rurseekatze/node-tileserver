@@ -27,7 +27,7 @@
 import sys
 import os
 import re
-import Image
+from PIL import Image
 
 import cairo
 import tempfile
