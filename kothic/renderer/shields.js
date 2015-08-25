@@ -139,7 +139,7 @@ Kothic.shields = {
         }
 
         collides.addPointWH(point, collisionHeight, collisionWidth,
-                (parseFloat(style["shield-casing-width"]) || 0) + (parseFloat(style["shield-frame-width"]) || 0) + (parseFloat(style["-x-mapnik-min-distance"]) || 30), feature.kothicId);
+                (parseFloat(style["shield-casing-width"]) || 0) + (parseFloat(style["shield-frame-width"]) || 0) + (parseFloat(style["mapnik-min-distance"]) || 30), feature.kothicId);
 
     }
 };

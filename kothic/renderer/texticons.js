@@ -77,7 +77,7 @@ Kothic.texticons = {
                     // TODO direcion of y-offset is reverse in JOSM
                     offsetY = style['text-offset'] || style['text-offset-y'] || 0;
 
-            if (style['-x-kothicjs-ignore-text-offset-x'] === 'true')
+            if (style['kothicjs-ignore-text-offset-x'] === 'true')
                 offsetX = 0;
 
             var halo = (style.hasOwnProperty('text-halo-radius'));
@@ -101,7 +101,7 @@ Kothic.texticons = {
                 }
                 ctx.fillText(text, point[0] + offsetX, point[1] + offsetY);
 
-                var padding = style['-x-kot-min-distance'] || 20;
+                var padding = style['kothicjs-min-distance'] || 20;
                 collides.addPointWH([point[0] + offsetX, point[1] + offsetY], collisionWidth, collisionHeight, padding, feature.kothicId);
 
             } else if (feature.type === 'LineString') {
@@ -116,7 +116,7 @@ Kothic.texticons = {
                     Math.floor(point[0] - w / 2),
                     Math.floor(point[1] - h / 2), w, h);
 
-            var padding2 = parseFloat(style['-x-kot-min-distance']) || 0;
+            var padding2 = parseFloat(style['kothicjs-min-distance']) || 0;
             collides.addPointWH(point, w, h, padding2, feature.kothicId);
         }
     }
