@@ -311,7 +311,7 @@ __Note:__ For some parameters it is also necessary to change the modify the opti
 
  node-tileserver extends the used KothicJS renderer with a new MapCSS rule. Set
 
-    -x-ignore-layer: true;
+    kothicjs-ignore-layer: true;
 
  to ignore the `layer=*` tag.
 

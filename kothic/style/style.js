@@ -44,7 +44,7 @@ Kothic.style = {
 
         for (i = 0, len = styledFeatures.length; i < len; i++) {
             feature = styledFeatures[i];
-            layerStyle = feature.style['-x-mapnik-layer'];
+            layerStyle = feature.style['mapnik-layer'];
             layerId = !layerStyle ? feature.properties.layer || 0 :
                 layerStyle === 'top' ? 10000 : -10000;
 
