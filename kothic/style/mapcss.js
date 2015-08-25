@@ -222,6 +222,10 @@ var MapCSS = {
 		return (crc ^ (-1)) >>> 0;
 	},
 
+	e_cond: function (cond, a, b) {
+		return (cond) ? a : b;
+	},
+
     loadStyle: function (style, restyle, sprite_images, external_images, presence_tags, value_tags) {
         var i;
         sprite_images = sprite_images || [];
