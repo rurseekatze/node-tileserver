@@ -1,0 +1,1 @@
+\(+type == 'node'\)? && MapCSS\.e_tag\(tags, 'railway:signal:distant:states'\)\.split\('.'\).indexOf\('DE-ESO:vr2'\) >= 0\)+ {.*s_default\['z-index'\] = 1000[^}]*}.*presence_tags = \[\].*value_tags = \['railway:signal:distant:states'\]

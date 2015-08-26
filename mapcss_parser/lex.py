@@ -89,9 +89,9 @@ tokens = (
 t_ANY_ignore  = ' \t'
 
 t_SUBJECT = r'\w+|\*'
-t_condition_SIGN = r'!~|=~|<>|<=|>=|!=|<|>|='
+t_condition_SIGN = r'!~|=~|<>|<=|>=|!=|<|>|=|~='
 t_condition_NOT = r'\!'
-t_condition_IDENTIFIER = r'[^!<>=\[\]]+'
+t_condition_IDENTIFIER = r'[^!<>=\[\]~]+'
 t_condition_REGEX = r'/\w+?/'
 t_COMMA = r','
 t_actionkey_KEY = r'[\w-]+'

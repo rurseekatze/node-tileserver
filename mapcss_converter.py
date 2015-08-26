@@ -172,6 +172,8 @@ def condition_check_as_js(self):
         return "%s.test(tags['%s'])" % (v, k)
     elif self.sign == '!~':
         return "!(%s.test(tags['%s']))" % (v, k)
+    elif self.sign == '~=':
+        return "MapCSS.e_tag(tags, '%s').split(';').indexOf('%s') >= 0" % (k, v)
     elif isNumeric(v):
         return "tags['%s'] %s %s" % (k, CHECK_OPERATORS[self.sign], v)
     else:
