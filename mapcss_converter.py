@@ -354,7 +354,7 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
 
     if not options.input:
-        print "--mapcss parameter is required"
+        print("--mapcss parameter is required")
         raise SystemExit
 
     if options.name:

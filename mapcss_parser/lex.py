@@ -234,7 +234,7 @@ def t_condition_RSQBRACE(t):
 
 # Error handling rule
 def t_ANY_error(t):
-    print "Illegal character '%s' at line %s" % (t.value[0], t.lexer.lineno)
+    print("Illegal character '%s' at line %s" % (t.value[0], t.lexer.lineno))
     t.lexer.skip(1)
 
 # Define a rule so we can track line numbers
