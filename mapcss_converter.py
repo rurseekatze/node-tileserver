@@ -1,19 +1,19 @@
 #!/usr/bin/python
 
 # Copyright (c) 2011-2013, Darafei Praliaskouski, Vladimir Agafonkin, Maksim Gurtovenko
-# 
+#
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without modification, are
 # permitted provided that the following conditions are met:
-# 
+#
 #    1. Redistributions of source code must retain the above copyright notice, this list of
 #       conditions and the following disclaimer.
-# 
+#
 #    2. Redistributions in binary form must reproduce the above copyright notice, this list
 #       of conditions and the following disclaimer in the documentation and/or other materials
-# 	  provided with the distribution.
-# 
+#       provided with the distribution.
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 # MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
@@ -71,10 +71,9 @@ def open_svg_as_image(fn):
      tmpfile = os.fdopen(tmpfd,'w')
 
      file = StringIO.StringIO()
-     
-     
+
      svg = rsvg.Handle(file=fn)
-     
+
      svgwidth = svg.get_property('width')
      svgheight = svg.get_property('height')
      svgsurface = cairo.SVGSurface(file, svgwidth, svgheight)
@@ -93,7 +92,7 @@ def open_svg_as_image(fn):
 
 
 def wrap_key(key):
-	return "'%s'" % key
+    return "'%s'" % key
 
 def propagate_import(url):
     content = open(url).read()
@@ -174,7 +173,7 @@ def condition_tag_as_js(self):
 def condition_nottag_as_js(self):
     presence_tags.add("'%s'" % wrap_key(self.key).strip("'\""))
     return "(!tags.hasOwnProperty('%s'))" % (wrap_key(self.key).strip("'\""))
-    
+
 def condition_pseudoclass_as_js(self):
     #TODO: Not supported yet
     return "true"
@@ -185,7 +184,7 @@ def action_as_js(self, subpart):
             subpart = 'everything'
         subpart = re.sub("-", "_", subpart)
         if subpart != "default":
-			subparts.add(subpart)
+            subparts.add(subpart)
 
         return """{
 %s
@@ -266,7 +265,6 @@ def create_css_sprite(image_names, icons_path, sprite_filename):
         if not os.path.isfile(fpath):
             external_images.append(fname)
             continue
-        
 
         if '.svg' in fpath:
             image = open_svg_as_image(fpath)
@@ -416,4 +414,3 @@ if __name__ == "__main__":
 
     with open(output, "w") as fh:
         fh.write(js)
-
