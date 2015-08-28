@@ -179,7 +179,7 @@ def condition_pseudoclass_as_js(self):
     return "true"
 
 def action_as_js(self, subpart):
-    if len(filter(lambda x: x, map(lambda x: isinstance(x, ast.StyleStatement), self.statements))) > 0:
+    if len(list(filter(lambda x: x, map(lambda x: isinstance(x, ast.StyleStatement), self.statements)))) > 0:
         if subpart == '*':
             subpart = 'everything'
         subpart = re.sub("-", "_", subpart)
