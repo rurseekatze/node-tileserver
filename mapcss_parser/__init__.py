@@ -24,8 +24,8 @@
 # authors and should not be interpreted as representing official policies, either expressed
 # or implied, of Miroff.
 
-import lex
-import parse
+from mapcss_parser import lex
+from mapcss_parser import parse
 
 from ply import *
 

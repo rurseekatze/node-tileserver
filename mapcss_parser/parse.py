@@ -27,9 +27,9 @@
 # or implied, of Miroff.
 
 import ply.yacc as yacc
-import lex
+from mapcss_parser import lex
 
-import ast
+from mapcss_parser import ast
 
 tokens = lex.tokens
 
