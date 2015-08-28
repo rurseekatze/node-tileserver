@@ -31,7 +31,7 @@ from PIL import Image
 
 import cairo
 import tempfile
-import StringIO
+import io
 import rsvg
 
 from mapcss_parser import MapCSSParser
