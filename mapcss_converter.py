@@ -32,7 +32,10 @@ from PIL import Image
 import cairo
 import tempfile
 import io
-import rsvg
+try:
+  import rsvg
+except ImportError:
+  from gi.repository import Rsvg
 
 from mapcss_parser import MapCSSParser
 from mapcss_parser import ast
