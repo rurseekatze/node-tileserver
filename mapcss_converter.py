@@ -34,8 +34,13 @@ import tempfile
 import io
 try:
   import rsvg
+  FoundSVG = True
 except ImportError:
-  from gi.repository import Rsvg
+  try:
+    from gi.repository import Rsvg
+    FoundSVG = True
+  except ImportError:
+    FoundSVG = False
 
 from mapcss_parser import MapCSSParser
 from mapcss_parser import ast
@@ -270,7 +275,11 @@ def create_css_sprite(image_names, icons_path, sprite_filename):
             continue
 
         if '.svg' in fpath:
-            image = open_svg_as_image(fpath)
+            if FoundSVG:
+                image = open_svg_as_image(fpath)
+            else:
+                print("SVG image support has not been found, needed for image %s" % (fpath))
+                raise SystemExit(1)
         else:
             image = Image.open(fpath)
         sprite_images.append({
