@@ -29,7 +29,10 @@ import os
 import re
 from PIL import Image
 
-import cairo
+try:
+  import cairo
+except ImportError:
+  import cairocffi as cairo
 import tempfile
 import io
 try:
