@@ -1,0 +1,30 @@
+language: python
+python:
+ - "2.7"
+ - "3.2"
+sudo: false
+notifications:
+  irc:
+    channels:
+      - "irc.oftc.net#OpenRailwayMap"
+    on_success: change
+    on_failure: always
+    use_notice: true
+    skip_join: true
+addons:
+  apt:
+    packages:
+    - libxml2-utils
+    - python3-cairo
+    - python3-gi
+    - python-imaging
+    - python-cairo
+    - python-rsvg
+before_install:
+ #- sudo apt-get update -qq
+ #- sudo apt-get install -y libxml2-utils python-imaging python-cairo python-rsvg python3-cairo python3-gi
+install:
+ - pip install ply pillow cairocffi
+script:
+ - python -d ./mapcss_converter.py --help
+# - ./mapcss_converter.py --help
