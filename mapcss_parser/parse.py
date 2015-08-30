@@ -27,16 +27,16 @@
 # or implied, of Miroff.
 
 import ply.yacc as yacc
-import lex
+from mapcss_parser import lex
 
-import ast
+from mapcss_parser import ast
 
 tokens = lex.tokens
 
 # Error rule for syntax errors
 def p_error(p):
     if p:
-        print "Syntax error in input at line %s" % (p.lineno)
+        print("Syntax error in input at line %s" % (p.lineno))
 
 def p_mapcss(p):
     'css : rule'

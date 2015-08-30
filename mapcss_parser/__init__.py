@@ -24,8 +24,8 @@
 # authors and should not be interpreted as representing official policies, either expressed
 # or implied, of Miroff.
 
-import lex
-import parse
+from mapcss_parser import lex
+from mapcss_parser import parse
 
 from ply import *
 
@@ -42,7 +42,7 @@ class MapCSSParser:
                 tok = lexer.token()
                 if not tok: 
                     break      # No more input
-                print tok            
+                print(tok)
         
         return yacc.parse(content)
         
