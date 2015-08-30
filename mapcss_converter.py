@@ -400,8 +400,10 @@ if __name__ == "__main__":
     presence_tags -= value_tags
 
     js += """
-    var sprite_images = {%s
-    }, external_images = [%s], presence_tags = [%s], value_tags = [%s];
+    var sprite_images = {%s};
+    var external_images = [%s];
+    var presence_tags = [%s];
+    var value_tags = [%s];
 
     MapCSS.loadStyle('%s', restyle, sprite_images, external_images, presence_tags, value_tags);
     MapCSS.preloadExternalImages('%s');
