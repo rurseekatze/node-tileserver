@@ -358,7 +358,7 @@ if __name__ == "__main__":
 
     if not options.input:
         print("--mapcss parameter is required")
-        raise SystemExit
+        raise SystemExit(1)
 
     if options.name:
         style_name = options.name
