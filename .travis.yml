@@ -14,17 +14,17 @@ notifications:
 addons:
   apt:
     packages:
+    - cmake
     - libxml2-utils
+    - python-cairo
+    - python-imaging
+    - python-rsvg
     - python3-cairo
     - python3-gi
-    - python-imaging
-    - python-cairo
-    - python-rsvg
-before_install:
- #- sudo apt-get update -qq
- #- sudo apt-get install -y libxml2-utils python-imaging python-cairo python-rsvg python3-cairo python3-gi
 install:
  - pip install ply pillow cairocffi
 script:
- - python -d ./mapcss_converter.py --help
-# - ./mapcss_converter.py --help
+ - mkdir build
+ - cd build
+ - cmake ../tests
+ - ctest -V
