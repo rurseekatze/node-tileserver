@@ -427,5 +427,8 @@ if __name__ == "__main__":
             style_name,
             style_name)
 
-    with open(output, "w") as fh:
-        fh.write(js)
+    if output == "-":
+        sys.stdout.write(js)
+    else:
+        with open(output, "w") as fh:
+            fh.write(js)
