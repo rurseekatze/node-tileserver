@@ -207,7 +207,8 @@ def style_statement_as_js(self, subpart):
     val = escape_value(self.key, self.value, subpart)
     k = wrap_key(self.key)
     if self.key == 'text':
-        value_tags.add(val)
+        if not isinstance(self.value, ast.Eval):
+            value_tags.add(val)
         return "            s_%s[%s] = MapCSS.e_localize(tags, %s);" % (subpart, k, val)
     else:
         if self.key in ('icon-image', 'fill-image'):
@@ -224,6 +225,11 @@ def eval_as_js(self, subpart):
 def eval_function_as_js(self, subpart):
     args = ", ".join(map(lambda arg: arg.as_js(subpart), self.arguments))
     if self.function == 'tag':
+        # use the correct quotes
+        if args[0:1] == '"' and args[-1:] == '"':
+            value_tags.add("'%s'" % args[1:-1])
+        else:
+            value_tags.add("'%s'" % args)
         return "MapCSS.e_tag(tags, %s)" % (args)
     elif self.function == 'prop':
         return "MapCSS.e_prop(s_%s, %s)" % (subpart, args)
