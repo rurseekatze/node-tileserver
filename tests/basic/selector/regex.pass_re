@@ -1,0 +1,1 @@
+\(+type == 'way'\)? && /^\(2|3\)0\$/.test\(tags\['maxspeed'\]\)+ {.*s_default\['z-index'\] = 1000[^}]*}.*presence_tags = \[[ \t]*\].*value_tags = \['maxspeed'\]

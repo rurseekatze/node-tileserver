@@ -1,0 +1,30 @@
+language: python
+python:
+ - "2.7"
+ - "3.2"
+sudo: false
+notifications:
+  irc:
+    channels:
+      - "irc.oftc.net#OpenRailwayMap"
+    on_success: change
+    on_failure: always
+    use_notice: true
+    skip_join: true
+addons:
+  apt:
+    packages:
+    - cmake
+    - libxml2-utils
+    - python-cairo
+    - python-imaging
+    - python-rsvg
+    - python3-cairo
+    - python3-gi
+install:
+ - pip install ply pillow cairocffi
+script:
+ - mkdir build
+ - cd build
+ - cmake ../tests
+ - ctest -V

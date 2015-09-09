@@ -1,0 +1,1 @@
+\(+type == 'way'\)+ {.*s_default\['z-index'\] = 1000[^}]*}.*\(+type == 'node'\)+ {.*s_default\['z-index'\] = 1001[^}]*}.*\(+selector == 'area'\)+ {.*s_default\['z-index'\] = 1002[^}]*}.*presence_tags = \[[ \t]*\].*value_tags = \[[ \t]*\]

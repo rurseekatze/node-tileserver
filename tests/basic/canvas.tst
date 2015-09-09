@@ -1,0 +1,4 @@
+canvas
+{
+	default-lines: true;
+}
