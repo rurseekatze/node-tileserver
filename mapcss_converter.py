@@ -298,10 +298,19 @@ def tag_statement_as_js(self, subpart):
 def eval_as_js(self, subpart):
     return self.expression.as_js(subpart)
 
+# returns the expression in parentheses if it is an expression or direct if it is just a string
+def str_or_expr(val, subpart):
+    if isinstance(val, ast.EvalExpressionString):
+        return val.as_js(subpart);
+    else:
+        return "(%s)" % val.as_js(subpart)
+
 def eval_function_as_js(self, subpart):
-    args = ", ".join(map(lambda arg: arg.as_js(subpart), self.arguments))
+    if self.function != 'cond':
+        args = ", ".join(list(map(lambda arg: arg.as_js(subpart), self.arguments)))
+    global tag_function
+
     if self.function == 'tag':
-        global tag_function
         if (args == '""'):
             return "''"
         else:
@@ -312,6 +321,20 @@ def eval_function_as_js(self, subpart):
             return "''"
         else:
             return "MapCSS.e_prop(s_%s, %s)" % (subpart, args)
+    elif self.function == 'cond':
+        if len(self.arguments) == 3:
+            old_tag_f = tag_function
+            # do not localize the condition, but the outcome
+            tag_function = "e_tag"
+            check = self.arguments[0].as_js(subpart)
+            tag_function = "e_localize"
+            v1 = str_or_expr(self.arguments[1], subpart);
+            v2 = str_or_expr(self.arguments[2], subpart);
+            tag_function = old_tag_f
+            return "(%s ? %s : %s)" % (check, v1, v2)
+        else:
+            print("exactly 3 arguments to cond() expected, but got %i" % len(self.arguments))
+            sys.exit(1)
     else:
         return "MapCSS.e_%s(%s)" % (self.function, args)
 

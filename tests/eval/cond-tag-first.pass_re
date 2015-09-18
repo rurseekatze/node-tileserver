@@ -1,0 +1,1 @@
+\(+isWay\)+ {.*s_default\['color'\] = \(2 == 3 \? \(MapCSS\.e_localize\(tags, "foo"\)\) : "#0000ff"\).*}.*presence_tags = \[\].*value_tags = \['foo'\]
