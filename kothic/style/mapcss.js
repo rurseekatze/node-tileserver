@@ -85,7 +85,7 @@ var MapCSS = {
 
     e_tag: function (obj, tag) {
         if (obj.hasOwnProperty(tag) && obj[tag] !== null) {
-            return tag;
+            return obj[tag];
         } else {
             return '';
         }
@@ -141,33 +141,18 @@ var MapCSS = {
         return MapCSS.e_metric(arg);
     },
 
-    e_localize: function (tags, text) {
-        var locales = MapCSS.locales, i, j, tag;
-		var tagcombination = text;
-		var keys = tagcombination.split(" ");
+	e_localize: function (tags, text) {
+		var locales = MapCSS.locales, i, tag;
 
-		// replace keys by localized keys if existing
-        for (j = 0; j < keys.length; j++) {
-		    for (i = 0; i < locales.length; i++) {
-		        tag = keys[j] + ':' + locales[i];
-		        if (tags[tag]) {
-					tagcombination = tagcombination.replace(tag, tags[tag]);
-		        }
-		    }
-		}
-
-		// replace keys by values
-        for (j = 0; j < keys.length; j++) {
-			if (tags[keys[j]]) {
-				tagcombination = tagcombination.replace(keys[j], tags[keys[j]]);
-			}
-			else {
-				tagcombination = tagcombination.replace(keys[j], "");
+		for (i = 0; i < locales.length; i++) {
+			tag = text + ':' + locales[i];
+			if (tags[tag]) {
+				return tags[tag];
 			}
 		}
 
-		return tagcombination.trim();
-    },
+		return tags[text] ? tags[text] : "";
+	},
 
 	e_concat: function () {
 		var tagString = "";

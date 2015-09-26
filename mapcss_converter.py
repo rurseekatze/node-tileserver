@@ -79,6 +79,7 @@ images = set()
 subparts = set(['default'])
 presence_tags = set()
 value_tags = set()
+tag_function = 'e_tag' # to which function tag() resolves, may change e.g. to e_localize()
 
 def open_svg_as_image(fn):
      tmpfd, tmppath = tempfile.mkstemp(".png")
@@ -209,11 +210,16 @@ def action_as_js(self, subpart):
         return "{\n    %s\n    }" % "\n".join(map(lambda x: x.as_js(), self.statements))
 
 def style_statement_as_js(self, subpart):
+    global tag_function
+    old_tag_f = tag_function
+    if self.key == 'text' and isinstance(self.value, ast.Eval):
+        tag_function = 'e_localize';
     val = escape_value(self.key, self.value, subpart)
+    tag_function = old_tag_f
+
     k = wrap_key(self.key)
-    if self.key == 'text':
-        if not isinstance(self.value, ast.Eval):
-            value_tags.add(val)
+    if self.key == 'text' and not isinstance(self.value, ast.Eval):
+        value_tags.add(val)
         return "            s_%s[%s] = MapCSS.e_localize(tags, %s);" % (subpart, k, val)
     else:
         if self.key in ('icon-image', 'fill-image'):
@@ -230,8 +236,10 @@ def eval_as_js(self, subpart):
 def eval_function_as_js(self, subpart):
     args = ", ".join(map(lambda arg: arg.as_js(subpart), self.arguments))
     if self.function == 'tag':
+        # use the correct quotes
+        global tag_function
         value_tags.add("'%s'" % args.strip("'\""))
-        return "MapCSS.e_tag(tags, %s)" % (args)
+        return "MapCSS.%s(tags, %s)" % (tag_function, args)
     elif self.function == 'prop':
         return "MapCSS.e_prop(s_%s, %s)" % (subpart, args)
     else:

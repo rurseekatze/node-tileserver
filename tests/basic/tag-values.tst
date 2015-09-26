@@ -1,0 +1,4 @@
+node
+{
+	text: "name";
+}
