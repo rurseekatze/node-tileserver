@@ -45,13 +45,8 @@ Kothic.style = {
         for (i = 0, len = styledFeatures.length; i < len; i++) {
             feature = styledFeatures[i];
             layerStyle = feature.style['mapnik-layer'];
-            layerId = !layerStyle ? feature.properties.layer || 0 :
-                layerStyle === 'top' ? 10000 : -10000;
-
-			// added by rurseekatze: possibility to override layering
-			layerId = (feature.style['kothicjs-ignore-layer'] == 'true') ? 0 : layerId;
-			// end added by rurseekatze
-
+            layerId = !layerStyle ? (feature.properties.layer || 0) : (layerStyle === 'top' ? 10000 : -10000);
+            layerId = (feature.style['kothicjs-ignore-layer'] == 'true') ? 0 : layerId;
             layers[layerId] = layers[layerId] || [];
             layers[layerId].push(feature);
         }
