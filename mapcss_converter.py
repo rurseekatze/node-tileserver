@@ -131,7 +131,7 @@ def rule_as_js(self):
     selectors_js = []
     actions_js = []
     for selector in self.selectors:
-        selectors_js.append("(%s%s)" % (selector.as_js(), selector.get_zoom()))
+        selectors_js.append("(%s%s)" % (selector.get_zoom(), selector.as_js()))
 
     for action in self.actions:
         actions_js.append(action.as_js(selector.subpart))
@@ -261,13 +261,13 @@ def selector_get_zoom(self):
     if zoom and zoom[0] == 'z':
         zoom = zoom[1:].split('-')
         if len(zoom) == 1:
-            return ' && zoom === %d' % int(zoom[0])
+            return 'zoom === %d && ' % int(zoom[0])
 
         cond = ''
         if zoom[0]:
-            cond += ' && zoom >= %d' % int(zoom[0])
+            cond += 'zoom >= %d && ' % int(zoom[0])
         if zoom[1]:
-            cond += ' && zoom <= %d' % int(zoom[1])
+            cond += 'zoom <= %d && ' % int(zoom[1])
         return cond
 
     return ''
