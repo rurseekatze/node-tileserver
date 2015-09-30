@@ -21,7 +21,7 @@
 	"minExpiring" : 8,
 	"maxsockets" : 100,
 	"tileserverPort" : 9000,
-	"tileBoundTolerance" : 20,
+	"tileBoundTolerance" : 60,
 	"filterconditions" :
 	{
 		"0" : "AND (tags->'usage'='main')",

@@ -178,7 +178,7 @@ You can set various options to configure your tileserver:
 
  * `tileserverPort` Port on which the tileserver is listening. Change this value if you have conflicts with other applications. _Default: `9000`_
 
- * `tileBoundTolerance` Extend the bounding box of the requested data by this number of pixels to avoid cutted icons at tile bounds. _Default: `20`_
+ * `tileBoundTolerance` Extend the bounding box of the requested data by this number of pixels to avoid cutted icons at tile bounds. _Default: `60`_
 
  * `filterconditions` For higher performance and smaller tiles it is possible to set some hardcoded SQL filter conditions
 
