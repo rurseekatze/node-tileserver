@@ -67,6 +67,9 @@ NUMERIC_PROPERTIES = (
     'fill-opacity',
     'casing-width',
     'casing-opacity',
+    'shield-frame-width',
+    'shield-casing-width',
+    'shield-opacity',
     'text-offset',
     'max-width',
     'text-halo-radius'
