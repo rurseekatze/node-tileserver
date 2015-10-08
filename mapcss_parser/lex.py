@@ -38,6 +38,8 @@ states = (
     ('tagvalue', 'exclusive'),
     ('import', 'exclusive'),
     ('eval', 'exclusive'),
+    ('mediasel', 'exclusive'),
+    ('mediacontent', 'inclusive'),
 )
 
 tokens = (
@@ -83,6 +85,16 @@ tokens = (
     'NUMBER',
     'OPERATION',
     'FUNCTION',
+
+    #Media
+    'MEDIA',
+    'MNOT',
+    'MAND',
+    'MTYPE',
+    'MCOMMA',
+    'MFEATURE',
+    'MLCBRACE',
+    'MRCBRACE',
 )
 
 # Completely ignored characters
@@ -234,6 +246,42 @@ def t_LSQBRACE(t):
 def t_condition_RSQBRACE(t):
     r'\]'
     t.lexer.pop_state()
+    return t
+
+def t_MEDIA(t):
+    r'@media'
+    t.lexer.push_state('mediasel')
+    return t
+
+def t_mediasel_MNOT(t):
+    r'not'
+    pass
+
+def t_mediasel_MAND(t):
+    r'and'
+    pass
+
+def t_mediasel_MFEATURE(t):
+    r'\([^):]+:[ \t]*[^)]+\)'
+    pass
+
+def t_mediasel_MCOMMA(t):
+    r','
+    pass
+
+def t_mediasel_MTYPE(t):
+    r'(all|print|screen|speech)'
+    pass
+
+def t_mediacontent_MRCBRACE(t):
+    r'}'
+    t.lexer.pop_state()
+    pass
+
+def t_mediasel_MLCBRACE(t):
+    r'{'
+    t.lexer.pop_state()
+    t.lexer.push_state('mediacontent')
     return t
 
 # Error handling rule
