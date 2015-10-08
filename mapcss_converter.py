@@ -126,7 +126,7 @@ def escape_value(key, value, subpart):
         return "'%s'" % value
 
 def mapcss_as_aj(self):
-    imports = "".join(map(lambda imp: propagate_import(imp.url).as_js, self.imports))
+    imports = "".join(map(lambda imp: propagate_import(imp.url).as_js(), self.imports))
     rules = "".join(map(lambda x: x.as_js(), self.rules))
     return "%s%s" % (imports, rules)
 
