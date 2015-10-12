@@ -35,7 +35,7 @@ log4js.configure(
 			"appender":
 			{
 				"type": "file",
-				"filename": 'tileserver.log', 
+				"filename": 'tileserver.log',
 				'maxLogSize': 20480,
 				'backups': 0
 			}

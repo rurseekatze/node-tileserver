@@ -673,7 +673,7 @@ Tile.prototype =
 			if (type === 'Point')
 				coordinates[1] = tileSize - coordinates[1];
 			else if (type === 'MultiPoint' || type === 'LineString')
-				for (j = 0; j < coordinates.length; j++) 
+				for (j = 0; j < coordinates.length; j++)
 				    coordinates[j][1] = tileSize - coordinates[j][1];
 			else if (type === 'MultiLineString' || type === 'Polygon')
 				for (k = 0; k < coordinates.length; k++)
