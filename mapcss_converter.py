@@ -184,11 +184,11 @@ def condition_check_as_js(self):
 
 def condition_tag_as_js(self):
     presence_tags.add("'%s'" % wrap_key(self.key).strip("'\""))
-    return "(tags.hasOwnProperty('%s'))" % (wrap_key(self.key).strip("'\""))
+    return "tags.hasOwnProperty('%s')" % (wrap_key(self.key).strip("'\""))
 
 def condition_nottag_as_js(self):
     presence_tags.add("'%s'" % wrap_key(self.key).strip("'\""))
-    return "(!tags.hasOwnProperty('%s'))" % (wrap_key(self.key).strip("'\""))
+    return "!tags.hasOwnProperty('%s')" % (wrap_key(self.key).strip("'\""))
 
 def condition_pseudoclass_as_js(self):
     #TODO: Not supported yet
