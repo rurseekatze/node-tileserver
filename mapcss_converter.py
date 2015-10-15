@@ -230,11 +230,7 @@ def eval_as_js(self, subpart):
 def eval_function_as_js(self, subpart):
     args = ", ".join(map(lambda arg: arg.as_js(subpart), self.arguments))
     if self.function == 'tag':
-        # use the correct quotes
-        if args[0:1] == '"' and args[-1:] == '"':
-            value_tags.add("'%s'" % args[1:-1])
-        else:
-            value_tags.add("'%s'" % args)
+        value_tags.add("'%s'" % args.strip("'\""))
         return "MapCSS.e_tag(tags, %s)" % (args)
     elif self.function == 'prop':
         return "MapCSS.e_prop(s_%s, %s)" % (subpart, args)
