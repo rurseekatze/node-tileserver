@@ -36,7 +36,7 @@ log4js.configure(
 			"appender":
 			{
 				"type": "file",
-				"filename": 'init.log', 
+				"filename": 'init.log',
 				'maxLogSize': 20480,
 				'backups': 0
 			}

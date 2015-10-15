@@ -325,8 +325,8 @@ def create_css_sprite(image_names, icons_path, sprite_filename):
 def image_as_js(image):
     return """
         '%s': {
-            width: %d, 
-            height: %d, 
+            width: %d,
+            height: %d,
             offset: %d
         }""" % (
         image['name'],

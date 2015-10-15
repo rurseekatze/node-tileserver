@@ -40,10 +40,8 @@ class MapCSSParser:
 
             while True:
                 tok = lexer.token()
-                if not tok: 
+                if not tok:
                     break      # No more input
                 print(tok)
-        
-        return yacc.parse(content)
-        
 
+        return yacc.parse(content)

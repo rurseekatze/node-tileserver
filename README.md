@@ -8,7 +8,7 @@
 
  * Serves tiles bitmap tiles usable in Leaflet or OpenLayers
  * Serves vector tiles rendered on clientside by KothicJS
- * Uses KothicJS both as bitmap renderer on serverside and canvas renderer on clientside 
+ * Uses KothicJS both as bitmap renderer on serverside and canvas renderer on clientside
  * Filesystem caching mechanisms
  * Map styling with MapCSS
  * Support for tiles in multiple rendering styles
@@ -288,7 +288,7 @@ __Note:__ For some parameters it is also necessary to change the modify the opti
 
     $ osm2pgsql --database railmap --username railmap --append --prefix railmap --slim --style railmap.style --hstore --cache 512 --expire-tiles 0-15 --expire-output expired_tiles changes.osc
 
- Note that the value of the parameter `--expire-tiles` should have the format `minZoom-(maxCached minus 2)`. 
+ Note that the value of the parameter `--expire-tiles` should have the format `minZoom-(maxCached minus 2)`.
 
  Also have a look at an [example toolchain](https://github.com/rurseekatze/OpenRailwayMap/blob/master/import/update.sh) on how to update a database containing filtered data.
 

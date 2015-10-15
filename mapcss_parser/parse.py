@@ -105,7 +105,7 @@ def p_selector_or(p):
     'selector : selector COMMA selector'
     p[0] = p[1]
     p[0] += p[3]
-    
+
 def p_selecotr_last(p):
     'selector : selector COMMA'
     p[0] = p[1]
@@ -120,7 +120,7 @@ def p_selector_subpart(p):
 def p_criteria_check(p):
     'criteria : LSQBRACE condition RSQBRACE'
     p[0] = p[2]
-    
+
 def p_criteria_class(p):
     'criteria : CLASS'
     p[0] = ast.ConditionClass(p[1])
@@ -221,8 +221,8 @@ def p_eval_function_argument_multiple(p):
     p[0] = p[1]
     p[1] += p[3]
 
-def p_eval_function(p): 
+def p_eval_function(p):
     'eval_function : FUNCTION LPAREN function_argument RPAREN'
     p[0] = ast.EvalFunction(p[1], p[3])
 
-yacc.yacc(debug=0)    
+yacc.yacc(debug=0)
