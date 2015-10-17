@@ -1,0 +1,1 @@
+\(+type == 'way'\)+ {.*s_default\['z-index'\] = 42[^}]*}.*presence_tags = \[\].*value_tags = \[\]
