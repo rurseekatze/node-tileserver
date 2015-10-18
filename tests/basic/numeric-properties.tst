@@ -11,8 +11,14 @@ node::d
 	shield-casing-width: 5;
 	shield-opacity: 1;
 	text-offset: 6;
+	text-offset-x: 12;
+	text-offset-y: -6;
 	max-width: 7;
 	text-halo-radius: 8;
 	unknown: "text";
 	font: Helvetica;
+	icon-width: 13;
+	icon-height: 14;
+	font-size: 15;
+	icon-opacity: 0.4;
 }
