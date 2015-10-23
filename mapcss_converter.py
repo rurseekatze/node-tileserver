@@ -195,6 +195,12 @@ def condition_pseudoclass_as_js(self):
     #TODO: Not supported yet
     return "true"
 
+def condition_class_as_js(self):
+    return "cssClasses.indexOf('%s') >= 0" % self.name;
+
+def class_statement_as_js(self):
+    return "        if (cssClasses.indexOf('%s') < 0) { cssClasses.push('%s'); }" % (self.name, self.name);
+
 def action_as_js(self, subpart):
     if len(list(filter(lambda x: x, map(lambda x: isinstance(x, ast.StyleStatement), self.statements)))) > 0:
         if subpart == '*':
@@ -347,9 +353,11 @@ ast.ConditionCheck.as_js = condition_check_as_js
 ast.ConditionTag.as_js = condition_tag_as_js
 ast.ConditionNotTag.as_js = condition_nottag_as_js
 ast.ConditionPseudoclass.as_js = condition_pseudoclass_as_js
+ast.ConditionClass.as_js = condition_class_as_js
 ast.Action.as_js = action_as_js
 ast.StyleStatement.as_js = style_statement_as_js
 ast.TagStatement.as_js = tag_statement_as_js
+ast.ClassStatement.as_js = class_statement_as_js
 ast.Eval.as_js = eval_as_js
 
 ast.EvalExpressionString.as_js = eval_string_as_js
@@ -405,6 +413,7 @@ if __name__ == "__main__":
     'use strict';
 
     function restyle(style, tags, zoom, type, selector) {
+        var cssClasses = [];
 %s
 %s
 %s
