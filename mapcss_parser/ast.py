@@ -148,7 +148,7 @@ class TagStatement:
 
 class ClassStatement:
     def __init__(self, name):
-        self.name = name
+        self.name = name[1:]
 
     def __str__(self):
         return "    set %s;" % (self.name)
@@ -182,7 +182,7 @@ class ConditionCheck:
 
 class ConditionClass:
     def __init__(self, name):
-        self.name = name
+        self.name = name[1:]
 
     def __str__(self):
         return "%s" % (self.name)
