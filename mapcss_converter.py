@@ -67,10 +67,16 @@ NUMERIC_PROPERTIES = (
     'fill-opacity',
     'casing-width',
     'casing-opacity',
+    'font-size',
+    'icon-height',
+    'icon-opacity',
+    'icon-width',
     'shield-frame-width',
     'shield-casing-width',
     'shield-opacity',
     'text-offset',
+    'text-offset-x',
+    'text-offset-y',
     'max-width',
     'text-halo-radius'
 )
