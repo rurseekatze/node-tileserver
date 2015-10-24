@@ -170,6 +170,7 @@ def t_import_URL(t):
 
 def t_ANY_COMMENT(t):
     r'/\*.*?\*/'
+    t.lexer.lineno += t.value.count('\n')
     pass
 
 def t_ZOOM(t):
