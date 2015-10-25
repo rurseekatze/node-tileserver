@@ -123,7 +123,7 @@ def t_eval_RPAREN(t):
     r'\)'
     t.lexer.level -= 1
     if t.lexer.level == 0:
-        t.lexer.begin('actionvalue')
+        t.lexer.pop_state()
     return t
 
 def t_eval_STRING(t):
@@ -133,13 +133,13 @@ def t_eval_STRING(t):
 
 def t_tagvalue_EVAL(t):
     r'eval'
-    t.lexer.begin('eval')
+    t.lexer.push_state('eval')
     t.lexer.level = 0
     return t
 
 def t_actionvalue_EVAL(t):
     r'eval'
-    t.lexer.begin('eval')
+    t.lexer.push_state('eval')
     t.lexer.level = 0
     return t
 
@@ -155,12 +155,12 @@ def t_tagvalue_VALUE(t):
 
 def t_import_SEMICOLON(t):
     r';'
-    t.lexer.begin('INITIAL')
+    t.lexer.pop_state()
     return t
 
 def t_IMPORT(t):
     r'@import'
-    t.lexer.begin('import')
+    t.lexer.push_state('import')
     return t
 
 def t_import_URL(t):
@@ -175,42 +175,45 @@ def t_ANY_COMMENT(t):
 
 def t_ZOOM(t):
     r'\|(z|s)\d*(\-\d*)?'
-    t.lexer.begin('INITIAL')
     return t
 
 def t_actionkey_COLON(t):
     r':'
-    t.lexer.begin('actionvalue')
+    t.lexer.pop_state()
+    t.lexer.push_state('actionvalue')
     return t
 
 def t_actionkey_SEMICOLON(t):
     r';'
-    t.lexer.begin('actionkey')
+    t.lexer.pop_state()
+    t.lexer.push_state('actionkey')
     pass
 
 def t_actionkey_EQUALS(t):
     r'='
-    t.lexer.begin('tagvalue')
+    t.lexer.push_state('tagvalue')
     return t
 
 def t_actionkey_EXIT(t):
     r'exit';
-    t.lexer.begin('actionvalue')
+    t.lexer.pop_state()
+    t.lexer.push_state('actionvalue')
     return t
 
 def t_actionkey_RCBRACE(t):
     r'}'
-    t.lexer.begin('INITIAL')
+    t.lexer.pop_state()
     return t
 
 def t_actionvalue_SEMICOLON(t):
     r';'
-    t.lexer.begin('actionkey')
+    t.lexer.pop_state()
+    t.lexer.push_state('actionkey')
     pass
 
 def t_actionvalue_RCBRACE(t):
     r'}'
-    t.lexer.begin('INITIAL')
+    t.lexer.pop_state()
     return t
 
 def t_tagvalue_SEMICOLON(t):
@@ -220,17 +223,17 @@ def t_tagvalue_SEMICOLON(t):
 
 def t_LCBRACE(t):
     r'{'
-    t.lexer.begin('actionkey')
+    t.lexer.push_state('actionkey')
     return t
 
 def t_LSQBRACE(t):
     r'\['
-    t.lexer.begin('condition')
+    t.lexer.push_state('condition')
     return t
 
 def t_condition_RSQBRACE(t):
     r'\]'
-    t.lexer.begin('INITIAL')
+    t.lexer.pop_state()
     return t
 
 # Error handling rule
