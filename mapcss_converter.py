@@ -49,8 +49,22 @@ from mapcss_parser import MapCSSParser
 from mapcss_parser import ast
 
 
-CHECK_OPERATORS = {
+# operators when comparing to numbers
+# do not check for type equality here as the left hand part will come from the tags
+# array and is a string
+CHECK_OPERATORS_NUM = {
     '=': '==',
+    '<': '<',
+    '<=': '<=',
+    '>': '>',
+    '>=': '>=',
+    '!=': '!=',
+    '<>': '!='
+}
+
+# operators when comparing to strings
+CHECK_OPERATORS = {
+    '=': '===',
     '<': '<',
     '<=': '<=',
     '>': '>',
@@ -185,7 +199,7 @@ def condition_check_as_js(self):
     elif self.sign == '~=':
         return "MapCSS.e_tag(tags, '%s').split(';').indexOf('%s') >= 0" % (k, v)
     elif isNumeric(v):
-        return "tags['%s'] %s %s" % (k, CHECK_OPERATORS[self.sign], v)
+        return "tags['%s'] %s %s" % (k, CHECK_OPERATORS_NUM[self.sign], v)
     else:
         return "tags['%s'] %s '%s'" % (k, CHECK_OPERATORS[self.sign], v)
 
