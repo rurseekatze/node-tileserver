@@ -77,9 +77,6 @@ Kothic.texticons = {
                     // TODO direcion of y-offset is reverse in JOSM
                     offsetY = style['text-offset'] || style['text-offset-y'] || 0;
 
-            if (style['kothicjs-ignore-text-offset-x'] === 'true')
-                offsetX = 0;
-
             var halo = (style.hasOwnProperty('text-halo-radius'));
 
             Kothic.style.setStyles(ctx, {
