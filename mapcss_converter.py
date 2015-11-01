@@ -459,8 +459,8 @@ if __name__ == "__main__":
     """ % (
             ",".join(map(image_as_js, sprite_images)),
             ", ".join(map(lambda i: "'%s'" % i, external_images)),
-            ", ".join(presence_tags),
-            ", ".join(value_tags),
+            ", ".join(sorted(presence_tags)),
+            ", ".join(sorted(value_tags)),
             style_name,
             style_name)
 
