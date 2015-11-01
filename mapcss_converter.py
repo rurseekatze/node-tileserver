@@ -98,8 +98,18 @@ NUMERIC_PROPERTIES = (
 images = set()
 subparts = set(['default'])
 presence_tags = set()
-value_tags = set()
+value_tags = dict()
 tag_function = 'e_tag' # to which function tag() resolves, may change e.g. to e_localize()
+
+def add_vtag(k, v = None):
+     # use None here as a marker for wildcard usage
+     # treat regular expressions as wildcards as there are usually too many possible outcomes
+     st = value_tags.get(k, set())
+     if v and v[0] == '/':
+         st.add(None)
+     else:
+         st.add(v)
+     value_tags[k] = st
 
 def open_svg_as_image(fn):
      tmpfd, tmppath = tempfile.mkstemp(".png")
@@ -191,7 +201,7 @@ def isNumeric(value):
 def condition_check_as_js(self):
     k = wrap_key(self.key).strip("'\"")
     v = wrap_key(self.value).strip("'\"")
-    value_tags.add(k)
+    add_vtag(k, v)
     if self.sign == '=~':
         return "%s.test(tags['%s'])" % (v, k)
     elif self.sign == '!~':
@@ -248,7 +258,7 @@ def style_statement_as_js(self, subpart):
         if (self.value == ''):
             return "            s_%s[%s] = '';" % (subpart, k)
         else:
-            value_tags.add(self.value)
+            add_vtag(self.value)
             return "            s_%s[%s] = MapCSS.e_localize(tags, %s);" % (subpart, k, val)
     else:
         if self.key in ('icon-image', 'fill-image'):
@@ -269,7 +279,7 @@ def eval_function_as_js(self, subpart):
         if (args == '""'):
             return "''"
         else:
-            value_tags.add(args.strip("'\""))
+            add_vtag(args.strip("'\""))
             return "MapCSS.%s(tags, %s)" % (tag_function, args)
     elif self.function == 'prop':
         if (args == '""'):
@@ -460,7 +470,7 @@ if __name__ == "__main__":
     (sprite_images, external_images) = create_css_sprite(images, options.icons, sprite)
 
     #We don't need to check presence if we already check value
-    presence_tags -= value_tags
+    presence_tags -= set(value_tags.keys())
     ptags = ""
     if presence_tags:
         ptags = "'%s'" % "', '".join(sorted(presence_tags))
