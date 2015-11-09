@@ -92,9 +92,7 @@ Kothic.path = (function () {
         if (type === "Polygon") {
             coords = [coords];
             type = "MultiPolygon";
-        }
-
-        if (type === "LineString") {
+        } else if (type === "LineString") {
             coords = [coords];
             type = "MultiLineString";
         }
@@ -104,9 +102,7 @@ Kothic.path = (function () {
             len = coords.length,
             len2, pointsLen,
             prevPoint, point, screenPoint,
-            dx, dy, dist,
-            pad = 50, // how many pixels to draw out of the tile to avoid path edges when lines crosses tile borders
-            skip = 2; // do not draw line segments shorter than this
+            dx, dy, dist;
 
         if (type === "MultiPolygon") {
             for (i = 0; i < len; i++) {
@@ -132,9 +128,10 @@ Kothic.path = (function () {
                     }
                 }
             }
-        }
+        } else if (type === "MultiLineString") {
+            var pad = 50, // how many pixels to draw out of the tile to avoid path edges when lines crosses tile borders
+                skip = 2; // do not draw line segments shorter than this
 
-        if (type === "MultiLineString") {
             for (i = 0; i < len; i++) {
                 points = coords[i];
                 pointsLen = points.length;
