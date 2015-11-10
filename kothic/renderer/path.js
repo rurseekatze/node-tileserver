@@ -89,12 +89,12 @@ Kothic.path = (function () {
         var type = feature.type,
             coords = feature.coordinates;
 
-        if (type === "Polygon") {
-            coords = [coords];
-            type = "MultiPolygon";
-        } else if (type === "LineString") {
+        if (type === "LineString") {
             coords = [coords];
             type = "MultiLineString";
+        } else if (type === "Polygon") {
+            coords = [coords];
+            type = "MultiPolygon";
         }
 
         var i, j, k,
@@ -104,31 +104,7 @@ Kothic.path = (function () {
             prevPoint, point, screenPoint,
             dx, dy, dist;
 
-        if (type === "MultiPolygon") {
-            for (i = 0; i < len; i++) {
-                for (k = 0, len2 = coords[i].length; k < len2; k++) {
-                    points = coords[i][k];
-                    pointsLen = points.length;
-                    prevPoint = points[0];
-
-                    for (j = 0; j <= pointsLen; j++) {
-                        point = points[j] || points[0];
-                        screenPoint = Kothic.geom.transformPoint(point, ws, hs);
-
-                        if (j === 0 || (!fill &&
-                                isTileBoundary(point, granularity) &&
-                                isTileBoundary(prevPoint, granularity))) {
-                            moveTo(ctx, screenPoint, dashes);
-                        } else if (fill || !dashes) {
-                            ctx.lineTo(screenPoint[0], screenPoint[1]);
-                        } else {
-                            dashTo(ctx, screenPoint);
-                        }
-                        prevPoint = point;
-                    }
-                }
-            }
-        } else if (type === "MultiLineString") {
+        if (type === "MultiLineString") {
             var pad = 50, // how many pixels to draw out of the tile to avoid path edges when lines crosses tile borders
                 skip = 2; // do not draw line segments shorter than this
 
@@ -170,6 +146,30 @@ Kothic.path = (function () {
                         dashTo(ctx, screenPoint);
                     } else {
                         ctx.lineTo(screenPoint[0], screenPoint[1]);
+                    }
+                }
+            }
+        } else if (type === "MultiPolygon") {
+            for (i = 0; i < len; i++) {
+                for (k = 0, len2 = coords[i].length; k < len2; k++) {
+                    points = coords[i][k];
+                    pointsLen = points.length;
+                    prevPoint = points[0];
+
+                    for (j = 0; j <= pointsLen; j++) {
+                        point = points[j] || points[0];
+                        screenPoint = Kothic.geom.transformPoint(point, ws, hs);
+
+                        if (j === 0 || (!fill &&
+                                isTileBoundary(point, granularity) &&
+                                isTileBoundary(prevPoint, granularity))) {
+                            moveTo(ctx, screenPoint, dashes);
+                        } else if (fill || !dashes) {
+                            ctx.lineTo(screenPoint[0], screenPoint[1]);
+                        } else {
+                            dashTo(ctx, screenPoint);
+                        }
+                        prevPoint = point;
                     }
                 }
             }
