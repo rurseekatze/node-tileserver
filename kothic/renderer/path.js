@@ -89,14 +89,12 @@ Kothic.path = (function () {
         var type = feature.type,
             coords = feature.coordinates;
 
-        if (type === "Polygon") {
-            coords = [coords];
-            type = "MultiPolygon";
-        }
-
         if (type === "LineString") {
             coords = [coords];
             type = "MultiLineString";
+        } else if (type === "Polygon") {
+            coords = [coords];
+            type = "MultiPolygon";
         }
 
         var i, j, k,
@@ -104,9 +102,54 @@ Kothic.path = (function () {
             len = coords.length,
             len2, pointsLen,
             prevPoint, point, screenPoint,
-            dx, dy, dist, pad = 50;
+            dx, dy, dist;
 
-        if (type === "MultiPolygon") {
+        if (type === "MultiLineString") {
+            var pad = 50, // how many pixels to draw out of the tile to avoid path edges when lines crosses tile borders
+                skip = 2; // do not draw line segments shorter than this
+
+            for (i = 0; i < len; i++) {
+                points = coords[i];
+                pointsLen = points.length;
+
+                for (j = 0; j < pointsLen; j++) {
+                    point = points[j];
+
+                    // continue path off the tile by some abount to fix path edges between tiles
+                    if ((j === 0 || j === pointsLen - 1) && isTileBoundary(point, granularity)) {
+                        k = j;
+                        do {
+                            k = j ? k - 1 : k + 1;
+                            if (k < 0 || k >= pointsLen)
+                                break;
+                            prevPoint = points[k];
+
+                            dx = point[0] - prevPoint[0];
+                            dy = point[1] - prevPoint[1];
+                            dist = Math.sqrt(dx * dx + dy * dy);
+                        } while (dist <= skip);
+
+                        // all points are so close to each other that it doesn't make sense to
+                        // draw the line beyond the tile border, simply skip the entire line from
+                        // here
+                        if (k < 0 || k >= pointsLen)
+                            break;
+
+                        point[0] = point[0] + pad * dx / dist;
+                        point[1] = point[1] + pad * dy / dist;
+                    }
+                    screenPoint = Kothic.geom.transformPoint(point, ws, hs);
+
+                    if (j === 0) {
+                        moveTo(ctx, screenPoint, dashes);
+                    } else if (dashes) {
+                        dashTo(ctx, screenPoint);
+                    } else {
+                        ctx.lineTo(screenPoint[0], screenPoint[1]);
+                    }
+                }
+            }
+        } else if (type === "MultiPolygon") {
             for (i = 0; i < len; i++) {
                 for (k = 0, len2 = coords[i].length; k < len2; k++) {
                     points = coords[i][k];
@@ -127,38 +170,6 @@ Kothic.path = (function () {
                             dashTo(ctx, screenPoint);
                         }
                         prevPoint = point;
-                    }
-                }
-            }
-        }
-
-        if (type === "MultiLineString") {
-            for (i = 0; i < len; i++) {
-                points = coords[i];
-                pointsLen = points.length;
-
-                for (j = 0; j < pointsLen; j++) {
-                    point = points[j];
-                    screenPoint = Kothic.geom.transformPoint(point, ws, hs);
-
-                    // continue path off the tile by some abount to fix path edges between tiles
-                    if ((j === 0 || j === pointsLen - 1) && isTileBoundary(point, granularity)) {
-                        prevPoint = points[j ? pointsLen - 2 : 1];
-
-                        dx = point[0] - prevPoint[0];
-                        dy = point[1] - prevPoint[1];
-                        dist = Math.sqrt(dx * dx + dy * dy);
-
-                        screenPoint[0] = screenPoint[0] + pad * dx / dist;
-                        screenPoint[1] = screenPoint[1] + pad * dy / dist;
-                    }
-
-                    if (j === 0) {
-                        moveTo(ctx, screenPoint, dashes);
-                    } else if (dashes) {
-                        dashTo(ctx, screenPoint);
-                    } else {
-                        ctx.lineTo(screenPoint[0], screenPoint[1]);
                     }
                 }
             }
