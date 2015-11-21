@@ -164,12 +164,16 @@ var MapCSS = {
 	},
 
 	e_join: function () {
-		var tagString = "";
+		if (arguments.length === 2 && Object.prototype.toString.call(arguments[1]) === '[object Array]') {
+			return arguments[1].join(arguments[0]);
+		} else {
+			var tagString = "";
 
-		for (var i = 1; i < arguments.length; i++)
-			tagString = tagString.concat(arguments[0]).concat(arguments[i]);
+			for (var i = 1; i < arguments.length; i++)
+				tagString = tagString.concat(arguments[0]).concat(arguments[i]);
 
-		return tagString.substr(arguments[0].length);
+			return tagString.substr(arguments[0].length);
+		}
 	},
 
 	e_equal: function (arga, argb) {
@@ -270,13 +274,6 @@ var MapCSS = {
 		lst.push(v);
 
 		return lst;
-	},
-
-	e_join: function(sep, lst) {
-		if (Object.prototype.toString.call(lst) !== '[object Array]')
-			return "";
-
-		return lst.join(sep);
 	},
 
 	e_contains: function(lst, v) {
