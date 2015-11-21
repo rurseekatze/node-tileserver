@@ -226,6 +226,84 @@ var MapCSS = {
 		return (cond) ? a : b;
 	},
 
+	e_split: function (sep, text) {
+		return text.split(sep);
+	},
+
+	e_get: function(arr, index) {
+		if (Object.prototype.toString.call(arr) !== '[object Array]')
+			return "";
+
+		if (!/^[0-9]+$/.test(index) || index >= arr.length())
+			return "";
+
+		return arr[index];
+	},
+
+	e_set: function(arr, index, text) {
+		if (Object.prototype.toString.call(arr) !== '[object Array]')
+			return [];
+
+		if (!/^[0-9]+$/.test(index))
+			return [];
+
+		arr[index] = text;
+
+		return arr;
+	},
+
+	e_count: function(arr) {
+		if (Object.prototype.toString.call(arr) !== '[object Array]')
+			return 0;
+
+		return arr.length();
+	},
+
+	e_list: function() {
+		return arguments;
+	},
+
+	e_append: function(lst, v) {
+		if (Object.prototype.toString.call(lst) !== '[object Array]')
+			return [];
+
+		lst.push(v);
+
+		return lst;
+	},
+
+	e_join: function(sep, lst) {
+		if (Object.prototype.toString.call(lst) !== '[object Array]')
+			return "";
+
+		return lst.join(sep);
+	},
+
+	e_contains: function(lst, v) {
+		if (Object.prototype.toString.call(lst) !== '[object Array]')
+			return false;
+
+		return (lst.indexOf(v) >= 0);
+	},
+
+	e_sort: function(lst) {
+		if (Object.prototype.toString.call(lst) !== '[object Array]')
+			return [];
+
+		lst.sort();
+
+		return lst;
+	},
+
+	e_reverse: function(lst) {
+		if (Object.prototype.toString.call(lst) !== '[object Array]')
+			return [];
+
+		lst.reverse();
+
+		return lst;
+	},
+
     loadStyle: function (style, restyle, sprite_images, external_images, presence_tags, value_tags) {
         var i;
         sprite_images = sprite_images || [];
