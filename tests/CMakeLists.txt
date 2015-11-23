@@ -39,9 +39,15 @@ file(GLOB_RECURSE TEST_FILES LIST_DIRECTORIES false RELATIVE "${CMAKE_CURRENT_SO
 list(SORT TEST_FILES)
 
 foreach(_file IN LISTS TEST_FILES)
+	get_filename_component(_path "${_file}" PATH)
 	get_filename_component(_name "${_file}" NAME_WE)
 	add_test(NAME "bug_${_name}" COMMAND ${_converter_command} -o - -i "${CMAKE_CURRENT_SOURCE_DIR}/${_file}")
-	set_tests_properties(bug_${_name} PROPERTIES PASS_REGULAR_EXPRESSION "Illegal character '.' at line")
+	if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_path}/${_name}.pass_re")
+		file(READ "${CMAKE_CURRENT_SOURCE_DIR}/${_path}/${_name}.pass_re" _pass_re)
+		set_tests_properties(bug_${_name} PROPERTIES PASS_REGULAR_EXPRESSION "${_pass_re}")
+	else ()
+		set_tests_properties(bug_${_name} PROPERTIES PASS_REGULAR_EXPRESSION "Illegal character '.' at line")
+	endif ()
 endforeach ()
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/import.css" "${CMAKE_CURRENT_BINARY_DIR}/import.css" COPYONLY)
