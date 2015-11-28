@@ -142,8 +142,8 @@ def p_condition_check(p):
     p[0] = ast.ConditionCheck(p[1], p[2], p[3])
 
 def p_condition_regex(p):
-    'condition : IDENTIFIER SIGN REGEX'
-    p[0] = ast.ConditionRegex(p[1], p[2], p[3])
+    'condition : IDENTIFIER SIGN REGEX_START REGEX_BODY'
+    p[0] = ast.ConditionCheck(p[1], p[2], p[3] + p[4])
 
 def p_condition_set(p):
     'condition : IDENTIFIER'
