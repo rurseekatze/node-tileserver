@@ -1,0 +1,7 @@
+node
+{
+	/* the first expression is equivalent, it just proves that there
+	 * is no other error and the workaround works */
+	z-index: eval(cond(0-3 < 0, 0-3, 1 * (0-3)));
+	z-index: eval(cond(-3 < 0, -3, 1 * -3));
+}
