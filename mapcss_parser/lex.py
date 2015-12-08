@@ -31,6 +31,16 @@
 import re
 import ply.lex as lex
 
+# Compute column.
+#     input is the input text string
+#     token is a token instance
+# Basically taken from the PLY documentation
+def find_column(input,token):
+    last_cr = input.rfind('\n',0,token.lexpos)
+    if last_cr < 0:
+        last_cr = 0
+    return (token.lexpos - last_cr)
+
 states = (
     ('condition', 'exclusive'),
     ('actionkey', 'exclusive'),
@@ -61,6 +71,7 @@ tokens = (
     'SIGN',
     'NOT',
     'IDENTIFIER',
+    'REGEX',
 
     #Actions
     'LCBRACE',
@@ -70,7 +81,6 @@ tokens = (
     'COLON',
     'SEMICOLON',
     'COMMA',
-    'REGEX',
     'EXIT',
     'EQUALS',
 
@@ -292,7 +302,7 @@ def t_mediasel_MLCBRACE(t):
 
 # Error handling rule
 def t_ANY_error(t):
-    print("Illegal character '%s' at line %s" % (t.value[0], t.lexer.lineno))
+    print("Illegal character '%s' at line %i position %i" % (t.value[0], t.lexer.lineno, find_column(t.lexer.lexdata, t)))
     t.lexer.skip(1)
 
 # Define a rule so we can track line numbers

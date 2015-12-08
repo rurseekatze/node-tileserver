@@ -36,7 +36,7 @@ tokens = lex.tokens
 # Error rule for syntax errors
 def p_error(p):
     if p:
-        print("Syntax error in input at line %s" % (p.lineno))
+        print("Syntax error in input at line %i position %i, token %s" % (p.lineno, lex.find_column(p.lexer.lexdata, p), p))
 
 def p_mapcss(p):
     'css : rule'
