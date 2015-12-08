@@ -45,6 +45,8 @@ states = (
 tokens = (
     #Comments in C-style
     'COMMENT',
+    #Comments in C++-style
+    'CXXCOMMENT',
 
     #Rule sublect
     'SUBJECT',
@@ -116,6 +118,10 @@ t_eval_NUMBER = r'\d+(\.\d+)?'
 t_eval_OPERATION = r'\+|-|\*|\/|==|<>|!=|<=|>=|>|<|eq|ne|\.'
 t_eval_FUNCTION = r'\w+'
 t_eval_COMMA = r','
+
+def t_ANY_CXXCOMMENT(t):
+    r'//[^\n]*'
+    pass
 
 def t_MEMBEROF(t):
     r'>'
