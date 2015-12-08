@@ -191,7 +191,7 @@ def isNumeric(value):
 def condition_check_as_js(self):
     k = wrap_key(self.key).strip("'\"")
     v = wrap_key(self.value).strip("'\"")
-    value_tags.add("'%s'" % k)
+    value_tags.add(k)
     if self.sign == '=~':
         return "%s.test(tags['%s'])" % (v, k)
     elif self.sign == '!~':
@@ -204,11 +204,11 @@ def condition_check_as_js(self):
         return "tags['%s'] %s '%s'" % (k, CHECK_OPERATORS[self.sign], v)
 
 def condition_tag_as_js(self):
-    presence_tags.add("'%s'" % wrap_key(self.key).strip("'\""))
+    presence_tags.add(wrap_key(self.key).strip("'\""))
     return "tags.hasOwnProperty('%s')" % (wrap_key(self.key).strip("'\""))
 
 def condition_nottag_as_js(self):
-    presence_tags.add("'%s'" % wrap_key(self.key).strip("'\""))
+    presence_tags.add(wrap_key(self.key).strip("'\""))
     return "!tags.hasOwnProperty('%s')" % (wrap_key(self.key).strip("'\""))
 
 def condition_pseudoclass_as_js(self):
@@ -245,7 +245,7 @@ def style_statement_as_js(self, subpart):
 
     k = wrap_key(self.key)
     if self.key == 'text' and not isinstance(self.value, ast.Eval):
-        value_tags.add(val)
+        value_tags.add(self.value)
         return "            s_%s[%s] = MapCSS.e_localize(tags, %s);" % (subpart, k, val)
     else:
         if self.key in ('icon-image', 'fill-image'):
@@ -262,9 +262,8 @@ def eval_as_js(self, subpart):
 def eval_function_as_js(self, subpart):
     args = ", ".join(map(lambda arg: arg.as_js(subpart), self.arguments))
     if self.function == 'tag':
-        # use the correct quotes
         global tag_function
-        value_tags.add("'%s'" % args.strip("'\""))
+        value_tags.add(args.strip("'\""))
         return "MapCSS.%s(tags, %s)" % (tag_function, args)
     elif self.function == 'prop':
         return "MapCSS.e_prop(s_%s, %s)" % (subpart, args)
@@ -455,6 +454,12 @@ if __name__ == "__main__":
 
     #We don't need to check presence if we already check value
     presence_tags -= value_tags
+    ptags = ""
+    if presence_tags:
+        ptags = "'%s'" % "', '".join(sorted(presence_tags))
+    vtags = ""
+    if value_tags:
+        vtags = "'%s'" % "', '".join(sorted(value_tags))
 
     js += """
     var sprite_images = {%s};
@@ -468,8 +473,8 @@ if __name__ == "__main__":
     """ % (
             ",".join(map(image_as_js, sprite_images)),
             ", ".join(map(lambda i: "'%s'" % i, external_images)),
-            ", ".join(sorted(presence_tags)),
-            ", ".join(sorted(value_tags)),
+            ptags,
+            vtags,
             style_name,
             style_name)
 
