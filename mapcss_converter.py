@@ -272,7 +272,10 @@ def eval_function_as_js(self, subpart):
             value_tags.add(args.strip("'\""))
             return "MapCSS.%s(tags, %s)" % (tag_function, args)
     elif self.function == 'prop':
-        return "MapCSS.e_prop(s_%s, %s)" % (subpart, args)
+        if (args == '""'):
+            return "''"
+        else:
+            return "MapCSS.e_prop(s_%s, %s)" % (subpart, args)
     else:
         return "MapCSS.e_%s(%s)" % (self.function, args)
 
