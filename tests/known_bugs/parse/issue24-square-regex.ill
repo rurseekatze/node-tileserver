@@ -1,4 +1,0 @@
-canvas[foo=~/bla[0-9]/]
-{
-	default-lines: true;
-}

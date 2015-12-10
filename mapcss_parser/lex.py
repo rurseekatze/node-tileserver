@@ -43,6 +43,7 @@ def find_column(input,token):
 
 states = (
     ('condition', 'exclusive'),
+    ('regex', 'exclusive'),
     ('actionkey', 'exclusive'),
     ('actionvalue', 'exclusive'),
     ('tagvalue', 'exclusive'),
@@ -71,7 +72,10 @@ tokens = (
     'SIGN',
     'NOT',
     'IDENTIFIER',
-    'REGEX',
+    'REGEX_START',
+
+    #Regex
+    'REGEX_BODY',
 
     #Actions
     'LCBRACE',
@@ -115,8 +119,7 @@ t_ANY_ignore  = ' \t'
 t_SUBJECT = r'\w+|\*'
 t_condition_SIGN = r'!~|=~|<>|<=|>=|!=|<|>|=|~='
 t_condition_NOT = r'\!'
-t_condition_IDENTIFIER = r'[^!<>=\[\]~]+'
-t_condition_REGEX = r'/\w+?/'
+t_condition_IDENTIFIER = r'[^/!<>=\[\]~]+'
 t_COMMA = r','
 t_actionkey_KEY = r'[\w-]+'
 t_actionkey_CLASS = r'\.\w+'
@@ -257,6 +260,16 @@ def t_LCBRACE(t):
 def t_LSQBRACE(t):
     r'\['
     t.lexer.push_state('condition')
+    return t
+
+def t_condition_REGEX_START(t):
+    r'/'
+    t.lexer.push_state('regex')
+    return t
+
+def t_regex_REGEX_BODY(t):
+    r'[^/]*/'
+    t.lexer.pop_state()
     return t
 
 def t_condition_RSQBRACE(t):
