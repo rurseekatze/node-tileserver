@@ -301,6 +301,22 @@ var MapCSS = {
 		return lst;
 	},
 
+	e_length: function(str) {
+		if (Object.prototype.toString.call(str) !== '[object String]')
+			return 0;
+
+		return str.length;
+	},
+
+	e_substring: function(str, index, length) {
+		return str.substr(index, length);
+	},
+
+	e_replace: function(s, target, replace) {
+		// this intentionally does not use replace() as the arguments should not be regular expressions
+		return s.split(target).join(replace);
+	},
+
     loadStyle: function (style, restyle, sprite_images, external_images, presence_tags, value_tags) {
         var i;
         sprite_images = sprite_images || [];
