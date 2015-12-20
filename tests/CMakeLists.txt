@@ -48,6 +48,9 @@ foreach(_file IN LISTS TEST_FILES)
 	else ()
 		set_tests_properties(bug_${_name} PROPERTIES PASS_REGULAR_EXPRESSION "Illegal character '.' at line")
 	endif ()
+
+	add_test(NAME "bug_${_name}_rc" COMMAND ${_converter_command} -o - -i "${CMAKE_CURRENT_SOURCE_DIR}/${_file}")
+	set_tests_properties("bug_${_name}_rc" PROPERTIES WILL_FAIL TRUE)
 endforeach ()
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/import.css" "${CMAKE_CURRENT_BINARY_DIR}/import.css" COPYONLY)
