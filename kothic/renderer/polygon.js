@@ -10,7 +10,7 @@ permitted provided that the following conditions are met:
 
    2. Redistributions in binary form must reproduce the above copyright notice, this list
       of conditions and the following disclaimer in the documentation and/or other materials
-	  provided with the distribution.
+      provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -25,59 +25,59 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 Kothic.polygon = {
-    render: function (ctx, feature, nextFeature, ws, hs, granularity) {
-        var style = feature.style,
-            nextStyle = nextFeature && nextFeature.style;
+	render: function (ctx, feature, nextFeature, ws, hs, granularity) {
+		var style = feature.style,
+			nextStyle = nextFeature && nextFeature.style;
 
-        if (!this.pathOpened) {
-            this.pathOpened = true;
-            ctx.beginPath();
-        }
+		if (!this.pathOpened) {
+			this.pathOpened = true;
+			ctx.beginPath();
+		}
 
-        Kothic.path(ctx, feature, false, true, ws, hs, granularity);
+		Kothic.path(ctx, feature, false, true, ws, hs, granularity);
 
-        if (nextFeature &&
-                (nextStyle['fill-color'] === style['fill-color']) &&
-                (nextStyle['fill-image'] === style['fill-image']) &&
-                (nextStyle['fill-opacity'] === style['fill-opacity'])) {
-            return;
-        }
+		if (nextFeature &&
+				(nextStyle['fill-color'] === style['fill-color']) &&
+				(nextStyle['fill-image'] === style['fill-image']) &&
+				(nextStyle['fill-opacity'] === style['fill-opacity'])) {
+			return;
+		}
 
-        this.fill(ctx, style);
+		this.fill(ctx, style);
 
-        this.pathOpened = false;
-    },
+		this.pathOpened = false;
+	},
 
-    fill: function (ctx, style, fillFn) {
-        var opacity = style["fill-opacity"] || style.opacity, image;
+	fill: function (ctx, style, fillFn) {
+		var opacity = style["fill-opacity"] || style.opacity, image;
 
-        if (style.hasOwnProperty('fill-color')) {
-            // first pass fills with solid color
-            Kothic.style.setStyles(ctx, {
-                fillStyle: style["fill-color"] || "#000000",
-                globalAlpha: opacity || 1
-            });
-            if (fillFn) {
-                fillFn();
-            } else {
-                ctx.fill();
-            }
-        }
+		if (style.hasOwnProperty('fill-color')) {
+			// first pass fills with solid color
+			Kothic.style.setStyles(ctx, {
+				fillStyle: style["fill-color"] || "#000000",
+				globalAlpha: opacity || 1
+			});
+			if (fillFn) {
+				fillFn();
+			} else {
+				ctx.fill();
+			}
+		}
 
-        if (style.hasOwnProperty('fill-image')) {
-            // second pass fills with texture
-            image = MapCSS.getImage(style['fill-image']);
-            if (image) {
-                Kothic.style.setStyles(ctx, {
-                    fillStyle: ctx.createPattern(image, 'repeat'),
-                    globalAlpha: opacity || 1
-                });
-                if (fillFn) {
-                    fillFn();
-                } else {
-                    ctx.fill();
-                }
-            }
-        }
-    }
+		if (style.hasOwnProperty('fill-image')) {
+			// second pass fills with texture
+			image = MapCSS.getImage(style['fill-image']);
+			if (image) {
+				Kothic.style.setStyles(ctx, {
+					fillStyle: ctx.createPattern(image, 'repeat'),
+					globalAlpha: opacity || 1
+				});
+				if (fillFn) {
+					fillFn();
+				} else {
+					ctx.fill();
+				}
+			}
+		}
+	}
 };
