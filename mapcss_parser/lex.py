@@ -38,7 +38,7 @@ import ply.lex as lex
 def find_column(input,token):
 	last_cr = input.rfind('\n',0,token.lexpos)
 	if last_cr < 0:
-	last_cr = 0
+		last_cr = 0
 	return (token.lexpos - last_cr)
 
 states = (
