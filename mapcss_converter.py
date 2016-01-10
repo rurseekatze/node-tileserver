@@ -386,6 +386,14 @@ def image_as_js(image):
         image['offset']
     )
 
+def supports_as_js(self):
+    tag_enable.append(self.value())
+    return ""
+
+def supports_end_as_js(supports):
+    tag_enable.pop()
+    return ""
+
 ast.MapCSS.as_js = mapcss_as_js
 ast.Rule.as_js = rule_as_js
 ast.Selector.as_js = selector_as_js
@@ -405,6 +413,8 @@ ast.EvalExpressionString.as_js = eval_string_as_js
 ast.EvalExpressionOperation.as_js = eval_op_as_js
 ast.EvalExpressionGroup.as_js = eval_group_as_js
 ast.EvalFunction.as_js = eval_function_as_js
+ast.Supports.as_js = supports_as_js
+ast.SupportsEnd.as_js = supports_end_as_js
 
 if __name__ == "__main__":
     from optparse import OptionParser

@@ -51,6 +51,9 @@ states = (
 	('eval', 'exclusive'),
 	('mediasel', 'exclusive'),
 	('mediacontent', 'inclusive'),
+	('supportssel', 'exclusive'),
+	('supportsselparen', 'inclusive'),
+	('supportscontent', 'inclusive'),
 )
 
 tokens = (
@@ -111,6 +114,17 @@ tokens = (
 	'MFEATURE',
 	'MLCBRACE',
 	'MRCBRACE',
+
+	#@supports
+	'SUPPORTS',
+	'SUP_LCBRACE',
+	'SUP_RCBRACE',
+	'SUP_LPAREN',
+	'SUP_RPAREN',
+	'SUP_NOT',
+	'SUP_OR',
+	'SUP_AND',
+	'SUP_STATEMENT',
 )
 
 # Completely ignored characters
@@ -131,6 +145,10 @@ t_eval_NUMBER = r'\d+(\.\d+)?'
 t_eval_OPERATION = r'\+|-|\*|\/|==|<>|!=|<=|>=|>|<|eq|ne|\.'
 t_eval_FUNCTION = r'\w+'
 t_eval_COMMA = r','
+
+t_supportssel_SUP_NOT = '[Nn][Oo][Tt]'
+t_supportssel_SUP_OR = '[Oo][Rr]'
+t_supportssel_SUP_AND = '[Aa][Nn][Dd]'
 
 def t_ANY_CXXCOMMENT(t):
 	r'//[^\n]*'
@@ -311,6 +329,37 @@ def t_mediasel_MLCBRACE(t):
 	r'{'
 	t.lexer.pop_state()
 	t.lexer.push_state('mediacontent')
+	return t
+
+def t_SUPPORTS(t):
+	r'@supports'
+	t.lexer.push_state('supportssel')
+	return t
+
+def t_supportssel_SUP_LCBRACE(t):
+	r'{'
+	t.lexer.pop_state()
+	t.lexer.push_state('supportscontent')
+	return t
+
+def t_supportscontent_SUP_RCBRACE(t):
+	r'}'
+	t.lexer.pop_state()
+	return t
+
+def t_supportssel_SUP_LPAREN(t):
+	r'\('
+	t.lexer.push_state('supportsselparen')
+	return t
+
+def t_supportsselparen_SUP_RPAREN(t):
+	r'\)'
+	t.lexer.pop_state()
+	return t
+
+# this is incomplete, but should work for now
+def t_supportsselparen_SUP_STATEMENT(t):
+	r'[^(){}\n]+(\([^(){}]*\)\n)*[^(){}\n]*'
 	return t
 
 # Error handling rule

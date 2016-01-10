@@ -52,6 +52,11 @@ def p_mapcss_media(p):
 	'css : media'
 	p[0] = ast.MapCSS()
 
+def p_mapcss_supports(p):
+	'css : supports'
+	p[0] = ast.MapCSS()
+	p[0].append_rule(p[1])
+
 def p_mapcss_multiple_rules(p):
 	'css : css rule'
 	p[0] = p[1]
@@ -65,6 +70,11 @@ def p_mapcss_multiple_imports(p):
 def p_mapcss_multiple_medias(p):
 	'css : css media'
 	p[0] = p[1]
+
+def p_mapcss_multiple_supports(p):
+	'css : css supports'
+	p[0] = p[1]
+	p[0].append_rule(p[2])
 
 def p_import_pseudoclass(p):
 	'import : IMPORT URL PSEUDOCLASS SEMICOLON'
@@ -236,5 +246,58 @@ def p_eval_function(p):
 # Media
 def p_media(p):
 	'media : MEDIA MLCBRACE'
+
+def p_supports_condition_neg(p):
+	'sup_condition : sup_negation'
+	p[0] = ast.SupportsCondition(p[1])
+
+def p_supports_condition_conj(p):
+	'sup_condition : sup_conjunction'
+	p[0] = ast.SupportsCondition(p[1])
+
+def p_supports_condition_disj(p):
+	'sup_condition : sup_disjunction'
+	p[0] = ast.SupportsCondition(p[1])
+
+def p_supports_condition_parens(p):
+	'sup_condition : sup_cond_parens'
+	p[0] = ast.SupportsCondition(p[1])
+
+def p_supports_negation(p):
+	'sup_negation : SUP_NOT sup_cond_parens'
+	p[0] = ast.SupportsNot(p[2])
+
+def p_supports_conjunction(p):
+	'sup_conjunction : sup_cond_parens SUP_AND sup_cond_parens'
+	p[0] = ast.SupportsAnd(p[1], p[3])
+
+def p_supports_multiple_conjunction(p):
+	'sup_conjunction : sup_conjunction SUP_AND sup_cond_parens'
+	p[0] = ast.SupportsAnd(p[1], p[3])
+
+def p_supports_disjunction(p):
+	'sup_disjunction : sup_cond_parens SUP_OR sup_cond_parens'
+	p[0] = ast.SupportsOr(p[1], p[3])
+
+def p_supports_multiple_disjunction(p):
+	'sup_disjunction : sup_disjunction SUP_OR sup_cond_parens'
+	p[0] = ast.SupportsOr(p[1], p[3])
+
+def p_supports_parens(p):
+	'sup_cond_parens : SUP_LPAREN sup_condition SUP_RPAREN'
+	p[0] = p[2]
+
+def p_support_decl_condition(p):
+	'sup_cond_parens : SUP_LPAREN SUP_STATEMENT SUP_RPAREN'
+	p[0] = ast.SupportsDecl(p[2])
+
+def p_supports(p):
+	'supports : SUPPORTS sup_condition SUP_LCBRACE'
+	p[0] = ast.Supports(p[2])
+
+def p_supports_end(p):
+	'css : css SUP_RCBRACE'
+	p[0] = p[1]
+	p[0].append_rule(ast.SupportsEnd())
 
 yacc.yacc(debug=0)
