@@ -146,7 +146,7 @@ def escape_value(key, value, subpart):
     else:
         return "'%s'" % value
 
-def mapcss_as_aj(self):
+def mapcss_as_js(self):
     imports = "".join(map(lambda imp: propagate_import(imp.url).as_js(), self.imports))
     rules = "".join(map(lambda x: x.as_js(), self.rules))
     return "%s%s" % (imports, rules)
@@ -373,7 +373,7 @@ def image_as_js(image):
         image['offset']
     )
 
-ast.MapCSS.as_js = mapcss_as_aj
+ast.MapCSS.as_js = mapcss_as_js
 ast.Rule.as_js = rule_as_js
 ast.Selector.as_js = selector_as_js
 ast.Selector.get_zoom = selector_get_zoom
