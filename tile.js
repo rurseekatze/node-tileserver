@@ -268,7 +268,7 @@ Tile.prototype =
 		{
 			return process.nextTick(function()
 			{
-				callback((!err && mtime.getFullYear() == "1970") ? true : false);
+				callback((err || mtime.getFullYear() == "1970") ? true : false);
 			});
 		});
 	},
@@ -832,7 +832,7 @@ Tile.prototype =
 		});
 	},
 
-	// indicates if a bitmap in this style is already cached
+	// indicates if a bitmap tile in this style is already cached
 	bitmapIsCached: function(callback)
 	{
 		fs.exists(configuration.tiledir+'/'+this.style+'/'+this.z+'/'+this.x+'/'+this.y+'.png', function(exists)

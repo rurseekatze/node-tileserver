@@ -34,7 +34,7 @@ BitmapTilerequest = function(self)
 
 BitmapTilerequest.prototype =
 {
-	// serves a vector tile
+	// serves a bitmap tile
 	getTile: function()
 	{
 		var self = this;
