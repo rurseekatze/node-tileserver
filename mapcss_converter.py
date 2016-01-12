@@ -286,11 +286,9 @@ def eval_op_as_js(self, subpart):
     op = self.operation
     if op == '.':
         op = '+'
-
-    if op == 'eq':
+    elif op == 'eq':
         op = '=='
-
-    if op == 'ne':
+    elif op == 'ne':
         op = '!='
 
     return "%s %s %s" % (self.arg1.as_js(subpart), self.operation, self.arg2.as_js(subpart))
