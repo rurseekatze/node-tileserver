@@ -62,14 +62,14 @@ Kothic.texticons = {
 			}
 		}
 
-		if (renderText) {
+		var text = String(style.text).trim();
+		if (renderText && text) {
 			Kothic.style.setStyles(ctx, {
 				lineWidth: style['text-halo-radius'] * 2,
 				font: Kothic.style.getFontString(style['font-family'], style['font-size'], style)
 			});
 
-			var text = String(style.text),
-					textWidth = ctx.measureText(text).width,
+			var textWidth = ctx.measureText(text).width,
 					letterWidth = textWidth / text.length,
 					collisionWidth = textWidth,
 					collisionHeight = letterWidth * 2.5,
