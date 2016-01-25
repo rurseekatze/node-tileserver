@@ -69,14 +69,6 @@ Kothic.texticons = {
 				font: Kothic.style.getFontString(style['font-family'], style['font-size'], style)
 			});
 
-			var textWidth = ctx.measureText(text).width,
-					letterWidth = textWidth / text.length,
-					collisionWidth = textWidth,
-					collisionHeight = letterWidth * 2.5,
-					offsetX = style['text-offset-x'] || 0,
-					// TODO direcion of y-offset is reverse in JOSM
-					offsetY = style['text-offset'] || style['text-offset-y'] || 0;
-
 			var halo = (style.hasOwnProperty('text-halo-radius'));
 
 			Kothic.style.setStyles(ctx, {
@@ -95,6 +87,14 @@ Kothic.texticons = {
 				text = text.replace(/(^|\s)\S/g, function(ch) { return ch.toUpperCase(); });
 
 			if (feature.type === 'Polygon' || feature.type === 'Point') {
+				var textWidth = ctx.measureText(text).width,
+					letterWidth = textWidth / text.length,
+					collisionWidth = textWidth,
+					collisionHeight = letterWidth * 2.5,
+					offsetX = style['text-offset-x'] || 0,
+					// TODO direction of y-offset is reverse in JOSM
+					offsetY = style['text-offset'] || style['text-offset-y'] || 0;
+
 				if ((style['text-allow-overlap'] !== 'true') &&
 						collides.checkPointWH([point[0] + offsetX, point[1] + offsetY], collisionWidth, collisionHeight, feature.kothicId)) {
 					return;
