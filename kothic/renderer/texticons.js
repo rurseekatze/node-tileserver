@@ -87,6 +87,13 @@ Kothic.texticons = {
 				textBaseline: 'middle'
 			});
 
+			if (style['text-transform'] === 'uppercase')
+				text = text.toUpperCase();
+			else if (style['text-transform'] === 'lowercase')
+				text = text.toLowerCase();
+			else if (style['text-transform'] === 'capitalize')
+				text = text.replace(/(^|\s)\S/g, function(ch) { return ch.toUpperCase(); });
+
 			if (feature.type === 'Polygon' || feature.type === 'Point') {
 				if ((style['text-allow-overlap'] !== 'true') &&
 						collides.checkPointWH([point[0] + offsetX, point[1] + offsetY], collisionWidth, collisionHeight, feature.kothicId)) {
