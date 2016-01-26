@@ -316,7 +316,7 @@ def t_mediasel_MLCBRACE(t):
 # Error handling rule
 def t_ANY_error(t):
 	print("Illegal character '%s' at line %i position %i" % (t.value[0], t.lexer.lineno, find_column(t.lexer.lexdata, t)))
-	t.lexer.skip(1)
+	exit(1)
 
 # Define a rule so we can track line numbers
 def t_ANY_newline(t):

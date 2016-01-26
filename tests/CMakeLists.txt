@@ -53,4 +53,6 @@ foreach(_file IN LISTS TEST_FILES)
 	set_tests_properties("bug_${_name}_rc" PROPERTIES WILL_FAIL TRUE)
 endforeach ()
 
+add_subdirectory(errors)
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/import.css" "${CMAKE_CURRENT_BINARY_DIR}/import.css" COPYONLY)
