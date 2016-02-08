@@ -88,12 +88,14 @@ Kothic.texticons = {
 
 			if (feature.type === 'Polygon' || feature.type === 'Point') {
 				for (var i = 0; i < 5; i++) {
-					var rtext;	// the split label text
+					var rtext,	// the split label text
+						joinstr = '';	// the string to use when joining them back
 
 					switch (i) {
 					case 0:
 						// if the text contains braces split there
 						rtext = text.replace(/ \(/g, '\n(').split('\n');
+						joinstr = ' ';
 						break;
 					case 1:
 						// if not, try splitting at slashes
@@ -108,6 +110,7 @@ Kothic.texticons = {
 						break;
 					case 4:
 						rtext = text.split(' ');
+						joinstr = ' ';
 						break;
 					}
 					var s, rlines = rtext.length;
@@ -116,13 +119,35 @@ Kothic.texticons = {
 						continue;
 
 					var collisionWidth = 0,		// width of the longest substring
-						letterWidth = 0;	// mean width of a letter of the longest substring
+						letterWidth = 0,	// mean width of a letter of the longest substring
+						tlens = [];		// width of every substring
 
 					for (s of rtext) {
 						var textWidth = ctx.measureText(s).width;
+						tlens.push(textWidth);
 						if (collisionWidth < textWidth) {
 							collisionWidth = textWidth;
 							letterWidth = textWidth / s.length;
+						}
+					}
+
+					// if there is one item that is larger than 2 other consecutive ones then
+					// join those shorter ones together, resulting in less vertical space being used
+					if (rlines > 2) {
+						var jlen = ctx.measureText(joinstr).width;
+						var j = 0;
+
+						while (j < rlines - 1) {
+							if (tlens[j] + tlens[j + 1] + jlen < collisionWidth) {
+								rtext[j] = rtext[j] + joinstr + rtext[j + 1];
+								tlens[j] = tlens[j] + tlens[j + 1] + jlen;
+								rtext.splice(j + 1, 1);
+								tlens.splice(j + 1, 1);
+								rlines--;
+								// force this item to be checked again, maybe even more can be joined
+							} else {
+								j++;
+							}
 						}
 					}
 
