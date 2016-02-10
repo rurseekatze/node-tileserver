@@ -186,10 +186,10 @@ var Kothic = {
 		layerIds = ['_bg'].concat(layerIds);
 
 		for (i = 0; i < layerIds.length; i++) {
-			// begin modified by rurseekatze
-			//queue = layersToRender[layerIds[i]];
-			queue = layersToRender[layerIds[i]] = layersToRender[layerIds[i]] || {};
-			// end modified by rurseekatze
+			queue = layersToRender[layerIds[i]];
+			if (!queue)
+				continue;
+
 			if (queue.polygons) {
 				for (j = 0, len = queue.polygons.length; j < len; j++) {
 					Kothic.polygon.render(ctx, queue.polygons[j], queue.polygons[j + 1], ws, hs, granularity);
