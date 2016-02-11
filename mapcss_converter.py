@@ -48,6 +48,11 @@ except ImportError:
 from mapcss_parser import MapCSSParser
 from mapcss_parser import ast
 
+from collections import deque
+
+class flag_stack(deque):
+	def value(self):
+		return self.count(False) == 0
 
 # operators when comparing to numbers
 # do not check for type equality here as the left hand part will come from the tags
@@ -100,6 +105,7 @@ subparts = set(['default'])
 presence_tags = set()
 value_tags = set()
 tag_function = 'e_tag' # to which function tag() resolves, may change e.g. to e_localize()
+tag_enable = flag_stack()
 
 def open_svg_as_image(fn):
      tmpfd, tmppath = tempfile.mkstemp(".png")
@@ -152,6 +158,9 @@ def mapcss_as_js(self):
     return "%s%s" % (imports, rules)
 
 def rule_as_js(self):
+    if not tag_enable.value():
+        return ""
+
     selectors_js = []
     actions_js = []
     for selector in self.selectors:
@@ -163,6 +172,9 @@ def rule_as_js(self):
     return """\n        if (%s) %s""" % (" || \n            ".join(selectors_js), "".join(actions_js))
 
 def selector_as_js(self):
+    if not tag_enable.value():
+        return ""
+
     criteria = " && ".join(map(lambda x: x.as_js(), self.criteria))
 
     if self.subject == 'line':
@@ -222,6 +234,9 @@ def class_statement_as_js(self):
     return "        if (cssClasses.indexOf('%s') < 0) { cssClasses.push('%s'); }" % (self.name, self.name);
 
 def action_as_js(self, subpart):
+    if not tag_enable.value():
+        return "{}"
+
     if len(list(filter(lambda x: x, map(lambda x: isinstance(x, ast.StyleStatement), self.statements)))) > 0:
         if subpart == '*':
             subpart = 'everything'
@@ -371,6 +386,14 @@ def image_as_js(image):
         image['offset']
     )
 
+def supports_as_js(self):
+    tag_enable.append(self.value())
+    return ""
+
+def supports_end_as_js(supports):
+    tag_enable.pop()
+    return ""
+
 ast.MapCSS.as_js = mapcss_as_js
 ast.Rule.as_js = rule_as_js
 ast.Selector.as_js = selector_as_js
@@ -390,6 +413,8 @@ ast.EvalExpressionString.as_js = eval_string_as_js
 ast.EvalExpressionOperation.as_js = eval_op_as_js
 ast.EvalExpressionGroup.as_js = eval_group_as_js
 ast.EvalFunction.as_js = eval_function_as_js
+ast.Supports.as_js = supports_as_js
+ast.SupportsEnd.as_js = supports_end_as_js
 
 if __name__ == "__main__":
     from optparse import OptionParser

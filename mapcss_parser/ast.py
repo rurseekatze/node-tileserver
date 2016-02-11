@@ -30,6 +30,8 @@
 MapCSS data model. This is "as is" object representation of MapCSS file
 """
 
+import re
+
 def is_number(s):
 	try:
 		float(s)
@@ -234,3 +236,77 @@ class EvalFunction:
 
 	def __str__(self):
 		return "%s(%s)" % (self.function, ", ".join(map(str, self.arguments)))
+
+class Supports:
+	def __init__(self, conditions):
+		self.conditions = conditions
+
+	def __str__(self):
+		return "@supports"
+
+	def value(self):
+		return self.conditions.value()
+
+class SupportsAnd:
+	def __init__(self, condA, condB):
+		self.condA = condA
+		self.condB = condB
+
+	def __str__(self):
+		return "(%s) AND (%s)" % (self.condA, self.condB)
+
+	def value(self):
+		if not self.condA.value():
+			return False
+
+		return self.condB.value()
+
+class SupportsOr:
+	def __init__(self, condA, condB):
+		self.condA = condA
+		self.condB = condB
+
+	def __str__(self):
+		return "(%s) OR (%s)" % (self.condA, self.condB)
+
+	def value(self):
+		if self.condA.value():
+			return True
+
+		return self.condB.value()
+
+class SupportsNot:
+	def __init__(self, cond):
+		self.cond = cond
+
+	def __str__(self):
+		return "NOT (%s)" % self.cond
+
+	def value(self):
+		return not self.cond.value()
+
+class SupportsCondition:
+	def __init__(self, cond):
+		self.cond = cond
+
+	def __str__(self):
+		return "%s" % self.cond
+
+	def value(self):
+		return self.cond.value()
+
+class SupportsDecl:
+	def __init__(self, condition):
+		self.cond = condition
+
+	def __str__(self):
+		return "%s" % self.cond
+
+	def value(self):
+		if re.search(r'user-agent[ \t]*:[ \t]*node-tileserver', self.cond):
+			return True
+		return False
+
+class SupportsEnd:
+	def __str__(self):
+		return "}"
