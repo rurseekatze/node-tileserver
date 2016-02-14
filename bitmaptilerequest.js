@@ -199,9 +199,7 @@ BitmapTilerequest.prototype =
 
 									self.tile.getModifyTime(function(err, mtime)
 									{
-										var header = {
-											'Content-Type': 'image/png'
-										};
+										var header = self.getHeader();
 
 										if (!err)
 											header['Last-Modified'] = mtime.toUTCString();
@@ -248,11 +246,11 @@ BitmapTilerequest.prototype =
 		return;
 	},
 
-	// sends a 500 error response
 	getHeader: function(msg)
 	{
 		return {
-			'Content-Type': 'application/javascript'
+			'Content-Type': 'image/png',
+			'Server': 'node-tileserver/0.3'
 		};
 	}
 };
