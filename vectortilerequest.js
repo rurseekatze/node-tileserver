@@ -67,9 +67,7 @@ VectorTilerequest.prototype =
 
 						self.tile.getModifyTime(function(err, mtime)
 						{
-							var header = {
-								'Content-Type': 'application/javascript'
-							};
+							var header = self.getHeader();
 
 							if (!err)
 							{
@@ -136,11 +134,11 @@ VectorTilerequest.prototype =
 		return;
 	},
 
-	// sends a 500 error response
 	getHeader: function(msg)
 	{
 		return {
-			'Content-Type': 'application/javascript'
+			'Content-Type': 'application/javascript',
+			'Server': 'node-tileserver/0.3'
 		};
 	}
 };
