@@ -137,7 +137,7 @@ VectorTilerequest.prototype =
 	getHeader: function(msg)
 	{
 		return {
-			'Content-Type': 'application/javascript',
+			'Content-Type': 'text/javascript;charset=UTF-8',
 			'Server': 'node-tileserver/0.3'
 		};
 	}
