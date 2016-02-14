@@ -28,6 +28,7 @@ import sys
 import os
 import re
 from PIL import Image
+import json
 
 try:
   import cairo
@@ -103,9 +104,19 @@ NUMERIC_PROPERTIES = (
 images = set()
 subparts = set(['default'])
 presence_tags = set()
-value_tags = set()
+value_tags = dict()
 tag_function = 'e_tag' # to which function tag() resolves, may change e.g. to e_localize()
 tag_enable = flag_stack()
+
+def add_vtag(k, v = None):
+     # use None here as a marker for wildcard usage
+     # treat regular expressions as wildcards as there are usually too many possible outcomes
+     st = value_tags.get(k, set())
+     if v and v[0] == '/':
+         st.add(None)
+     else:
+         st.add(v)
+     value_tags[k] = st
 
 def open_svg_as_image(fn):
      tmpfd, tmppath = tempfile.mkstemp(".png")
@@ -203,7 +214,7 @@ def isNumeric(value):
 def condition_check_as_js(self):
     k = wrap_key(self.key).strip("'\"")
     v = wrap_key(self.value).strip("'\"")
-    value_tags.add(k)
+    add_vtag(k, v)
     if self.sign == '=~':
         return "%s.test(tags['%s'])" % (v, k)
     elif self.sign == '!~':
@@ -263,7 +274,7 @@ def style_statement_as_js(self, subpart):
         if (self.value == ''):
             return "            s_%s[%s] = '';" % (subpart, k)
         else:
-            value_tags.add(self.value)
+            add_vtag(self.value)
             return "            s_%s[%s] = MapCSS.e_localize(tags, %s);" % (subpart, k, val)
     else:
         if self.key in ('icon-image', 'fill-image'):
@@ -284,7 +295,7 @@ def eval_function_as_js(self, subpart):
         if (args == '""'):
             return "''"
         else:
-            value_tags.add(args.strip("'\""))
+            add_vtag(args.strip("'\""))
             return "MapCSS.%s(tags, %s)" % (tag_function, args)
     elif self.function == 'prop':
         if (args == '""'):
@@ -416,6 +427,32 @@ ast.EvalFunction.as_js = eval_function_as_js
 ast.Supports.as_js = supports_as_js
 ast.SupportsEnd.as_js = supports_end_as_js
 
+def dump_ptags(filename, ptags, vtags):
+    taglist = list()
+
+    for t in ptags:
+        foo = dict()
+        foo['key'] = t;
+        taglist.append(foo)
+
+    for t in vtags.keys():
+        vals = vtags[t]
+        if not None in vals:
+            for v in vals:
+                foo = dict()
+                foo['key'] = t;
+                foo['value'] = v
+                taglist.append(foo)
+        else:
+            foo = dict()
+            foo['key'] = t;
+            taglist.append(foo)
+
+    jsonfile = open(filename, "w")
+
+    json.dump(taglist, jsonfile, indent=4, sort_keys=True)
+    jsonfile.close()
+
 if __name__ == "__main__":
     from optparse import OptionParser
     parser = OptionParser(usage="%prog [options]")
@@ -439,6 +476,10 @@ if __name__ == "__main__":
     parser.add_option("-s", "--output-sprite",
         dest="sprite",
         help="Filename of generated CSS sprite. If not specified, [stylename].png will be used")
+
+    parser.add_option("-t", "--output-taginfo",
+        dest="taginfo",
+        help="Dump information about used keys and values in taginfo format. If not specified, no output will be generated")
 
     (options, args) = parser.parse_args()
 
@@ -485,7 +526,7 @@ if __name__ == "__main__":
     (sprite_images, external_images) = create_css_sprite(images, options.icons, sprite)
 
     #We don't need to check presence if we already check value
-    presence_tags -= value_tags
+    presence_tags -= set(value_tags.keys())
     ptags = ""
     if presence_tags:
         ptags = "'%s'" % "', '".join(sorted(presence_tags))
@@ -515,3 +556,6 @@ if __name__ == "__main__":
     else:
         with open(output, "w") as fh:
             fh.write(js)
+
+    if options.taginfo:
+        dump_ptags(options.taginfo, presence_tags, value_tags)
