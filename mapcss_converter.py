@@ -200,7 +200,7 @@ def selector_as_js(self):
         return 'false'
 
     if self.criteria:
-        return "(%s == %s && %s)" % (subject_property, wrap_key(self.subject), criteria)
+        return "%s == %s && %s" % (subject_property, wrap_key(self.subject), criteria)
     else:
         return "%s == %s" % (subject_property, wrap_key(self.subject))
 
