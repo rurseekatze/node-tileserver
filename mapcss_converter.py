@@ -242,7 +242,7 @@ def condition_class_as_js(self):
     return "cssClasses.indexOf('%s') >= 0" % self.name;
 
 def class_statement_as_js(self):
-    return "        if (cssClasses.indexOf('%s') < 0) { cssClasses.push('%s'); }" % (self.name, self.name);
+    return "            if (cssClasses.indexOf('%s') < 0) { cssClasses.push('%s'); }" % (self.name, self.name);
 
 def action_as_js(self, subpart):
     if not tag_enable.value():
@@ -257,9 +257,11 @@ def action_as_js(self, subpart):
 
         return """{
 %s
-        }\n""" % ("\n".join(map(lambda x: x.as_js(subpart), self.statements)))
+        }\n""" % "\n".join(map(lambda x: x.as_js(subpart), self.statements))
     else:
-        return "{\n    %s\n    }" % "\n".join(map(lambda x: x.as_js(), self.statements))
+        return """{
+%s
+        }""" % "\n".join(map(lambda x: x.as_js(), self.statements))
 
 def style_statement_as_js(self, subpart):
     global tag_function
