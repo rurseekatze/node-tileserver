@@ -30,6 +30,7 @@ VectorTilerequest = function(self)
 	this.command = self.command;
 	this.queue = self.queue;
 	this.requestModified = self.requestModified;
+	this.params = self.params;
 };
 
 VectorTilerequest.prototype =
@@ -41,6 +42,16 @@ VectorTilerequest.prototype =
 		self.tile.debug('Vector tile requested.');
 		self.tile.readVectorData(function(err, data)
 		{
+			var jsonRequest;
+			{
+				var searchString = '.json';
+				var subjectString = self.params[4];
+				var position = subjectString.length;
+				position -= searchString.length;
+				var lastIndex = subjectString.indexOf(searchString, position);
+				jsonRequest = lastIndex !== -1 && lastIndex === position;
+			}
+
 			if (err || self.command == "dirty")
 			{
 				if (err)
@@ -67,7 +78,7 @@ VectorTilerequest.prototype =
 
 						self.tile.getModifyTime(function(err, mtime)
 						{
-							var header = self.getHeader();
+							var header = self.getHeader(jsonRequest);
 
 							if (!err)
 							{
@@ -77,7 +88,10 @@ VectorTilerequest.prototype =
 
 							self.tile.debug('Returning vector tile...');
 							self.response.writeHead(200, header);
-							self.response.end(self.tile.getDataString());
+							if (!jsonRequest)
+								self.response.end(self.tile.getDataString());
+							else
+								self.response.end(JSON.stringify(self.tile.data));
 							self.tile.debug('Finished request.');
 							return;
 						});
@@ -94,7 +108,7 @@ VectorTilerequest.prototype =
 
 					self.tile.getModifyTime(function(err, mtime)
 					{
-						var header = self.getHeader();
+						var header = self.getHeader(jsonRequest);
 
 						if (!err)
 							header['Last-Modified'] = mtime.toUTCString();
@@ -115,7 +129,10 @@ VectorTilerequest.prototype =
 						{
 							self.tile.debug('Returning vector tile...');
 							self.response.writeHead(200, header);
-							self.response.end(self.tile.getDataString());
+							if (!jsonRequest)
+								self.response.end(self.tile.getDataString());
+							else
+								self.response.end(JSON.stringify(self.tile.data));
 							self.tile.debug('Finished request.');
 							return;
 						}
@@ -134,12 +151,18 @@ VectorTilerequest.prototype =
 		return;
 	},
 
-	getHeader: function(msg)
+	getHeader: function(jsonRequest)
 	{
-		return {
-			'Content-Type': 'text/javascript;charset=UTF-8',
-			'Server': 'node-tileserver/0.3'
-		};
+		if (!jsonRequest)
+			return {
+				'Content-Type': 'text/javascript;charset=UTF-8',
+				'Server': 'node-tileserver/0.3'
+			};
+		else
+			return {
+				'Content-Type': 'application/vnd.geo+json;charset=UTF-8',
+				'Server': 'node-tileserver/0.3'
+			};
 	}
 };
 
