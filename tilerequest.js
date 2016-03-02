@@ -53,7 +53,7 @@ Tilerequest = function(request, response)
 		return;
 	}
 
-	this.tile = new Tile(this.params[2], this.params[3], this.params[4].replace(/\.png|\.js/g, ""), this.params[1]);
+	this.tile = new Tile(this.params[2], this.params[3], this.params[4].replace(/\.png|\.js|\.json/g, ""), this.params[1]);
 	this.queue = queue;
 	this.command = this.params[5];
 	// if no caching header was sent, use date before unix timestamp 0 to force a full request
