@@ -161,6 +161,7 @@ VectorTilerequest.prototype =
 		else
 			return {
 				'Content-Type': 'application/vnd.geo+json;charset=UTF-8',
+				'Access-Control-Allow-Origin': '*',
 				'Server': 'node-tileserver/0.3'
 			};
 	}
