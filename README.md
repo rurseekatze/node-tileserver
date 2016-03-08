@@ -21,8 +21,8 @@
 
 ## Authors
 
- * Alexander Matheisen ([rurseekatze](http://github.com/rurseekatze))
- * Rolf Eike Beer ([DerDakon](http://github.com/DerDakon))
+ * Alexander Matheisen [@rurseekatze](http://github.com/rurseekatze)
+ * Rolf Eike Beer [@DerDakon](http://github.com/DerDakon)
 
 ## Installation
 
