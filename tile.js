@@ -156,7 +156,7 @@ Tile.prototype =
 			}
 
 			self.debug('Created path. Saving vector tile at path: '+filepath+file);
-			fs.writeFile(filepath+file, JSON.stringify(self.data), {mode: 0777}, function(err)
+			fs.writeFile(filepath+file, JSON.stringify(self.data), {mode: 0666}, function(err)
 			{
 				if (err)
 				{
@@ -490,7 +490,7 @@ Tile.prototype =
 				}
 
 				self.debug('Saving bitmap tile at path: '+filepath+'/'+self.y+'.png');
-				var out = fs.createWriteStream(filepath+'/'+self.y+'.png', {mode: 0777});
+				var out = fs.createWriteStream(filepath+'/'+self.y+'.png', {mode: 0666});
 				var stream = image.createPNGStream();
 
 				// write PNG data stream
@@ -794,7 +794,7 @@ Tile.prototype =
 			else
 			{
 				self.trace('Saving bitmap data...');
-				var out = fs.createWriteStream(filepath+'/'+self.y+'.png', {mode: 0777});
+				var out = fs.createWriteStream(filepath+'/'+self.y+'.png', {mode: 0666});
 				var stream = image.createPNGStream();
 
 				// write PNG data stream
