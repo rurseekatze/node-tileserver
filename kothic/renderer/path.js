@@ -37,13 +37,6 @@ Kothic.path = (function () {
 		};
 	}
 
-	function moveTo(ctx, point, dashes) {
-		ctx.moveTo(point[0], point[1]);
-		if (dashes) {
-			setDashPattern(point, dashes);
-		}
-	}
-
 	function dashTo(ctx, point) {
 		var pt = dashPattern,
 			dx = point[0] - pt.x,
@@ -169,7 +162,8 @@ Kothic.path = (function () {
 					screenPoint = Kothic.geom.transformPoint(point, ws, hs);
 
 					if (j === 0) {
-						moveTo(ctx, screenPoint, dashes);
+						ctx.moveTo(screenPoint[0], screenPoint[1]);
+						setDashPattern(screenPoint, dashes);
 					} else if (dashes) {
 						dashTo(ctx, screenPoint);
 					} else {
@@ -188,9 +182,11 @@ Kothic.path = (function () {
 						point = points[j] || points[0];
 						screenPoint = Kothic.geom.transformPoint(point, ws, hs);
 
-						if (j === 0 || (!fill &&
-								checkSameBoundary(point, prevPoint, granularity))) {
-							moveTo(ctx, screenPoint, dashes);
+						if (j === 0) {
+							ctx.moveTo(screenPoint[0], screenPoint[1]);
+							setDashPattern(screenPoint, dashes);
+						} else if (!fill && checkSameBoundary(point, prevPoint, granularity)) {
+							ctx.moveTo(screenPoint[0], screenPoint[1]);
 						} else if (fill || !dashes) {
 							ctx.lineTo(screenPoint[0], screenPoint[1]);
 						} else {
