@@ -489,8 +489,10 @@ Tile.prototype =
 					return;
 				}
 
-				self.debug('Saving bitmap tile at path: '+filepath+'/'+self.y+'.png');
-				var out = fs.createWriteStream(filepath+'/'+self.y+'.png', {mode: 0666});
+				var fname = filepath + '/' + self.y + '.png';
+				self.debug('Saving bitmap tile at path: ' + fname);
+				fs.unlinkSync(fname)
+				var out = fs.createWriteStream(fname, {mode: 0666});
 				var stream = image.createPNGStream();
 
 				// write PNG data stream
@@ -773,12 +775,15 @@ Tile.prototype =
 				});
 			}
 
+			var fname = filepath + '/' + self.y + '.png';
+			fs.unlinkSync(fname);
+
 			// store empty tile if no image could be rendered
 			if (image == null)
 			{
 				self.debug('Bitmap tile empty.');
 
-				fs.link('emptytile.png', filepath + '/' + self.y + '.png', function(err)
+				fs.link('emptytile.png', fname, function(err)
 				{
 					if (!err)
 						self.debug('Empty bitmap tile was stored.');
@@ -794,7 +799,7 @@ Tile.prototype =
 			else
 			{
 				self.trace('Saving bitmap data...');
-				var out = fs.createWriteStream(filepath+'/'+self.y+'.png', {mode: 0666});
+				var out = fs.createWriteStream(fname, {mode: 0666});
 				var stream = image.createPNGStream();
 
 				// write PNG data stream
