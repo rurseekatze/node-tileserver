@@ -428,15 +428,13 @@ Tile.prototype =
 			client.query(self.getDatabaseQuery(bbox_p), function(err, results)
 			{
 				var content = new Object();
-				content.features = new Array();
 
 				self.trace('All database queries finished, generating JSON data object.');
 				content.features = self.getJSONFeatures(results);
 
 				// catch tiles without data
-				if (!content.features)
+				if (content.features.length === 0)
 				{
-					content.features = new Array();
 					self.debug('Vector tile contains no data.');
 				}
 
@@ -695,10 +693,11 @@ Tile.prototype =
 	// converts raw JSON features from database response to objects
 	getJSONFeatures: function(data)
 	{
-		if (typeof data == undefined || data == null)
-			return [];
-
 		var features = new Array();
+
+		if (typeof data == undefined || data == null)
+			return features;
+
 		for (var i=0; i<data.rows.length; i++)
 		{
 			// catch JSON parsing errors
