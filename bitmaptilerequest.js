@@ -141,10 +141,7 @@ BitmapTilerequest.prototype =
 
 										self.tile.getModifyTime(function(err, mtime)
 										{
-											var header = {
-												'Content-Type': 'image/png',
-												'Cache-Control': 'public, max-age=3600'
-											};
+											var header = self.getHeader();
 
 											if (!err)
 												header['Last-Modified'] = mtime.toUTCString();
@@ -206,8 +203,6 @@ BitmapTilerequest.prototype =
 
 										if (expired)
 											header['Cache-Control'] = 'max-age=0';
-										else
-											header['Cache-Control'] = 'public, max-age=3600';
 
 										self.tile.trace('Responding bitmap data...');
 										var stream = image.createPNGStream();
@@ -250,6 +245,7 @@ BitmapTilerequest.prototype =
 	{
 		return {
 			'Content-Type': 'image/png',
+			'Cache-Control': 'public, max-age=3600',
 			'Server': 'node-tileserver/0.3'
 		};
 	}
