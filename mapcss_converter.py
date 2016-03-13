@@ -248,20 +248,24 @@ def action_as_js(self, subpart):
     if not tag_enable.value():
         return "{}"
 
-    if len(list(filter(lambda x: x, map(lambda x: isinstance(x, ast.StyleStatement), self.statements)))) > 0:
-        if subpart == '*':
-            subpart = 'everything'
-        subpart = re.sub("-", "_", subpart)
-        if subpart != "default":
-            subparts.add(subpart)
+    lines = list()
+    # only add subpart to the list if it needs any special handling
+    firstSub = (subpart != "default")
+    for statement in self.statements:
+        if isinstance(statement, ast.StyleStatement):
+            if firstSub:
+                if subpart == '*':
+                    subpart = 'everything'
+                subpart = re.sub("-", "_", subpart)
+                subparts.add(subpart)
+                firstSub = False
+            lines.append(statement.as_js(subpart))
+        else:
+            lines.append(statement.as_js())
 
-        return """{
+    return """{
 %s
-        }\n""" % "\n".join(map(lambda x: x.as_js(subpart), self.statements))
-    else:
-        return """{
-%s
-        }""" % "\n".join(map(lambda x: x.as_js(), self.statements))
+        }\n""" % "\n".join(lines)
 
 def style_statement_as_js(self, subpart):
     global tag_function

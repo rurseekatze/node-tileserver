@@ -1,6 +1,7 @@
 way[highway]
 {
 	set .test;
+	font-weight: 'bold';
 }
 
 way.test
