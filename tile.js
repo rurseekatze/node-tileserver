@@ -778,28 +778,16 @@ Tile.prototype =
 			{
 				self.debug('Bitmap tile empty.');
 
-				fs.readFile('emptytile.png', function(err, data)
+				fs.link('emptytile.png', filepath + '/' + self.y + '.png', function(err)
 				{
-					if (err)
-					{
-						self.warn('Could not read empty bitmap tile.');
-						return process.nextTick(function()
-						{
-							callback(true);
-						});
-					}
+					if (!err)
+						self.debug('Empty bitmap tile was stored.');
+					else
+						self.debug('Could not link empty bitmap file.');
 
-					fs.writeFile(filepath+'/'+self.y+'.png', data, {mode: 0777}, function(err)
+					return process.nextTick(function()
 					{
-						if (!err)
-							self.debug('Empty bitmap tile was stored.');
-						else
-							self.debug('Could not save empty bitmap file.');
-
-						return process.nextTick(function()
-						{
-							callback(true);
-						});
+						callback(true);
 					});
 				});
 			}
