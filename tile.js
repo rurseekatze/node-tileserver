@@ -140,7 +140,7 @@ Tile.prototype =
 		}
 
 		var filepath = configuration.vtiledir+'/'+this.z+'/'+this.x+'/';
-		var file = this.y+'.json';
+		var file = filepath + this.y + '.json';
 
 		this.debug('Creating path '+filepath+'...');
 		var self = this;
@@ -155,19 +155,37 @@ Tile.prototype =
 				});
 			}
 
-			self.debug('Created path. Saving vector tile at path: '+filepath+file);
-			fs.writeFile(filepath+file, JSON.stringify(self.data), {mode: 0666}, function(err)
+			if (self.data.features.length === 0)
+			{
+				self.debug('Created path. Linking empty vector tile to: ' + file);
+				fs.link('emptytile.json', file, function(err)
+				{
+					if (!err)
+						self.debug('Empty vector tile was stored.');
+					else
+						self.debug('Could not link empty vector file.');
+
+					return process.nextTick(function()
+					{
+						callback(true);
+					});
+				});
+			}
+
+			self.debug('Created path. Saving vector tile at path: ' + file);
+			fs.unlinkSync(file);
+			fs.writeFile(file, JSON.stringify(self.data), {mode: 0666}, function(err)
 			{
 				if (err)
 				{
-					self.error('Cannot save vector tile at path: '+filepath+file);
+					self.error('Cannot save vector tile at path: ' + file);
 					return process.nextTick(function()
 					{
 						callback(err);
 					});
 				}
 
-				self.debug('Saved vector tile at path: '+filepath+file);
+				self.debug('Saved vector tile at path: ' + file);
 				return process.nextTick(function()
 				{
 					callback(false);
