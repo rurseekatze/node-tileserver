@@ -169,8 +169,16 @@ BitmapTilerequest.prototype =
 								if (err)
 									self.tile.warn('Vector tile could not be saved.');
 
-								self.tile.debug('Rendering bitmap tile with style '+self.tile.style);
-								self.tile.render(renderCallback);
+								if (self.data.features.length === 0)
+								{
+									self.tile.debug('Vector tile without features, serving empty PNG tile for style ' + self.tile.style);
+									renderCallback(false, null);
+								}
+								else
+								{
+									self.tile.debug('Rendering bitmap tile with style ' + self.tile.style);
+									self.tile.render(renderCallback);
+								}
 							});
 						});
 					}
