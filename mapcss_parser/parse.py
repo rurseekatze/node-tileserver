@@ -48,10 +48,6 @@ def p_mapcss_import(p):
 	p[0] = ast.MapCSS()
 	p[0].append_import(p[1])
 
-def p_mapcss_media(p):
-	'css : media'
-	p[0] = ast.MapCSS()
-
 def p_mapcss_supports(p):
 	'css : supports'
 	p[0] = ast.MapCSS()
@@ -66,10 +62,6 @@ def p_mapcss_multiple_imports(p):
 	'css : css import'
 	p[0] = p[1]
 	p[0].append_import(p[2])
-
-def p_mapcss_multiple_medias(p):
-	'css : css media'
-	p[0] = p[1]
 
 def p_mapcss_multiple_supports(p):
 	'css : css supports'
@@ -242,10 +234,6 @@ def p_eval_function_argument_multiple(p):
 def p_eval_function(p):
 	'eval_function : FUNCTION LPAREN function_argument RPAREN'
 	p[0] = ast.EvalFunction(p[1], p[3])
-
-# Media
-def p_media(p):
-	'media : MEDIA MLCBRACE'
 
 def p_supports_condition_neg(p):
 	'sup_condition : sup_negation'
