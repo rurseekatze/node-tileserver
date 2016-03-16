@@ -48,6 +48,7 @@ except ImportError:
 
 from mapcss_parser import MapCSSParser
 from mapcss_parser import ast
+from mapcss_parser import error
 
 from collections import deque
 
@@ -500,7 +501,11 @@ if __name__ == "__main__":
 
     content = open(options.input).read()
     parser = MapCSSParser(debug=False)
-    mapcss = parser.parse(content)
+    try:
+        mapcss = parser.parse(content)
+    except error.MapCSSError as error:
+        print(error)
+        exit(1)
 
     mapcss_js = mapcss.as_js()
     subparts_var = ", ".join(map(lambda subpart: "s_%s = {}" % subpart, subparts))

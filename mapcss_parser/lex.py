@@ -30,6 +30,7 @@
 
 import re
 import ply.lex as lex
+from mapcss_parser import error
 
 # Compute column.
 #	 input is the input text string
@@ -314,8 +315,7 @@ def t_supportsselparen_SUP_STATEMENT(t):
 
 # Error handling rule
 def t_ANY_error(t):
-	print("Illegal character '%s' at line %i position %i" % (t.value[0], t.lexer.lineno, find_column(t.lexer.lexdata, t)))
-	exit(1)
+	raise error.MapCSSError("Illegal character '%s' at line %i position %i" % (t.value[0], t.lexer.lineno, find_column(t.lexer.lexdata, t)))
 
 # Define a rule so we can track line numbers
 def t_ANY_newline(t):
