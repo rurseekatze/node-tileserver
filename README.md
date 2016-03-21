@@ -281,7 +281,7 @@ __Note:__ For some parameters it is also necessary to change the modify the opti
 
  or
 
-    http://tiles.YOURDOMAIN.org/vector/z/x/y.png/dirty
+    http://tiles.YOURDOMAIN.org/vector/z/x/y.json/dirty
 
 ## Update database and tiles
 
