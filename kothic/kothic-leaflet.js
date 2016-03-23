@@ -98,9 +98,7 @@ L.TileLayer.Kothic = L.TileLayer.Canvas.extend({
 	},
 
 	enableStyle: function(name) {
-		// start modified by rurseekatze
 		if (this.options.styles.indexOf(name) == -1) {
-		// end modified by rurseekatze
 			this.options.styles.push(name);
 		}
 	},
@@ -112,7 +110,6 @@ L.TileLayer.Kothic = L.TileLayer.Canvas.extend({
 		}
 	},
 
-	// start modified by rurseekatze
 	redraw: function() {
 		MapCSS.invalidateCache();
 
@@ -127,7 +124,6 @@ L.TileLayer.Kothic = L.TileLayer.Canvas.extend({
 			this._redrawTile(this._tiles[i]);
 		}
 	},
-	// end modified by rurseekatze
 
 	_invertYAxe: function(data) {
 		var type, coordinates, tileSize = data.granularity, i, j, k, l, feature;
