@@ -1,1 +1,1 @@
-\(+type == 'way'\)? && \(?tags\['maxspeed'\] == 80\)+ {.*s_default\['z-index'\] = 1000[^}]*}.*presence_tags = \[[ \t]*\].*value_tags = \['maxspeed'\]
+\(+isWay\)? && \(?tags\['maxspeed'\] == 80\)+ {.*s_default\['z-index'\] = 1000[^}]*}.*presence_tags = \[[ \t]*\].*value_tags = \['maxspeed'\]

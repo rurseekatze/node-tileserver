@@ -1,1 +1,1 @@
-\(+type == 'way'\)+ {.*s_default\['text'\] = MapCSS.e_concat\(" ", MapCSS\.e_localize\(tags, "bar"\), MapCSS\.e_localize\(tags, "foo"\)\).*}.*presence_tags = \[\].*value_tags = \['bar', 'foo'\]
+\(+isWay\)+ {.*s_default\['text'\] = MapCSS.e_concat\(" ", MapCSS\.e_localize\(tags, "bar"\), MapCSS\.e_localize\(tags, "foo"\)\).*}.*presence_tags = \[\].*value_tags = \['bar', 'foo'\]

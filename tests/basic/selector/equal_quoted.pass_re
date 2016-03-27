@@ -1,1 +1,1 @@
-\(+type == 'way'\)? && \(?tags\['bridge'\] === 'yes'\)+ {.*s_default\['z-index'\] = 1000[^}]*}.*presence_tags = \[[ \t]*\].*value_tags = \['bridge'\]
+\(+isWay\)? && \(?tags\['bridge'\] === 'yes'\)+ {.*s_default\['z-index'\] = 1000[^}]*}.*presence_tags = \[[ \t]*\].*value_tags = \['bridge'\]

@@ -1,1 +1,1 @@
-\(+type == 'way'\)+ {.*s_default\['z-index'\] = MapCSS.e_tag\(tags, "maxspeed"\) \* 2.*}.*\(+type == 'node'\)+ {.*s_default\['z-index'\] = MapCSS.e_tag\(tags, "maxspeed"\) \* 3.*}.*presence_tags = \[[ \t]*\].*value_tags = \['maxspeed'\]
+\(+isWay\)+ {.*s_default\['z-index'\] = MapCSS.e_tag\(tags, "maxspeed"\) \* 2.*}.*\(+isNode\)+ {.*s_default\['z-index'\] = MapCSS.e_tag\(tags, "maxspeed"\) \* 3.*}.*presence_tags = \[[ \t]*\].*value_tags = \['maxspeed'\]
