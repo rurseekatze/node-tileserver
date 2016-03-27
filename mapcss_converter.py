@@ -187,8 +187,6 @@ def selector_as_js(self):
     if not tag_enable.value():
         return ""
 
-    criteria = " && ".join(map(lambda x: x.as_js(), self.criteria))
-
     if self.subject == 'line':
         self.subject = 'way'
     if self.subject in ['node', 'way', 'relation', 'coastline']:
@@ -201,6 +199,7 @@ def selector_as_js(self):
         return 'false'
 
     if self.criteria:
+        criteria = " && ".join(map(lambda x: x.as_js(), self.criteria))
         return "%s == %s && %s" % (subject_property, wrap_key(self.subject), criteria)
     else:
         return "%s == %s" % (subject_property, wrap_key(self.subject))
