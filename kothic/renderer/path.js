@@ -187,6 +187,8 @@ Kothic.path = (function () {
 							setDashPattern(screenPoint, dashes);
 						} else if (!fill && checkSameBoundary(point, prevPoint, granularity)) {
 							ctx.moveTo(screenPoint[0], screenPoint[1]);
+							dashPattern.x = screenPoint[0];
+							dashPattern.y = screenPoint[1];
 						} else if (fill || !dashes) {
 							ctx.lineTo(screenPoint[0], screenPoint[1]);
 						} else {
