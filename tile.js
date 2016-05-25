@@ -577,8 +577,7 @@ Tile.prototype =
 				Null AS reprpoint\
 				FROM " + configuration.prefix + "_point\
 				WHERE " +
-				configuration.geomcolumn + " && ST_SetSRID('BOX3D(" + (bbox[0] - tolerance) + " " + (bbox[1] - tolerance) + "," + (bbox[2] + tolerance) + " " + (bbox[3] + tolerance) + ")'::box3d, 900913) " + cond +
-				" LIMIT 10000";
+				configuration.geomcolumn + " && ST_SetSRID('BOX3D(" + (bbox[0] - tolerance) + " " + (bbox[1] - tolerance) + "," + (bbox[2] + tolerance) + " " + (bbox[3] + tolerance) + ")'::box3d, 900913) " + cond;
 	},
 
 	// equivalent of tanh in PHP
