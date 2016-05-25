@@ -153,7 +153,7 @@ class ClassStatement:
 		self.name = name[1:]
 
 	def __str__(self):
-		return "	set %s;" % (self.name)
+		return "	set .%s;" % (self.name)
 
 class ExitStatement:
 	def __str__(self):
