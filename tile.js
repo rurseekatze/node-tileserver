@@ -531,53 +531,54 @@ Tile.prototype =
 		var cond = configuration.filterconditions[zoom] || "";
 		var buffer = this.pixelSizeAtZoom(configuration.pxtolerance);
 		var tolerance = this.pixelSizeAtZoom(configuration.tileBoundTolerance);
+		var st_bbox = "ST_SetSRID('BOX3D(" + bbox[0] + " " + bbox[1] + "," + bbox[2] + " " + bbox[3] + ")'::box3d, 900913)";
+		var xy_wh = "" + (-bbox[0]) + ", " + (-bbox[1]) + ", " + (configuration.intscalefactor / (bbox[2] - bbox[0])) + ", " + (configuration.intscalefactor / (bbox[3] - bbox[1]));
 
-			return "\
-						SELECT\
-							ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_Intersection("+configuration.geomcolumn+", ST_SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913))), "+(-bbox[0])+", "+(-bbox[1])+", "+configuration.intscalefactor/(bbox[2]-bbox[0])+", "+configuration.intscalefactor/(bbox[3]-bbox[1])+"), 0) AS "+configuration.geomcolumn+",\
-							hstore2json(CAST(hstore(tags) AS hstore)) AS tags,\
-							ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_PointOnSurface("+configuration.geomcolumn+")), "+(-bbox[0])+", "+(-bbox[1])+", "+configuration.intscalefactor/(bbox[2]-bbox[0])+", "+configuration.intscalefactor/(bbox[3]-bbox[1])+"), 0) AS reprpoint\
+			return "SELECT\
+					ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_Intersection(" + configuration.geomcolumn + ", " + st_bbox + ")), " + xy_wh + "), 0) AS " + configuration.geomcolumn + ", \
+					hstore2json(CAST(hstore(tags) AS hstore)) AS tags,\
+					ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_PointOnSurface(" + configuration.geomcolumn + ")), " + xy_wh + "), 0) AS reprpoint\
+				FROM\
+					(\
+						SELECT (ST_Dump(ST_Multi(ST_SimplifyPreserveTopology(ST_Buffer(" + configuration.geomcolumn + " ,-" + buffer + "), " + buffer + ")))).geom AS " + configuration.geomcolumn + ", tags\
 						FROM\
 							(\
-								SELECT (ST_Dump(ST_Multi(ST_SimplifyPreserveTopology(ST_Buffer("+configuration.geomcolumn+" ,-"+buffer+"), "+buffer+")))).geom AS "+configuration.geomcolumn+", tags\
+								SELECT ST_Union(" + configuration.geomcolumn + ") AS " + configuration.geomcolumn + ", tags\
 								FROM\
 									(\
-										SELECT ST_Union("+configuration.geomcolumn+") AS "+configuration.geomcolumn+", tags\
-										FROM\
-											(\
-												SELECT ST_Buffer("+configuration.geomcolumn+", "+buffer+") AS "+configuration.geomcolumn+", CAST(tags AS text) AS tags\
-												FROM "+configuration.prefix+"_polygon\
-												WHERE "+configuration.geomcolumn+" && ST_SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) AND way_area > "+(Math.pow(buffer, 2)/configuration.pxtolerance)+" "+cond+"\
-											) p\
-										GROUP BY CAST(tags AS text)\
-									) p\
-								WHERE ST_Area("+configuration.geomcolumn+") > "+Math.pow(buffer, 2)+"\
-								ORDER BY ST_Area("+configuration.geomcolumn+")\
+										SELECT ST_Buffer(" + configuration.geomcolumn + ", " + buffer + ") AS " + configuration.geomcolumn + ", CAST(tags AS text) AS tags\
+										FROM " + configuration.prefix + "_polygon\
+										WHERE " + configuration.geomcolumn + " && " + st_bbox + " AND way_area > " + (Math.pow(buffer, 2) / configuration.pxtolerance) + " " + cond +
+									") p\
+								GROUP BY CAST(tags AS text)\
 							) p\
-						UNION\
-						SELECT\
-							ST_AsGeoJSON(ST_TransScale(ST_Intersection("+configuration.geomcolumn+", ST_SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913)), "+(-bbox[0])+", "+(-bbox[1])+", "+(configuration.intscalefactor/(bbox[2]-bbox[0]))+", "+(configuration.intscalefactor/(bbox[3]-bbox[1]))+"), 0) AS "+configuration.geomcolumn+",\
-							hstore2json(CAST(hstore(tags) AS hstore)) as tags,\
-							Null AS reprpoint\
+						WHERE ST_Area(" + configuration.geomcolumn + ") > " + Math.pow(buffer, 2) +
+						" ORDER BY ST_Area("+configuration.geomcolumn+")\
+					) p\
+				UNION\
+				SELECT\
+					ST_AsGeoJSON(ST_TransScale(ST_Intersection(" + configuration.geomcolumn+", " + st_bbox + "), " + xy_wh + "), 0) AS " + configuration.geomcolumn + ",\
+					hstore2json(CAST(hstore(tags) AS hstore)) as tags,\
+					Null AS reprpoint\
+				FROM\
+					(\
+						SELECT (ST_Dump(ST_Multi(ST_SimplifyPreserveTopology(ST_LineMerge(" + configuration.geomcolumn + "), " + this.pixelSizeAtZoom(configuration.pxtolerance) + ")))).geom AS " + configuration.geomcolumn + ", tags\
 						FROM\
 							(\
-								SELECT (ST_Dump(ST_Multi(ST_SimplifyPreserveTopology(ST_LineMerge("+configuration.geomcolumn+"), "+this.pixelSizeAtZoom(configuration.pxtolerance)+")))).geom AS "+configuration.geomcolumn+", tags\
-								FROM\
-									(\
-										SELECT ST_Union("+configuration.geomcolumn+") AS "+configuration.geomcolumn+", CAST(tags AS text)\
-										FROM "+configuration.prefix+"_line\
-										WHERE "+configuration.geomcolumn+" && ST_SetSRID('BOX3D("+bbox[0]+" "+bbox[1]+","+bbox[2]+" "+bbox[3]+")'::box3d, 900913) "+cond+"\
-										GROUP BY CAST(tags AS text)\
-									) p\
+								SELECT ST_Union(" + configuration.geomcolumn + ") AS " + configuration.geomcolumn+", CAST(tags AS text)\
+								FROM " + configuration.prefix + "_line\
+								WHERE " + configuration.geomcolumn + " && " + st_bbox + " " + cond +
+								" GROUP BY CAST(tags AS text)\
 							) p\
-						UNION\
-						SELECT ST_AsGeoJSON(ST_TransScale("+configuration.geomcolumn+", "+(-bbox[0])+", "+(-bbox[1])+", "+(configuration.intscalefactor/(bbox[2]-bbox[0]))+", "+(configuration.intscalefactor/(bbox[3]-bbox[1]))+"), 0) AS "+configuration.geomcolumn+",\
-						hstore2json(tags) AS tags,\
-						Null AS reprpoint\
-						FROM "+configuration.prefix+"_point\
-						WHERE\
-						"+configuration.geomcolumn+" && ST_SetSRID('BOX3D("+(bbox[0]-tolerance)+" "+(bbox[1]-tolerance)+","+(bbox[2]+tolerance)+" "+(bbox[3]+tolerance)+")'::box3d, 900913) "+cond+"\
-						LIMIT 10000";
+					) p\
+				UNION\
+				SELECT ST_AsGeoJSON(ST_TransScale(" + configuration.geomcolumn + ", " + xy_wh + "), 0) AS " + configuration.geomcolumn + ",\
+				hstore2json(tags) AS tags,\
+				Null AS reprpoint\
+				FROM " + configuration.prefix + "_point\
+				WHERE " +
+				configuration.geomcolumn + " && ST_SetSRID('BOX3D(" + (bbox[0] - tolerance) + " " + (bbox[1] - tolerance) + "," + (bbox[2] + tolerance) + " " + (bbox[3] + tolerance) + ")'::box3d, 900913) " + cond +
+				" LIMIT 10000";
 	},
 
 	// equivalent of tanh in PHP
