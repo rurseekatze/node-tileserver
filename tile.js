@@ -140,7 +140,7 @@ Tile.prototype =
 		}
 
 		var filepath = configuration.vtiledir+'/'+this.z+'/'+this.x+'/';
-		var file = this.y+'.json';
+		var file = filepath + this.y + '.json';
 
 		this.debug('Creating path '+filepath+'...');
 		var self = this;
@@ -155,19 +155,37 @@ Tile.prototype =
 				});
 			}
 
-			self.debug('Created path. Saving vector tile at path: '+filepath+file);
-			fs.writeFile(filepath+file, JSON.stringify(self.data), {mode: 0777}, function(err)
+			if (self.data.features.length === 0)
+			{
+				self.debug('Created path. Linking empty vector tile to: ' + file);
+				fs.link('emptytile.json', file, function(err)
+				{
+					if (!err)
+						self.debug('Empty vector tile was stored.');
+					else
+						self.debug('Could not link empty vector file.');
+
+					return process.nextTick(function()
+					{
+						callback(true);
+					});
+				});
+			}
+
+			self.debug('Created path. Saving vector tile at path: ' + file);
+			fs.unlinkSync(file);
+			fs.writeFile(file, JSON.stringify(self.data), {mode: 0666}, function(err)
 			{
 				if (err)
 				{
-					self.error('Cannot save vector tile at path: '+filepath+file);
+					self.error('Cannot save vector tile at path: ' + file);
 					return process.nextTick(function()
 					{
 						callback(err);
 					});
 				}
 
-				self.debug('Saved vector tile at path: '+filepath+file);
+				self.debug('Saved vector tile at path: ' + file);
 				return process.nextTick(function()
 				{
 					callback(false);
@@ -428,15 +446,13 @@ Tile.prototype =
 			client.query(self.getDatabaseQuery(bbox_p), function(err, results)
 			{
 				var content = new Object();
-				content.features = new Array();
 
 				self.trace('All database queries finished, generating JSON data object.');
 				content.features = self.getJSONFeatures(results);
 
 				// catch tiles without data
-				if (!content.features)
+				if (content.features.length === 0)
 				{
-					content.features = new Array();
 					self.debug('Vector tile contains no data.');
 				}
 
@@ -491,8 +507,10 @@ Tile.prototype =
 					return;
 				}
 
-				self.debug('Saving bitmap tile at path: '+filepath+'/'+self.y+'.png');
-				var out = fs.createWriteStream(filepath+'/'+self.y+'.png', {mode: 0777});
+				var fname = filepath + '/' + self.y + '.png';
+				self.debug('Saving bitmap tile at path: ' + fname);
+				fs.unlinkSync(fname)
+				var out = fs.createWriteStream(fname, {mode: 0666});
 				var stream = image.createPNGStream();
 
 				// write PNG data stream
@@ -695,10 +713,11 @@ Tile.prototype =
 	// converts raw JSON features from database response to objects
 	getJSONFeatures: function(data)
 	{
-		if (typeof data == undefined || data == null)
-			return [];
-
 		var features = new Array();
+
+		if (typeof data == undefined || data == null)
+			return features;
+
 		for (var i=0; i<data.rows.length; i++)
 		{
 			// catch JSON parsing errors
@@ -774,40 +793,31 @@ Tile.prototype =
 				});
 			}
 
+			var fname = filepath + '/' + self.y + '.png';
+			fs.unlinkSync(fname);
+
 			// store empty tile if no image could be rendered
 			if (image == null)
 			{
 				self.debug('Bitmap tile empty.');
 
-				fs.readFile('emptytile.png', function(err, data)
+				fs.link('emptytile.png', fname, function(err)
 				{
-					if (err)
-					{
-						self.warn('Could not read empty bitmap tile.');
-						return process.nextTick(function()
-						{
-							callback(true);
-						});
-					}
+					if (!err)
+						self.debug('Empty bitmap tile was stored.');
+					else
+						self.debug('Could not link empty bitmap file.');
 
-					fs.writeFile(filepath+'/'+self.y+'.png', data, {mode: 0777}, function(err)
+					return process.nextTick(function()
 					{
-						if (!err)
-							self.debug('Empty bitmap tile was stored.');
-						else
-							self.debug('Could not save empty bitmap file.');
-
-						return process.nextTick(function()
-						{
-							callback(true);
-						});
+						callback(true);
 					});
 				});
 			}
 			else
 			{
 				self.trace('Saving bitmap data...');
-				var out = fs.createWriteStream(filepath+'/'+self.y+'.png', {mode: 0777});
+				var out = fs.createWriteStream(fname, {mode: 0666});
 				var stream = image.createPNGStream();
 
 				// write PNG data stream
