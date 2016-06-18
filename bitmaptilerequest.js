@@ -97,7 +97,7 @@ BitmapTilerequest.prototype =
 				{
 					if (err)
 					{
-						self.abortRequest('Cannot read cached bitmap tile. Returning status 500.');
+						self.abortRequest('Cannot read cached bitmap tile. Returning status 500.' + err);
 						return;
 					}
 
@@ -161,7 +161,7 @@ BitmapTilerequest.prototype =
 							self.tile.saveVectorData(function(err)
 							{
 								if (err)
-									self.tile.warn('Vector tile could not be saved.');
+									self.tile.warn('Vector tile could not be saved.' + err);
 
 								if (data.features.length === 0)
 								{
@@ -179,7 +179,7 @@ BitmapTilerequest.prototype =
 							});
 						}, function(err)
 						{
-							self.abortRequest('Vectortile could not be created. Aborting.');
+							self.abortRequest('Vectortile could not be created. Aborting.' + err);
 						});
 					}
 					else
