@@ -128,17 +128,14 @@ BitmapTilerequest.prototype =
 								self.response.writeHead(304, header);
 								self.response.end();
 								self.tile.debug('Bitmap tile cached on client.');
-								self.tile.debug('Finished request.');
-								return;
 							}
 							else
 							{
 								self.response.writeHead(200, header);
 								self.response.end(data);
 								self.tile.debug('Bitmap tile returned.');
-								self.tile.debug('Finished request.');
-								return;
 							}
+							self.tile.debug('Finished request.');
 						});
 					});
 				});

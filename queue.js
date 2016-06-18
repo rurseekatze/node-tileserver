@@ -96,7 +96,7 @@ Tilequeue.prototype =
 			return;
 		}
 
-		logger.debug('Getting vector data...');
+		tile.debug('Getting vector data...');
 		var self = this;
 		tile.getVectorData(function(data)
 		{
@@ -106,16 +106,14 @@ Tilequeue.prototype =
 				if (err)
 				{
 					tile.warn('Vector tile could not be saved. Returning.');
-					tile.destroy();
-					tile = null;
-					self.eventEmitter.emit('tileFinished');
-					return;
 				}
-
-				tile.debug('Vector tile saved, rendering bitmap tile...');
-				tile.rerenderBitmap();
-				// remove tile from queue and render next tile if every style was rendered
-				tile.debug('Finished. Getting the next tile from the queue...');
+				else
+				{
+					tile.debug('Vector tile saved, rendering bitmap tile...');
+					tile.rerenderBitmap();
+					// remove tile from queue and render next tile if every style was rendered
+					tile.debug('Finished. Getting the next tile from the queue...');
+				}
 				tile.destroy();
 				tile = null;
 				self.eventEmitter.emit('tileFinished');
