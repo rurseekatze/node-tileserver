@@ -1,0 +1,3 @@
+node[name=~"foo"] {
+	z-index: 1;
+}
