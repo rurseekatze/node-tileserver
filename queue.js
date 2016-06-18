@@ -98,17 +98,8 @@ Tilequeue.prototype =
 
 		logger.debug('Getting vector data...');
 		var self = this;
-		tile.getVectorData(function(err, data)
+		tile.getVectorData(function(data)
 		{
-			if (err)
-			{
-				tile.info('Vector tile could not be created. Aborting.');
-				tile.destroy();
-				tile = null;
-				self.eventEmitter.emit('tileFinished');
-				return;
-			}
-
 			tile.debug('Vector data loaded, saving vector tile...');
 			tile.saveVectorData(function(err)
 			{
@@ -129,6 +120,12 @@ Tilequeue.prototype =
 				tile = null;
 				self.eventEmitter.emit('tileFinished');
 			});
+		}, function(err)
+		{
+			tile.info('Vector tile could not be created. Aborting.');
+			tile.destroy();
+			tile = null;
+			self.eventEmitter.emit('tileFinished');
 		});
 	}
 };
