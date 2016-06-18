@@ -105,7 +105,7 @@ Tilequeue.prototype =
 			{
 				if (err)
 				{
-					tile.warn('Vector tile could not be saved. Returning.');
+					tile.warn('Vector tile could not be saved. Returning.' + err);
 				}
 				else
 				{
@@ -120,7 +120,7 @@ Tilequeue.prototype =
 			});
 		}, function(err)
 		{
-			tile.info('Vector tile could not be created. Aborting.');
+			tile.info('Vector tile could not be created. Aborting.' + err);
 			tile.destroy();
 			tile = null;
 			self.eventEmitter.emit('tileFinished');

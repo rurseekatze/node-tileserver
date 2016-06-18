@@ -148,7 +148,7 @@ Tile.prototype =
 		{
 			if (err)
 			{
-				self.error('Cannot create path: '+filepath+'. Returning.');
+				self.error('Cannot create path: ' + filepath + err);
 				return process.nextTick(function()
 				{
 					callback(err);
@@ -163,7 +163,7 @@ Tile.prototype =
 					if (!err)
 						self.debug('Empty vector tile was stored.');
 					else
-						self.debug('Could not link empty vector file.');
+						self.debug('Could not link empty vector file.' + err);
 
 					return process.nextTick(function()
 					{
@@ -181,7 +181,7 @@ Tile.prototype =
 				fs.writeFile(file, JSON.stringify(self.data), {mode: 0666}, function(err)
 				{
 					if (err)
-						self.error('Cannot save vector tile at path: ' + file);
+						self.error('Cannot save vector tile at path: ' + file + err);
 					else
 						self.debug('Saved vector tile at path: ' + file);
 

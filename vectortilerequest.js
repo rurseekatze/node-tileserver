@@ -67,7 +67,7 @@ VectorTilerequest.prototype =
 					{
 						if (err)
 						{
-							self.request.abort('Vector tile could not be saved.')
+							self.request.abort('Vector tile could not be saved.' + err);
 							return;
 						}
 
@@ -93,7 +93,7 @@ VectorTilerequest.prototype =
 					});
 				}, function(err)
 				{
-					self.request.abort('Vectortile could not be created. Aborting.')
+					self.request.abort('Vectortile could not be created. Aborting.' + err);
 				});
 			}
 			else
