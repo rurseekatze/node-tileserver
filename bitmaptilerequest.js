@@ -37,11 +37,14 @@ BitmapTilerequest.prototype =
 	// save the rendered image to disk and send it to the client
 	renderCallback: function(err, image)
 	{
+		var self = this;
+
 		if (err)
 			self.tile.debug('Vectortile was empty.');
+
 		self.tile.saveBitmapData(image, function(err)
 		{
-			if (err)
+			if (err || image == null)
 			{
 				self.response.writeHead(500, {'Content-Type': 'text/plain'});
 				self.response.end();
@@ -169,15 +172,18 @@ BitmapTilerequest.prototype =
 								if (err)
 									self.tile.warn('Vector tile could not be saved.');
 
-								if (self.data.features.length === 0)
+								if (data.features.length === 0)
 								{
 									self.tile.debug('Vector tile without features, serving empty PNG tile for style ' + self.tile.style);
-									renderCallback(false, null);
+									self.renderCallback(true, null);
 								}
 								else
 								{
 									self.tile.debug('Rendering bitmap tile with style ' + self.tile.style);
-									self.tile.render(renderCallback);
+									self.tile.render(function()
+									{
+										self.renderCallback
+									});
 								}
 							});
 						});
@@ -191,51 +197,9 @@ BitmapTilerequest.prototype =
 								self.queue.add(self.tile);
 
 							self.tile.debug('Rendering bitmap tile with style '+self.tile.style);
-							self.tile.render(function(err, image)
+							self.tile.render(function()
 							{
-								if (err)
-									self.tile.debug('Vectortile was empty.');
-								self.tile.saveBitmapData(image, function(err)
-								{
-									if (err)
-									{
-										self.response.writeHead(500, {'Content-Type': 'text/plain'});
-										self.response.end();
-										self.tile.debug('Empty bitmap tile was responded to the request.');
-										self.tile.debug('Finished request.');
-										return;
-									}
-
-									self.tile.getModifyTime(function(err, mtime)
-									{
-										var header = self.getHeader();
-
-										if (!err)
-											header['Last-Modified'] = mtime.toUTCString();
-
-										if (expired)
-											header['Cache-Control'] = 'max-age=0';
-
-										self.tile.trace('Responding bitmap data...');
-										var stream = image.createPNGStream();
-										self.response.writeHead(200, header);
-
-										// write PNG data stream
-										stream.on('data', function(data)
-										{
-											self.response.write(data);
-										});
-
-										// PNG data stream ended
-										stream.on('end', function()
-										{
-											self.response.end();
-											self.tile.debug('Bitmap tile was responded to the request.');
-											self.tile.debug('Finished request.');
-											return;
-										});
-									});
-								});
+								self.renderCallback
 							});
 						});
 					}

@@ -167,7 +167,7 @@ Tile.prototype =
 
 					return process.nextTick(function()
 					{
-						callback(true);
+						callback(err);
 					});
 				});
 			}

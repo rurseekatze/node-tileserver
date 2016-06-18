@@ -102,7 +102,7 @@ Tilequeue.prototype =
 		{
 			if (err)
 			{
-				tile.info('Vectortile could not be created. Aborting.');
+				tile.info('Vector tile could not be created. Aborting.');
 				tile.destroy();
 				tile = null;
 				self.eventEmitter.emit('tileFinished');
