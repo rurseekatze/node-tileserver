@@ -431,7 +431,7 @@ Tile.prototype =
 	},
 
 	// requests objects for a certain tile and returns the data as an object
-	getVectorData: function(callback)
+	getVectorData: function(callback, errcallback)
 	{
 		var bbox = this.getBbox();
 		var bbox_p = this.from4326To900913(bbox);
@@ -451,7 +451,7 @@ Tile.prototype =
 				self.error('Connection to database '+connection+' failed. Returning.');
 				return process.nextTick(function()
 				{
-					callback(err, null);
+					errcallback(err);
 				});
 			}
 			else
@@ -480,7 +480,7 @@ Tile.prototype =
 				self.debug('Generated vector data.');
 				return process.nextTick(function()
 				{
-					callback(false, content);
+					callback(content);
 				});
 			});
 		});

@@ -158,14 +158,8 @@ BitmapTilerequest.prototype =
 						if (self.command == "dirty")
 							self.tile.debug('Vectortile dirty, needs to be refreshed...');
 
-						self.tile.getVectorData(function(err, data)
+						self.tile.getVectorData(function(data)
 						{
-							if (err)
-							{
-								self.abortRequest('Vectortile could not be created. Aborting.');
-								return;
-							}
-
 							self.tile.debug('Vector tile created successfully, saving vector tile...');
 							self.tile.saveVectorData(function(err)
 							{
@@ -186,6 +180,9 @@ BitmapTilerequest.prototype =
 									});
 								}
 							});
+						}, function(err)
+						{
+							self.abortRequest('Vectortile could not be created. Aborting.');
 						});
 					}
 					else

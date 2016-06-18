@@ -106,15 +106,8 @@ eventEmitter.on('tileFinished', function()
 		}
 
 		var tile = new Tile(z, x, y);
-		tile.getVectorData(function(err, data)
+		tile.getVectorData(function(data)
 		{
-			tile.debug('Creating tile...');
-			if (err)
-			{
-				eventEmitter.emit('tileFinished');
-				return;
-			}
-
 			tile.saveVectorData(function(err)
 			{
 				if (err)
@@ -126,6 +119,10 @@ eventEmitter.on('tileFinished', function()
 				tile.rerenderBitmap();
 				eventEmitter.emit('tileFinished');
 			});
+		}, function(err)
+		{
+			tile.debug('Creating tile...');
+			eventEmitter.emit('tileFinished');
 		});
 	}
 	else
