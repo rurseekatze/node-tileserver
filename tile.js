@@ -170,6 +170,7 @@ Tile.prototype =
 						callback(err);
 					});
 				});
+				return;
 			}
 
 			self.debug('Created path. Saving vector tile at path: ' + file);
