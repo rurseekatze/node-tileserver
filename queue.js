@@ -96,7 +96,7 @@ Tilequeue.prototype =
 			return;
 		}
 
-		logger.debug('Getting vector data...');
+		tile.debug('Getting vector data...');
 		var self = this;
 		tile.getVectorData(function(data)
 		{
