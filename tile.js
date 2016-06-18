@@ -158,17 +158,30 @@ Tile.prototype =
 			if (self.data.features.length === 0)
 			{
 				self.debug('Created path. Linking empty vector tile to: ' + file);
-				fs.link('emptytile.json', file, function(err)
+				fs.exists(file, function(exists)
 				{
-					if (!err)
-						self.debug('Empty vector tile was stored.');
-					else
-						self.debug('Could not link empty vector file.' + err);
-
-					return process.nextTick(function()
+					if (!exists)
 					{
-						callback(err);
-					});
+						fs.link('emptytile.json', file, function(err)
+						{
+							if (!err)
+								self.debug('Empty vector tile was stored.');
+							else
+								self.debug('Could not link empty vector file.' + err);
+
+							return process.nextTick(function()
+							{
+								callback(err);
+							});
+						});
+					}
+					else
+					{
+						return process.nextTick(function()
+						{
+							callback(err);
+						});
+					}
 				});
 				return;
 			}
@@ -277,7 +290,8 @@ Tile.prototype =
 		{
 			if (exists)
 			{
-				fs.unlink(filepath, function(err) {
+				fs.unlink(filepath, function(err)
+				{
 					this.removeBitmap(this.z, this.x, this.y, selectedStyle+1);
 				});
 			}
@@ -521,7 +535,8 @@ Tile.prototype =
 
 				var fname = filepath + '/' + self.y + '.png';
 				self.debug('Saving bitmap tile at path: ' + fname);
-				fs.unlink(fname, function(err) {
+				fs.unlink(fname, function(err)
+				{
 					var out = fs.createWriteStream(fname, {mode: 0666});
 					var stream = image.createPNGStream();
 
