@@ -171,9 +171,9 @@ BitmapTilerequest.prototype =
 								else
 								{
 									self.tile.debug('Rendering bitmap tile with style ' + self.tile.style);
-									self.tile.render(function()
+									self.tile.render(function(err, image)
 									{
-										self.renderCallback
+										self.renderCallback(err, image);
 									});
 								}
 							});
@@ -191,9 +191,9 @@ BitmapTilerequest.prototype =
 								self.queue.add(self.tile);
 
 							self.tile.debug('Rendering bitmap tile with style '+self.tile.style);
-							self.tile.render(function()
+							self.tile.render(function(err, image)
 							{
-								self.renderCallback
+								self.renderCallback(err, image);
 							});
 						});
 					}
