@@ -173,22 +173,27 @@ Tile.prototype =
 			}
 
 			self.debug('Created path. Saving vector tile at path: ' + file);
-			fs.unlinkSync(file);
-			fs.writeFile(file, JSON.stringify(self.data), {mode: 0666}, function(err)
+			fs.exists(file, function(exists)
 			{
-				if (err)
+				if (exists)
+					fs.unlinkSync(file);
+
+				fs.writeFile(file, JSON.stringify(self.data), {mode: 0666}, function(err)
 				{
-					self.error('Cannot save vector tile at path: ' + file);
+					if (err)
+					{
+						self.error('Cannot save vector tile at path: ' + file);
+						return process.nextTick(function()
+						{
+							callback(err);
+						});
+					}
+
+					self.debug('Saved vector tile at path: ' + file);
 					return process.nextTick(function()
 					{
-						callback(err);
+						callback(false);
 					});
-				}
-
-				self.debug('Saved vector tile at path: ' + file);
-				return process.nextTick(function()
-				{
-					callback(false);
 				});
 			});
 		});
@@ -272,11 +277,15 @@ Tile.prototype =
 			return;
 
 		var filepath = configuration.tiledir+'/'+configuration.styles[selectedStyle]+'/'+this.z+'/'+this.x+'/'+this.y+'.png';
-		if (fs.existsSync(filepath))
+		fs.exists(filepath, function(exists)
 		{
-			fs.unlinkSync(filepath);
-			this.removeBitmap(this.z, this.x, this.y, selectedStyle+1);
-		}
+			if (exists)
+			{
+				fs.unlink(filepath, function(err) {
+					this.removeBitmap(this.z, this.x, this.y, selectedStyle+1);
+				});
+			}
+		});
 	},
 
 	// returns true if the tile was marked as expired, otherwise false is returned
@@ -301,11 +310,15 @@ Tile.prototype =
 		{
 			var filepath = configuration.vtiledir+'/'+this.z+'/'+this.x+'/'+this.y+'.json';
 			var self = this;
-			if (fs.existsSync(filepath))
+			fs.exists(filepath, function(exists)
 			{
-				fs.unlinkSync(filepath);
-				self.removeBitmap();
-			}
+				if (exists)
+				{
+					fs.unlink(filepath, function(err) {
+						self.removeBitmap();
+					});
+				}
+			});
 		}
 	},
 
@@ -314,8 +327,11 @@ Tile.prototype =
 	{
 		var filepath = configuration.vtiledir+'/'+this.z+'/'+this.x+'/'+this.y+'.json';
 
-		if (fs.existsSync(filepath))
-			touch.sync(filepath, {time: new Date(10)});
+		fs.exists(filepath, function(exists)
+		{
+			if (exists)
+				touch.sync(filepath, {time: new Date(10)});
+		});
 	},
 
 	// return the timestamp of last modification of a tile
@@ -509,27 +525,28 @@ Tile.prototype =
 
 				var fname = filepath + '/' + self.y + '.png';
 				self.debug('Saving bitmap tile at path: ' + fname);
-				fs.unlinkSync(fname)
-				var out = fs.createWriteStream(fname, {mode: 0666});
-				var stream = image.createPNGStream();
+				fs.unlink(fname, function(err) {
+					var out = fs.createWriteStream(fname, {mode: 0666});
+					var stream = image.createPNGStream();
 
-				// write PNG data stream
-				stream.on('data', function(data)
-				{
-					out.write(data);
-				});
+					// write PNG data stream
+					stream.on('data', function(data)
+					{
+						out.write(data);
+					});
 
-				// PNG data stream ended
-				stream.on('end', function()
-				{
-					out.end();
-					self.debug('Bitmap tile was saved.');
-					self.rerenderBitmap(selectedStyle+1);
-					self = null;
-					image = null;
-					stream = null;
-					out = null;
-					return;
+					// PNG data stream ended
+					stream.on('end', function()
+					{
+						out.end();
+						self.debug('Bitmap tile was saved.');
+						self.rerenderBitmap(selectedStyle+1);
+						self = null;
+						image = null;
+						stream = null;
+						out = null;
+						return;
+					});
 				});
 			});
 		});
@@ -794,51 +811,55 @@ Tile.prototype =
 			}
 
 			var fname = filepath + '/' + self.y + '.png';
-			fs.unlinkSync(fname);
-
-			// store empty tile if no image could be rendered
-			if (image == null)
+			fs.exists(fname, function(exists)
 			{
-				self.debug('Bitmap tile empty.');
+				if (exists)
+					fs.unlinkSync(fname);
 
-				fs.link('emptytile.png', fname, function(err)
+				// store empty tile if no image could be rendered
+				if (image == null)
 				{
-					if (!err)
-						self.debug('Empty bitmap tile was stored.');
-					else
-						self.debug('Could not link empty bitmap file.');
+					self.debug('Bitmap tile empty.');
 
-					return process.nextTick(function()
+					fs.link('emptytile.png', fname, function(err)
 					{
-						callback(true);
+						if (!err)
+							self.debug('Empty bitmap tile was stored.');
+						else
+							self.debug('Could not link empty bitmap file.');
+
+						return process.nextTick(function()
+						{
+							callback(true);
+						});
 					});
-				});
-			}
-			else
-			{
-				self.trace('Saving bitmap data...');
-				var out = fs.createWriteStream(fname, {mode: 0666});
-				var stream = image.createPNGStream();
-
-				// write PNG data stream
-				stream.on('data', function(data)
+				}
+				else
 				{
-					out.write(data);
-				});
+					self.trace('Saving bitmap data...');
+					var out = fs.createWriteStream(fname, {mode: 0666});
+					var stream = image.createPNGStream();
 
-				// PNG data stream ended
-				stream.on('end', function()
-				{
-					out.end();
-					image = null;
-					stream = null;
-					self.debug('Bitmap tile was stored.');
-					return process.nextTick(function()
+					// write PNG data stream
+					stream.on('data', function(data)
 					{
-						callback(false);
+						out.write(data);
 					});
-				});
-			}
+
+					// PNG data stream ended
+					stream.on('end', function()
+					{
+						out.end();
+						image = null;
+						stream = null;
+						self.debug('Bitmap tile was stored.');
+						return process.nextTick(function()
+						{
+							callback(false);
+						});
+					});
+				}
+			});
 		});
 	},
 
