@@ -108,7 +108,7 @@
     $ echo "CREATE INDEX railmap_line_tags ON railmap_line USING GIN (tags);" | psql -d railmap
     $ echo "CREATE INDEX railmap_polygon_tags ON railmap_polygon USING GIN (tags);" | psql -d railmap
 
- Now you can load some data into your database:
+ Now you can load some data into your database. All tags which are used by the MapCSS style sheet have to be in a hstore column called "tags".
 
     $ osm2pgsql --create --database railmap --username railmap --prefix railmap --slim --style railmap.style --hstore --cache 512 railways.osm
 
