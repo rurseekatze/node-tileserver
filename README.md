@@ -110,7 +110,7 @@
 
  Now you can load some data into your database. All tags which are used by the MapCSS style sheet have to be in a hstore column called "tags".
 
-    $ osm2pgsql --create --database railmap --username railmap --prefix railmap --slim --style railmap.style --hstore --cache 512 railways.osm
+    $ osm2pgsql --create --database railmap --username railmap --prefix railmap --slim --style railmap.style --hstore-all --cache 512 railways.osm
 
  Have a look at an [example toolchain](https://github.com/rurseekatze/OpenRailwayMap/blob/master/import/import.sh) for an example of using osm2pgsql with filtered data.
 
