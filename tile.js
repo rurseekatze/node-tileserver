@@ -20,7 +20,7 @@ var touch = require("touch");
 var Canvas = require('canvas');
 var events = require('events');
 var log4js = require('log4js');
-var fs = require('graceful-fs');
+var fs = require('fs.extra');
 
 // workaround to emulate browser properties
 var window = new Object;
@@ -126,6 +126,45 @@ Tile.prototype =
 		logger.warn('z'+this.z+'x'+this.x+'y'+this.y+' '+text);
 	},
 
+	// use multiple files as hardlink targets to overcome maximum hardlink
+	// limit of filesystems
+	emptyTileLinkLoop: function(extension, file, callback, cnt)
+	{
+		var modFactor = 128;
+		var linkTry = cnt % modFactor;
+		var linkTarget = 'emptytile' + linkTry + extension;
+		var linkFunc = function()
+		{
+			fs.link(linkTarget, file, function(err)
+			{
+				// if this target already has too many links try the next one
+				if (err == 'EMLINK')
+				{
+					self.debug('Hardlink limit reached for ' + linkTarget);
+					return process.nextTick(function()
+					{
+						self.emptyTileLinkLoop(extension, file, callback, cnt + 1);
+					});
+				}
+				else
+					return callback(err);
+			});
+		}
+
+		fs.exists(linkTarget, function(exists)
+		{
+			if (!exists)
+				return fs.copy('emptytile' + extension, linkTarget, { replace: false }, linkFunc);
+			else
+				return self.linkFunc();
+		});
+	},
+
+	emptyTileLink: function(extension, file, callback)
+	{
+		return this.emptyTileLinkLoop(extension, file, callback, this.y + 1);
+	},
+
 	// stores a vector tile in the vector tile directory
 	saveVectorData: function(callback)
 	{
@@ -162,7 +201,7 @@ Tile.prototype =
 				{
 					if (!exists)
 					{
-						fs.link('emptytile.json', file, function(err)
+						self.emptyTileLink('.json', file, function(err)
 						{
 							if (!err)
 								self.debug('Empty vector tile was stored.');
@@ -832,7 +871,7 @@ Tile.prototype =
 				{
 					self.debug('Bitmap tile empty.');
 
-					fs.link('emptytile.png', fname, function(err)
+					self.emptyTileLink('.png', fname, function(err)
 					{
 						if (!err)
 							self.debug('Empty bitmap tile was stored.');
