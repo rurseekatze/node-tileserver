@@ -156,7 +156,7 @@ Tile.prototype =
 			if (!exists)
 				return fs.copy('emptytile' + extension, linkTarget, { replace: false }, linkFunc);
 			else
-				return self.linkFunc();
+				return linkFunc();
 		});
 	},
 
