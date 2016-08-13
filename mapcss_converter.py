@@ -187,23 +187,26 @@ def selector_as_js(self):
     if not tag_enable.value():
         return ""
 
-    criteria = " && ".join(map(lambda x: x.as_js(), self.criteria))
-
-    if self.subject == 'line':
-        self.subject = 'way'
-    if self.subject in ['node', 'way', 'relation', 'coastline']:
-        subject_property = 'type'
+    if self.subject in ['line', 'way']:
+        sel = 'isWay'
+    elif self.subject == 'node':
+        sel = 'isNode'
     else:
-        subject_property = 'selector'
+        if self.subject in ['relation', 'coastline']:
+            subject_property = 'type'
+        else:
+            subject_property = 'selector'
+        sel = "%s == %s" % (subject_property, wrap_key(self.subject))
 
     #TODO: something > something is not supported yet
     if self.within_selector:
         return 'false'
 
     if self.criteria:
-        return "%s == %s && %s" % (subject_property, wrap_key(self.subject), criteria)
+        criteria = " && ".join(map(lambda x: x.as_js(), self.criteria))
+        return "%s && %s" % (sel, criteria)
     else:
-        return "%s == %s" % (subject_property, wrap_key(self.subject))
+        return sel
 
 def isNumeric(value):
     try:
@@ -516,7 +519,8 @@ if __name__ == "__main__":
     'use strict';
 
     function restyle(style, tags, zoom, type, selector) {
-        var cssClasses = [];
+        var cssClasses = [],
+            isNode = (type === 'node'), isWay = (type === 'way');
 %s
 %s
 %s

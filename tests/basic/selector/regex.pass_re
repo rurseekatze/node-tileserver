@@ -1,1 +1,1 @@
-if \(+type == 'way'\)? && /\^\(2|3\)0\$/\.test\(tags\['maxspeed'\]\)+ {.*s_default\['z-index'\] = 1000[^}]*}[^}]*if \(+type == 'way'\)? && /\^\[45\]0\$/\.test\(tags\['maxspeed'\]\)+ {.*s_default\['z-index'\] = 1001[^}]*}.*presence_tags = \[\].*value_tags = \['maxspeed'\]
+if \(+isWay\)? && /\^\(2|3\)0\$/\.test\(tags\['maxspeed'\]\)+ {.*s_default\['z-index'\] = 1000[^}]*}[^}]*if \(+isWay\)? && /\^\[45\]0\$/\.test\(tags\['maxspeed'\]\)+ {.*s_default\['z-index'\] = 1001[^}]*}.*presence_tags = \[\].*value_tags = \['maxspeed'\]

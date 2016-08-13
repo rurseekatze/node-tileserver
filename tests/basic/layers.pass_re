@@ -1,1 +1,1 @@
-\(+type == 'way'\)+ {.*s_default\['z-index'\] = 1000[^}]*}.*\(+type == 'node'\)+ {.*s_nodes\['z-index'\] = 1001[^}]*}.*\(+selector == 'area'\)+ {.*s_areas\['z-index'\] = 1002[^}]*}.*presence_tags = \[[ \t]*\].*value_tags = \[[ \t]*\]
+\(+isWay\)+ {.*s_default\['z-index'\] = 1000[^}]*}.*\(+isNode\)+ {.*s_nodes\['z-index'\] = 1001[^}]*}.*\(+selector == 'area'\)+ {.*s_areas\['z-index'\] = 1002[^}]*}.*presence_tags = \[[ \t]*\].*value_tags = \[[ \t]*\]

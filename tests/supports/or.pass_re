@@ -1,1 +1,1 @@
-\(+type == 'node'\)+ {.*s_default\['z-index'\] = 1[^}]*}.*presence_tags = \[[ \t]*\].*value_tags = \[[ \t]*\]
+\(+isNode\)+ {.*s_default\['z-index'\] = 1[^}]*}.*presence_tags = \[[ \t]*\].*value_tags = \[[ \t]*\]
