@@ -226,10 +226,6 @@ var MapCSS = {
 		return (crc ^ (-1)) >>> 0;
 	},
 
-	e_cond: function (cond, a, b) {
-		return (cond) ? a : b;
-	},
-
 	e_split: function (sep, text) {
 		return text.split(sep);
 	},
