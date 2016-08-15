@@ -122,7 +122,9 @@ Kothic.texticons = {
 						letterWidth = 0,	// mean width of a letter of the longest substring
 						tlens = [];		// width of every substring
 
-					for (s of rtext) {
+					var j;
+					for (var j = 0; j < rtext.length; j++) {
+						s = rtext[j];
 						var textWidth = ctx.measureText(s).width;
 						tlens.push(textWidth);
 						if (collisionWidth < textWidth) {
@@ -167,12 +169,16 @@ Kothic.texticons = {
 					// the center of the drawn text in the center of the collision rectangle
 					var l = 0;
 					if (halo) {
-						for (s of rtext)
+						for (var j = 0; j < rtext.length; j++) {
+							s = rtext[j];
 							ctx.strokeText(s, point[0] + offsetX, point[1] + offsetY + (l++ - (rlines - 1) / 2) * lheight);
+						}
 					}
 					l = 0;
-					for (s of rtext)
+					for (var j = 0; j < rtext.length; j++) {
+						s = rtext[j];
 						ctx.fillText(s, point[0] + offsetX, point[1] + offsetY + (l++ - (rlines - 1) / 2) * lheight);
+					}
 
 					var padding = style['kothicjs-min-distance'] || 20;
 					collides.addPointWH([point[0] + offsetX, point[1] + offsetY], collisionWidth, collisionHeight, padding, feature.kothicId);
