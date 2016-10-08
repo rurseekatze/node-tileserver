@@ -2,7 +2,7 @@
 	"tileSize" : 256,
 	"prefix" : "railmap",
 	"database" : "railmap",
-	"username" : "postgres",
+	"username" : "railmap",
 	"password" : "",
 	"vtiledir" : "/home/www/sites/194.245.35.149/site/orm/tiles",
 	"tiledir" : "/home/www/sites/194.245.35.149/site/orm/bitmap-tiles",
