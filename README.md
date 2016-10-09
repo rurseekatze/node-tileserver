@@ -85,7 +85,7 @@
 
     $ chmod 600 ~/.pgpass
 
- If you are using PostgreSQL version < 9.3 you also need to add a function (from https://gist.github.com/kenaniah/1315484):
+ If you are using PostgreSQL version 9.3 or earlier you also need to add a function (from https://gist.github.com/kenaniah/1315484):
 
     $ echo "CREATE OR REPLACE FUNCTION public.hstore2json (
       hs public.hstore
