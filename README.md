@@ -57,7 +57,7 @@
 
  Set up the PostgreSQL database with PostGIS and hstore extensions:
 
-    $ sudo -u postgres createuser
+    $ sudo -u postgres createuser railmap
     $ sudo -u postgres createdb -E UTF8 -O railmap railmap
 
     $ sudo -u postgres psql -d railmap -c "CREATE EXTENSION postgis;"
