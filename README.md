@@ -122,15 +122,9 @@ Then set the correct file permissions:
 
     $ echo "ALTER FUNCTION hstore2json(hs public.hstore) OWNER TO apache;"  | psql -d railmap
 
- For higher performance you should create some indexes:
-
-    $ echo "CREATE INDEX railmap_point_tags ON railmap_point USING GIN (tags);" | psql -d railmap
-    $ echo "CREATE INDEX railmap_line_tags ON railmap_line USING GIN (tags);" | psql -d railmap
-    $ echo "CREATE INDEX railmap_polygon_tags ON railmap_polygon USING GIN (tags);" | psql -d railmap
-
  Now you can load some data into your database. All tags which are used by the MapCSS style sheet have to be in a hstore column called "tags".
 
-    $ osm2pgsql --create --database railmap --username railmap --prefix railmap --slim --style railmap.style --hstore-all --cache 512 railways.osm
+    $ osm2pgsql --create --database railmap --username railmap --prefix railmap --slim --style railmap.style --hstore-all --hstore-add-index railways.osm
 
  Have a look at an [example toolchain](https://github.com/rurseekatze/OpenRailwayMap/blob/master/import/import.sh) for an example of using osm2pgsql with filtered data.
 
