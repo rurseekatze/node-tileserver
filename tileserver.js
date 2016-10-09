@@ -20,6 +20,7 @@ var Canvas = require('canvas');
 var events = require('events');
 var log4js = require('log4js');
 var fs = require('graceful-fs');
+var pgPass = require('pgpass');
 
 // load configuraion file
 configuration = require('./config.json');
@@ -64,50 +65,68 @@ var cpus = os.cpus().length;
 // maximum count of concurrent http connections
 http.globalAgent.maxSockets = configuration.maxsockets;
 
-
-// fork workers
-if (cluster.isMaster)
+// request password from pgpass only once at startup, not for each process or even each request
+var connectionDetails =
 {
-	for (var i=0; i<cpus; i++)
-		cluster.fork();
-	cluster.on("exit", function(worker, code, signal)
-	{
-		logger.fatal("WORKER STOPPED");
-		cluster.fork();
-	});
-	logger.info('Master has started.');
-}
-// start tile server instance
-else
+	'host' : 'localhost' ,
+	'database': configuration.database,
+	'user' : configuration.username
+};
+pgPass(connectionDetails, function(password)
 {
-	// handle exceptions
-	process.on('uncaughtException', function(err)
+	if (typeof password == 'undefined')
 	{
-		logger.fatal('An uncaughtException occurred:');
-		logger.fatal(err);
+		logger.fatal('PGPASS file cannot be read or no matching line for given connection info found');
 		process.exit(1);
-	});
-
-	// rendering queue for expired tiles
-	queue = new Tilequeue();
-
-	function onRequest(request, response)
-	{
-		if (toobusy())
-		{
-			logger.info('Server too busy. Aborting.');
-			response.writeHead(503, {'Content-Type': 'text/plain'});
-			response.end();
-			return;
-		}
-		else
-		{
-			var tilerequest = new Tilerequest(request, response);
-			tilerequest.getTile();
-			tilerequest = null;
-		}
 	}
 
-	http.createServer(onRequest).listen(configuration.tileserverPort);
-	logger.info('Worker has started.');
-}
+	logger.debug('Successfully read password using PGPASS');
+	configuration.password = password;
+
+	// fork workers
+	if (cluster.isMaster)
+	{
+		for (var i=0; i<cpus; i++)
+			cluster.fork();
+		cluster.on("exit", function(worker, code, signal)
+		{
+			logger.fatal("WORKER STOPPED");
+			cluster.fork();
+		});
+		logger.info('Master has started.');
+	}
+	// start tile server instance
+	else
+	{
+		// handle exceptions
+		process.on('uncaughtException', function(err)
+		{
+			logger.fatal('An uncaughtException occurred:');
+			logger.fatal(err);
+			process.exit(1);
+		});
+
+		// rendering queue for expired tiles
+		queue = new Tilequeue();
+
+		function onRequest(request, response)
+		{
+			if (toobusy())
+			{
+				logger.info('Server too busy. Aborting.');
+				response.writeHead(503, {'Content-Type': 'text/plain'});
+				response.end();
+				return;
+			}
+			else
+			{
+				var tilerequest = new Tilerequest(request, response);
+				tilerequest.getTile();
+				tilerequest = null;
+			}
+		}
+
+		http.createServer(onRequest).listen(configuration.tileserverPort);
+		logger.info('Worker has started.');
+	}
+});

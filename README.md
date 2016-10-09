@@ -54,16 +54,35 @@
     $ make
     $ cd ..
 
- Set up the PostgreSQL database with all necessary extensions such as hstore:
+ Set up the PostgreSQL database with PostGIS and hstore extensions:
 
-    $ su postgres
-    $ createuser railmap
-    $ createdb -E UTF8 -O railmap railmap
-    $ createlang plpgsql railmap
-    $ psql -d railmap -f /usr/share/pgsql/contrib/postgis-64.sql
-    $ psql -d railmap -f /usr/share/pgsql/contrib/postgis-1.5/spatial_ref_sys.sql
-    $ psql -d railmap -f /usr/share/pgsql/contrib/hstore.sql
-    $ psql -d railmap -f osm2pgsql/900913.sql
+    $ sudo -u postgres createuser
+    $ sudo -u postgres createdb -E UTF8 -O railmap railmap
+
+    $ sudo -u postgres psql -d railmap -c "CREATE EXTENSION postgis;"
+    $ sudo -u postgres psql -d railmap -c "CREATE EXTENSION hstore;"
+
+    $ sudo service postgresql-9.5 initdb
+    $ sudo service postgresql-9.5 start
+    $ sudo chkconfig postgresql-9.5 on
+
+For authentication to the database, we are using `md5` method. Edit your `pg_hba.conf` to use `md5` authentication for local unix sockets and local TCP/IP connections from your host.
+
+The database password is managed in a `pgpass` file. Create a `pgpass` file (or edit the existing one) in the home directory of the user that will be used for running the processes of API, tileserver and import/update scripts:
+
+    $ vim ~/.pgpass
+
+Add a line with this format:
+
+    hostname:port:database:username:password
+
+in this example (replace `YOURPASSWORD` by the password you entered in the `createuser` command):
+
+    localhost:5432:railmap:railmap:YOURPASSWORD
+
+Then set the correct file permissions:
+
+    $ chmod 600 ~/.pgpass
 
  If you are using PostgreSQL version < 9.3 you also need to add a function (from https://gist.github.com/kenaniah/1315484):
 
@@ -143,13 +162,11 @@ You can set various options to configure your tileserver:
 
  * `username` The username to be used for database requests. Depends on the parameters you are using in osm2pgsql. _Default: `railmap`_
 
- * `password` The password to be used for database requests. The value can be empty. Depends on the parameters you are using in osm2pgsql. _Default: `<empty>`_
+ * `vtiledir` Relative or absolute path to the vector tile directory. _Default: `/var/www/orm/OpenRailwayMap/tiles`_
 
- * `vtiledir` Relative or absolute path to the vector tile directory. _Default: `../tiles`_
+ * `tiledir` Relative or absolute path to the bitmap tile directory. _Default: `/var/www/orm/OpenRailwayMap/bitmap-tiles`_
 
- * `tiledir` Relative or absolute path to the bitmap tile directory. _Default: `../bitmap-tiles`_
-
- * `expiredtilesdir` Relative or absolute path to the list of expired tiles. _Default: `../../olm/import`_
+ * `expiredtilesdir` Relative or absolute path to the list of expired tiles. _Default: `/var/www/orm/OpenRailwayMap/import`_
 
  * `styledir` Relative or absolute path to the directory containing (compiled) MapCSS styles. _Default: `../styles`_
 
