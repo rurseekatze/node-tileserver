@@ -67,21 +67,21 @@
     $ sudo service postgresql-9.5 start
     $ sudo chkconfig postgresql-9.5 on
 
-For authentication to the database, we are using `md5` method. Edit your `pg_hba.conf` to use `md5` authentication for local unix sockets and local TCP/IP connections from your host.
+ For authentication to the database, we are using `md5` method. Edit your `pg_hba.conf` to use `md5` authentication for local unix sockets and local TCP/IP connections from your host.
 
-The database password is managed in a `pgpass` file. Create a `pgpass` file (or edit the existing one) in the home directory of the user that will be used for running the processes of API, tileserver and import/update scripts:
+ The database password is managed in a `pgpass` file. Create a `pgpass` file (or edit the existing one) in the home directory of the user that will be used for running the processes of API, tileserver and import/update scripts:
 
     $ vim ~/.pgpass
 
-Add a line with this format:
+ Add a line with this format:
 
     hostname:port:database:username:password
 
-in this example (replace `YOURPASSWORD` by the password you entered in the `createuser` command):
+ in this example (replace `YOURPASSWORD` by the password you entered in the `createuser` command):
 
     localhost:5432:railmap:railmap:YOURPASSWORD
 
-Then set the correct file permissions:
+ Then set the correct file permissions:
 
     $ chmod 600 ~/.pgpass
 
@@ -135,13 +135,30 @@ Then set the correct file permissions:
  * [MapCSS Website](http://www.mapcss.org/)
  * [MapCSS in OSM Wiki](http://wiki.openstreetmap.org/wiki/MapCSS)
 
-You need MapCSS converter to compile your MapCSS styles to JavaScript. Go to your styles directory and compile all your MapCSS styles in one run (you have to do this after every change of your stylesheets):
+ You need MapCSS converter to compile your MapCSS styles to JavaScript. Go to your styles directory and compile all your MapCSS styles in one run (you have to do this after every change of your stylesheets):
 
     $ for stylefile in *.mapcss ; do python mapcss_converter.py --mapcss "$stylefile" --icons-path . ; done
 
  Note that you have to recompile the stylesheets every time you change the MapCSS files to apply the changes. It is also necessary to restart the tileserver to reload the stylesheets.
 
- You need a proxy that routes incoming requests. It is recommended to use a NodeJS proxy like [this](https://github.com/rurseekatze/OpenRailwayMap/blob/master/proxy.js), especially if you are running another webserver like Apache parallel to NodeJS. Remember to change the domains in the script and the configuration of your parallel running webservers. The NodeJS proxy listens on port 80 while parallel webservers should listen on 8080.
+ If you plan to run another webserver like Apache parallel to the tileserver, you need a proxy that routes incoming requests. Apache can be used to forward incoming requests to the port of the tileserver.
+
+ The configuration is placed at `/etc/apache2/sites-available/` on Ubuntu/Debian. Other distros use `/etc/apache/vhosts.d/` or just another directory. Log files will be saved to `/var/log/apache2/` You should change this path if you are using other systems, e.g. to `/var/log/httpd/` on CentOS/RHEL.
+
+ Vhost configuration of the API (`tiles.example.com.conf`) looks like this:
+
+    <VirtualHost *:80>
+    ServerName tiles.example.com
+    ServerAlias  a.tiles.example.com b.tiles.example.com c.tiles.example.com
+    ProxyPreserveHost On
+    ProxyPass / http://localhost:9000/
+    ProxyPassReverse / http://localhost:9000/
+    ErrorLog /var/log/apache2/tiles.example.com.error.log
+    LogLevel warn
+    CustomLog /var/log/apache2/tiles.example.com.access.log combined
+    </VirtualHost>
+
+ Make sure that your server does not accept requests on port 9000 and 9002 from outside (to circumvent the proxy and its logging).
 
  Now you are almost ready to run the tileserver. You just need to check the configuration.
 
@@ -202,14 +219,10 @@ __Note:__ For some parameters it is also necessary to change the modify the opti
     $ screen -R tileserver
     $ node tileserver.js
     $ [Ctrl][A][D]
-    $ screen -R proxy
-    $ node proxy.js
-    $ [Ctrl][A][D]
 
  Jump back to the session to see log output or to restart the processes:
 
     $ screen -r tileserver
-    $ screen -r proxy
 
  Start the initial rendering:
 
