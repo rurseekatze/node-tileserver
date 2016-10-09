@@ -135,7 +135,7 @@
  * [MapCSS Website](http://www.mapcss.org/)
  * [MapCSS in OSM Wiki](http://wiki.openstreetmap.org/wiki/MapCSS)
 
- You need MapCSS converter to compile your MapCSS styles to JavaScript. Go to your styles directory and compile all your MapCSS styles in one run (you have to do this after every change of your stylesheets):
+You need MapCSS converter to compile your MapCSS styles to JavaScript. Go to your styles directory and compile all your MapCSS styles in one run (you have to do this after every change of your stylesheets):
 
     $ for stylefile in *.mapcss ; do python mapcss_converter.py --mapcss "$stylefile" --icons-path . ; done
 
