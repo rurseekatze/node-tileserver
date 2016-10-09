@@ -45,14 +45,15 @@
 
     $ npm install
 
- Now you need osm2pgsql:
+ Install osm2pgsql (Ubuntu and Debian users may use their `osm2pgsql` package provided by their distribution instead):
 
     $ git clone https://github.com/openstreetmap/osm2pgsql.git
     $ cd osm2pgsql
-    $ ./autogen.sh
-    $ CFLAGS="-O2 -march=native -fomit-frame-pointer" CXXFLAGS="-O2 -march=native -fomit-frame-pointer" ./configure
+    $ cmake
     $ make
+    $ sudo make install
     $ cd ..
+    $ rm -fr osm2pgsql
 
  Set up the PostgreSQL database with PostGIS and hstore extensions:
 
