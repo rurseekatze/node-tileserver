@@ -618,7 +618,7 @@ Tile.prototype =
 
 			return "SELECT\
 					ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_Intersection(" + configuration.geomcolumn + ", " + st_bbox + ")), " + xy_wh + "), 0) AS " + configuration.geomcolumn + ", \
-					hstore2json(CAST(hstore(tags) AS hstore)) AS tags,\
+					hstore_to_json(CAST(hstore(tags) AS hstore)) AS tags,\
 					ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_PointOnSurface(" + configuration.geomcolumn + ")), " + xy_wh + "), 0) AS reprpoint\
 				FROM\
 					(\
@@ -640,7 +640,7 @@ Tile.prototype =
 				UNION\
 				SELECT\
 					ST_AsGeoJSON(ST_TransScale(ST_Intersection(" + configuration.geomcolumn+", " + st_bbox + "), " + xy_wh + "), 0) AS " + configuration.geomcolumn + ",\
-					hstore2json(CAST(hstore(tags) AS hstore)) as tags,\
+					hstore_to_json(CAST(hstore(tags) AS hstore)) as tags,\
 					Null AS reprpoint\
 				FROM\
 					(\
@@ -655,7 +655,7 @@ Tile.prototype =
 					) p\
 				UNION\
 				SELECT ST_AsGeoJSON(ST_TransScale(" + configuration.geomcolumn + ", " + xy_wh + "), 0) AS " + configuration.geomcolumn + ",\
-				hstore2json(tags) AS tags,\
+				hstore_to_json(tags) AS tags,\
 				Null AS reprpoint\
 				FROM " + configuration.prefix + "_point\
 				WHERE " +

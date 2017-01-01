@@ -85,43 +85,6 @@
 
     $ chmod 600 ~/.pgpass
 
- If you are using PostgreSQL version 9.3 or earlier you also need to add a function (from https://gist.github.com/kenaniah/1315484):
-
-    $ echo "CREATE OR REPLACE FUNCTION public.hstore2json (
-      hs public.hstore
-    )
-    RETURNS text AS
-    $body$
-    DECLARE
-      rv text;
-      r record;
-    BEGIN
-      rv:='';
-      for r in (select key, val from each(hs) as h(key, val)) loop
-        if rv<>'' then
-          rv:=rv||',';
-        end if;
-        rv:=rv || '"'  || r.key || '":';
-
-        --Perform escaping
-        r.val := REPLACE(r.val, E'\\', E'\\\\');
-        r.val := REPLACE(r.val, '"', E'\\"');
-        r.val := REPLACE(r.val, E'\n', E'\\n');
-        r.val := REPLACE(r.val, E'\r', E'\\r');
-
-        rv:=rv || CASE WHEN r.val IS NULL THEN 'null' ELSE '"'  || r.val || '"' END;
-      end loop;
-      return '{'||rv||'}';
-    END;
-    $body$
-    LANGUAGE 'plpgsql'
-    IMMUTABLE
-    CALLED ON NULL INPUT
-    SECURITY INVOKER
-    COST 100;" | psql -d railmap
-
-    $ echo "ALTER FUNCTION hstore2json(hs public.hstore) OWNER TO apache;"  | psql -d railmap
-
  Now you can load some data into your database. All tags which are used by the MapCSS style sheet have to be in a hstore column called "tags".
 
     $ osm2pgsql --create --database railmap --username railmap --prefix railmap --slim --style railmap.style --hstore-all --hstore-add-index railways.osm
