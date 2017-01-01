@@ -618,7 +618,7 @@ Tile.prototype =
 
 			return "SELECT\
 					ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_Intersection(" + configuration.geomcolumn + ", " + st_bbox + ")), " + xy_wh + "), 0) AS " + configuration.geomcolumn + ", \
-					hstore_to_jsonb(tags) AS tags,\
+					hstore_to_json(tags) AS tags,\
 					ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_PointOnSurface(" + configuration.geomcolumn + ")), " + xy_wh + "), 0) AS reprpoint\
 				FROM\
 					(\
@@ -637,10 +637,10 @@ Tile.prototype =
 						WHERE ST_Area(" + configuration.geomcolumn + ") > " + Math.pow(buffer, 2) + "\
 						ORDER BY ST_Area("+configuration.geomcolumn+")\
 					) p\
-				UNION\
+				UNION ALL\
 				SELECT\
 					ST_AsGeoJSON(ST_TransScale(ST_Intersection(" + configuration.geomcolumn+", " + st_bbox + "), " + xy_wh + "), 0) AS " + configuration.geomcolumn + ",\
-					hstore_to_jsonb(tags) AS tags,\
+					hstore_to_json(tags) AS tags,\
 					NULL AS reprpoint\
 				FROM\
 					(\
@@ -653,9 +653,9 @@ Tile.prototype =
 								GROUP BY tags\
 							) p\
 					) p\
-				UNION\
+				UNION ALL\
 				SELECT ST_AsGeoJSON(ST_TransScale(" + configuration.geomcolumn + ", " + xy_wh + "), 0) AS " + configuration.geomcolumn + ",\
-				hstore_to_jsonb(tags) AS tags,\
+				hstore_to_json(tags) AS tags,\
 				NULL AS reprpoint\
 				FROM " + configuration.prefix + "_point\
 				WHERE " +
@@ -804,7 +804,7 @@ Tile.prototype =
 					var reprpoint = JSON.parse(data.rows[i].reprpoint);
 					geojson.reprpoint = reprpoint.coordinates;
 				}
-				geojson.properties = JSON.parse(data.rows[i].tags);
+				geojson.properties = data.rows[i].tags;
 			}
 			catch (err)
 			{
