@@ -618,7 +618,7 @@ Tile.prototype =
 
 			return "SELECT\
 					ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_Intersection(" + configuration.geomcolumn + ", " + st_bbox + ")), " + xy_wh + "), 0) AS " + configuration.geomcolumn + ", \
-					hstore_to_json(CAST(hstore(tags) AS hstore)) AS tags,\
+					hstore_to_jsonb(tags) AS tags,\
 					ST_AsGeoJSON(ST_TransScale(ST_ForceRHR(ST_PointOnSurface(" + configuration.geomcolumn + ")), " + xy_wh + "), 0) AS reprpoint\
 				FROM\
 					(\
@@ -630,18 +630,18 @@ Tile.prototype =
 									(\
 										SELECT ST_Buffer(" + configuration.geomcolumn + ", " + buffer + ") AS " + configuration.geomcolumn + ", CAST(tags AS text) AS tags\
 										FROM " + configuration.prefix + "_polygon\
-										WHERE " + configuration.geomcolumn + " && " + st_bbox + " AND way_area > " + (Math.pow(buffer, 2) / configuration.pxtolerance) + " " + cond +
-									") p\
-								GROUP BY CAST(tags AS text)\
+										WHERE " + configuration.geomcolumn + " && " + st_bbox + " AND way_area > " + (Math.pow(buffer, 2) / configuration.pxtolerance) + " " + cond + "\
+									) p\
+								GROUP BY tags\
 							) p\
-						WHERE ST_Area(" + configuration.geomcolumn + ") > " + Math.pow(buffer, 2) +
-						" ORDER BY ST_Area("+configuration.geomcolumn+")\
+						WHERE ST_Area(" + configuration.geomcolumn + ") > " + Math.pow(buffer, 2) + "\
+						ORDER BY ST_Area("+configuration.geomcolumn+")\
 					) p\
 				UNION\
 				SELECT\
 					ST_AsGeoJSON(ST_TransScale(ST_Intersection(" + configuration.geomcolumn+", " + st_bbox + "), " + xy_wh + "), 0) AS " + configuration.geomcolumn + ",\
-					hstore_to_json(CAST(hstore(tags) AS hstore)) as tags,\
-					Null AS reprpoint\
+					hstore_to_jsonb(tags) AS tags,\
+					NULL AS reprpoint\
 				FROM\
 					(\
 						SELECT (ST_Dump(ST_Multi(ST_SimplifyPreserveTopology(ST_LineMerge(" + configuration.geomcolumn + "), " + this.pixelSizeAtZoom(configuration.pxtolerance) + ")))).geom AS " + configuration.geomcolumn + ", tags\
@@ -649,14 +649,14 @@ Tile.prototype =
 							(\
 								SELECT ST_Union(" + configuration.geomcolumn + ") AS " + configuration.geomcolumn+", CAST(tags AS text)\
 								FROM " + configuration.prefix + "_line\
-								WHERE " + configuration.geomcolumn + " && " + st_bbox + " " + cond +
-								" GROUP BY CAST(tags AS text)\
+								WHERE " + configuration.geomcolumn + " && " + st_bbox + " " + cond + "\
+								GROUP BY tags\
 							) p\
 					) p\
 				UNION\
 				SELECT ST_AsGeoJSON(ST_TransScale(" + configuration.geomcolumn + ", " + xy_wh + "), 0) AS " + configuration.geomcolumn + ",\
-				hstore_to_json(tags) AS tags,\
-				Null AS reprpoint\
+				hstore_to_jsonb(tags) AS tags,\
+				NULL AS reprpoint\
 				FROM " + configuration.prefix + "_point\
 				WHERE " +
 				configuration.geomcolumn + " && ST_SetSRID('BOX3D(" + (bbox[0] - tolerance) + " " + (bbox[1] - tolerance) + "," + (bbox[2] + tolerance) + " " + (bbox[3] + tolerance) + ")'::box3d, 3857) " + cond;
