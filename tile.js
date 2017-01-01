@@ -95,10 +95,10 @@ Tile.prototype =
 	getCoords: function(z, x, y)
 	{
 		var normalizedTile = new Array(x/Math.pow(2.0, z), 1.0-(y/Math.pow(2.0, z)));
-		var projectedBounds = this.from4326To900913(new Array(-180.0, -85.0511287798, 180.0, 85.0511287798));
+		var projectedBounds = this.from4326To3857(new Array(-180.0, -85.0511287798, 180.0, 85.0511287798));
 		var maxp = new Array(projectedBounds[2]-projectedBounds[0], projectedBounds[3]-projectedBounds[1]);
 		var projectedCoords = new Array((normalizedTile[0]*maxp[0])+projectedBounds[0], (normalizedTile[1]*maxp[1])+projectedBounds[1]);
-		return this.from900913To4326(projectedCoords);
+		return this.from3857To4326(projectedCoords);
 	},
 
 	debug: function(text)
@@ -483,7 +483,7 @@ Tile.prototype =
 	getVectorData: function(callback, errcallback)
 	{
 		var bbox = this.getBbox();
-		var bbox_p = this.from4326To900913(bbox);
+		var bbox_p = this.from4326To3857(bbox);
 
 		var connection = "postgres://"+configuration.username+":"+configuration.password+"@localhost/"+configuration.database;
 		var client = new pg.Client(connection);
@@ -613,7 +613,7 @@ Tile.prototype =
 		var cond = configuration.filterconditions[zoom] || "";
 		var buffer = this.pixelSizeAtZoom(configuration.pxtolerance);
 		var tolerance = this.pixelSizeAtZoom(configuration.tileBoundTolerance);
-		var st_bbox = "ST_SetSRID('BOX3D(" + bbox[0] + " " + bbox[1] + "," + bbox[2] + " " + bbox[3] + ")'::box3d, 900913)";
+		var st_bbox = "ST_SetSRID('BOX3D(" + bbox[0] + " " + bbox[1] + "," + bbox[2] + " " + bbox[3] + ")'::box3d, 3857)";
 		var xy_wh = "" + (-bbox[0]) + ", " + (-bbox[1]) + ", " + (configuration.intscalefactor / (bbox[2] - bbox[0])) + ", " + (configuration.intscalefactor / (bbox[3] - bbox[1]));
 
 			return "SELECT\
@@ -659,7 +659,7 @@ Tile.prototype =
 				Null AS reprpoint\
 				FROM " + configuration.prefix + "_point\
 				WHERE " +
-				configuration.geomcolumn + " && ST_SetSRID('BOX3D(" + (bbox[0] - tolerance) + " " + (bbox[1] - tolerance) + "," + (bbox[2] + tolerance) + " " + (bbox[3] + tolerance) + ")'::box3d, 900913) " + cond;
+				configuration.geomcolumn + " && ST_SetSRID('BOX3D(" + (bbox[0] - tolerance) + " " + (bbox[1] - tolerance) + "," + (bbox[2] + tolerance) + " " + (bbox[3] + tolerance) + ")'::box3d, 3857) " + cond;
 	},
 
 	// equivalent of tanh in PHP
@@ -680,9 +680,9 @@ Tile.prototype =
 		return angle*(Math.PI/180.0);
 	},
 
-	// Wrapper around transform call for convenience. Transforms line from EPSG:900913 to EPSG:4326
+	// Wrapper around transform call for convenience. Transforms line from EPSG:3857 to EPSG:4326
 	// line - a list of [lat0,lon0,lat1,lon1,...] or [(lat0,lon0),(lat1,lon1),...]
-	from900913To4326: function(line)
+	from3857To4326: function(line)
 	{
 		var serial = false;
 		if (!Array.isArray(line[0]))
@@ -709,9 +709,9 @@ Tile.prototype =
 		return ans;
 	},
 
-	// Wrapper around transform call for convenience. Transforms line from EPSG:4326 to EPSG:900913
+	// Wrapper around transform call for convenience. Transforms line from EPSG:4326 to EPSG:3857
 	// line - a list of [lat0,lon0,lat1,lon1,...] or [(lat0,lon0),(lat1,lon1),...]
-	from4326To900913: function(line)
+	from4326To3857: function(line)
 	{
 		var serial = false;
 		if (!Array.isArray(line[0]))
