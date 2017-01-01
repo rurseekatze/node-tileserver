@@ -2,3 +2,5 @@ node_modules/
 npm-debug.log
 parsetab.py
 parsetab.pyc
+emptytile*
+*.log
