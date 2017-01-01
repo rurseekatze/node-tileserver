@@ -628,7 +628,7 @@ Tile.prototype =
 								SELECT ST_Union(" + configuration.geomcolumn + ") AS " + configuration.geomcolumn + ", tags\
 								FROM\
 									(\
-										SELECT ST_Buffer(" + configuration.geomcolumn + ", " + buffer + ") AS " + configuration.geomcolumn + ", CAST(tags AS text) AS tags\
+										SELECT ST_Buffer(" + configuration.geomcolumn + ", " + buffer + ") AS " + configuration.geomcolumn + ", tags AS tags\
 										FROM " + configuration.prefix + "_polygon\
 										WHERE " + configuration.geomcolumn + " && " + st_bbox + " AND way_area > " + (Math.pow(buffer, 2) / configuration.pxtolerance) + " " + cond + "\
 									) p\
@@ -647,7 +647,7 @@ Tile.prototype =
 						SELECT (ST_Dump(ST_Multi(ST_SimplifyPreserveTopology(ST_LineMerge(" + configuration.geomcolumn + "), " + this.pixelSizeAtZoom(configuration.pxtolerance) + ")))).geom AS " + configuration.geomcolumn + ", tags\
 						FROM\
 							(\
-								SELECT ST_Union(" + configuration.geomcolumn + ") AS " + configuration.geomcolumn+", CAST(tags AS text)\
+								SELECT ST_Union(" + configuration.geomcolumn + ") AS " + configuration.geomcolumn+", tags AS tags\
 								FROM " + configuration.prefix + "_line\
 								WHERE " + configuration.geomcolumn + " && " + st_bbox + " " + cond + "\
 								GROUP BY tags\
