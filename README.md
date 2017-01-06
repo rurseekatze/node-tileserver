@@ -121,7 +121,7 @@ You need MapCSS converter to compile your MapCSS styles to JavaScript. Go to you
     CustomLog /var/log/apache2/tiles.example.com.access.log combined
     </VirtualHost>
 
- Make sure that your server does not accept requests on port 9000 and 9002 from outside (to circumvent the proxy and its logging).
+ Make sure that your server does not accept requests on port 9000 from outside (to circumvent the proxy and its logging).
 
  Now you are almost ready to run the tileserver. You just need to check the configuration.
 
@@ -187,9 +187,11 @@ __Note:__ For some parameters it is also necessary to change the modify the opti
 
     $ screen -r tileserver
 
- Start the initial rendering:
+ Before the tileserver is being used for delivering tiles, you should start the initial rendering of tiles. This will take some time, so it is recommended to start the script in a screen session:
 
-    $ node init-rendering.js
+    $ screen -R init-rendering
+    $ ./init.sh
+    $ [Ctrl][A][D]
 
 ## Usage
 
