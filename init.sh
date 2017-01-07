@@ -18,20 +18,16 @@ echo "Started initial rendering at $(date)"
 
 # calculate amount of tiles to render
 LISTLENGTH=0
-Z=MINZOOM
 for (( Z=MINZOOM; Z<=MAXPRERENDER; Z++ ))
 do
-	LENGTH=`echo "2 ^ $Z" | bc`
-	LISTLENGTH=$(( LISTLENGTH + `echo "$LENGTH ^ 2" | bc` ))
+	LISTLENGTH=$(( LISTLENGTH + 2 ** (2 * Z) ))
 done
-LISTLENGTHK=$(($LISTLENGTH/1000))
-echo "Initial rendering of $LISTLENGTHK k tiles. This process can take some time."
+echo "Initial rendering of $((LISTLENGTH / 1000)) k tiles. This process can take some time."
 
-Z=$MINZOOM
 for (( Z=MINZOOM; Z<=MAXPRERENDER; Z++ ))
 do
-	LENGTH=`echo "2 ^ $Z" | bc`
-	TILECOUNT=$(( `echo "$LENGTH ^ 2" | bc` ))
+	LENGTH=$((2 ** Z))
+	TILECOUNT=$(( LENGTH ** 2 ))
 	echo "Rendering $TILECOUNT tiles at zoom level $Z..."
 	for (( X=0; X<LENGTH; X++ ))
 	do
