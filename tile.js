@@ -132,7 +132,7 @@ Tile.prototype =
 	{
 		var modFactor = 128;
 		var linkTry = cnt % modFactor;
-		var linkTarget = 'emptytile' + linkTry + extension;
+		var linkTarget = configuration.tiledir+'/emptytile' + linkTry + extension;
 		var linkFunc = function()
 		{
 			fs.link(linkTarget, file, function(err)
@@ -178,7 +178,7 @@ Tile.prototype =
 			});
 		}
 
-		var filepath = configuration.vtiledir+'/'+this.z+'/'+this.x+'/';
+		var filepath = configuration.tiledir+'/tiles/'+this.z+'/'+this.x+'/';
 		var file = filepath + this.y + '.json';
 
 		this.debug('Creating path '+filepath+'...');
@@ -250,7 +250,7 @@ Tile.prototype =
 	// returns the content of a vector tile as a string
 	readVectorData: function(callback)
 	{
-		var path = configuration.vtiledir+'/'+this.z+'/'+this.x+'/'+this.y+'.json';
+		var path = configuration.tiledir+'/tiles/'+this.z+'/'+this.x+'/'+this.y+'.json';
 		this.debug('Opening vector tile at path: '+path);
 		var self = this;
 		fs.readFile(path, function(err, data)
@@ -324,7 +324,7 @@ Tile.prototype =
 		if (selectedStyle > configuration.styles.length)
 			return;
 
-		var filepath = configuration.tiledir+'/'+configuration.styles[selectedStyle]+'/'+this.z+'/'+this.x+'/'+this.y+'.png';
+		var filepath = configuration.tiledir+'/bitmap-tiles/'+configuration.styles[selectedStyle]+'/'+this.z+'/'+this.x+'/'+this.y+'.png';
 		fs.exists(filepath, function(exists)
 		{
 			if (exists)
@@ -357,7 +357,7 @@ Tile.prototype =
 		// remove if zoom level higher than maxcached
 		else
 		{
-			var filepath = configuration.vtiledir+'/'+this.z+'/'+this.x+'/'+this.y+'.json';
+			var filepath = configuration.tiledir+'/tiles/'+this.z+'/'+this.x+'/'+this.y+'.json';
 			var self = this;
 			fs.exists(filepath, function(exists)
 			{
@@ -374,7 +374,7 @@ Tile.prototype =
 	// marks a tile as expired
 	markExpired: function()
 	{
-		var filepath = configuration.vtiledir+'/'+this.z+'/'+this.x+'/'+this.y+'.json';
+		var filepath = configuration.tiledir+'/tiles/'+this.z+'/'+this.x+'/'+this.y+'.json';
 
 		fs.exists(filepath, function(exists)
 		{
@@ -386,7 +386,7 @@ Tile.prototype =
 	// return the timestamp of last modification of a tile
 	getModifyTime: function(callback)
 	{
-		var filepath = configuration.vtiledir+'/'+this.z+'/'+this.x+'/'+this.y+'.json';
+		var filepath = configuration.tiledir+'/tiles/'+this.z+'/'+this.x+'/'+this.y+'.json';
 
 		fs.exists(filepath, function(exists)
 		{
@@ -543,7 +543,7 @@ Tile.prototype =
 		this.style = configuration.styles[selectedStyle];
 
 		this.trace('MapCSS style loaded.');
-		var filepath = configuration.tiledir+'/'+this.style+'/'+this.z+'/'+this.x;
+		var filepath = configuration.tiledir+'/bitmap-tiles/'+this.style+'/'+this.z+'/'+this.x;
 		var self = this;
 		this.render(function(err, image)
 		{
@@ -819,7 +819,7 @@ Tile.prototype =
 	// returns the cached bitmap image of a tile
 	readBitmapData: function(callback)
 	{
-		fs.readFile(configuration.tiledir+'/'+this.style+'/'+this.z+'/'+this.x+'/'+this.y+'.png', function(err, data)
+		fs.readFile(configuration.tiledir+'/bitmap-tiles/'+this.style+'/'+this.z+'/'+this.x+'/'+this.y+'.png', function(err, data)
 		{
 			return process.nextTick(function()
 			{
@@ -842,7 +842,7 @@ Tile.prototype =
 		}
 
 		var self = this;
-		var filepath = configuration.tiledir+'/'+this.style+'/'+this.z+'/'+this.x;
+		var filepath = configuration.tiledir+'/bitmap-tiles/'+this.style+'/'+this.z+'/'+this.x;
 		this.debug('Rendering successful.');
 		this.debug('Saving bitmap tile at path: '+filepath);
 		mkdirp(filepath, function(err)
@@ -913,7 +913,7 @@ Tile.prototype =
 	// indicates if a bitmap tile in this style is already cached
 	bitmapIsCached: function(callback)
 	{
-		fs.exists(configuration.tiledir+'/'+this.style+'/'+this.z+'/'+this.x+'/'+this.y+'.png', function(exists)
+		fs.exists(configuration.tiledir+'/bitmap-tiles/'+this.style+'/'+this.z+'/'+this.x+'/'+this.y+'.png', function(exists)
 		{
 			return process.nextTick(function()
 			{

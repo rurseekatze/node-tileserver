@@ -137,9 +137,7 @@ You can set various options to configure your tileserver:
 
  * `username` The username to be used for database requests. Depends on the parameters you are using in osm2pgsql. _Default: `railmap`_
 
- * `vtiledir` Relative or absolute path to the vector tile directory. _Default: `/var/www/orm/OpenRailwayMap/tiles`_
-
- * `tiledir` Relative or absolute path to the bitmap tile directory. _Default: `/var/www/orm/OpenRailwayMap/bitmap-tiles`_
+ * `tiledir` Relative or absolute path to the directory where bitmap and vector tiles are stored in separate directories. _Default: `/var/www/orm/OpenRailwayMap`_
 
  * `expiredtilesdir` Relative or absolute path to the list of expired tiles. _Default: `/var/www/orm/OpenRailwayMap/import`_
 
