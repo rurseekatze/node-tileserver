@@ -14,6 +14,7 @@ var assert = require('assert');
 var url = require("url");
 var mkdirp = require('mkdirp');
 var pg = require('pg');
+var Pool = require('pg-pool');
 var toobusy = require('toobusy-js');
 var byline = require('byline');
 var touch = require("touch");
@@ -485,16 +486,13 @@ Tile.prototype =
 		var bbox = this.getBbox();
 		var bbox_p = this.from4326To3857(bbox);
 
-		var connection = "postgres://"+configuration.username+":"+configuration.password+"@localhost/"+configuration.database;
-		var client = new pg.Client(connection);
-
-		this.debug('Connecting to database '+connection+'...');
 		var self = this;
-		client.connect(function(err)
+		logger.trace('Connecting to database...');
+		pool.connect(function(err, client, done)
 		{
 			if (err)
 			{
-				self.error('Connection to database '+connection+' failed. Returning.');
+				self.error('Fetching client from database pool failed: ' + err);
 				return process.nextTick(function()
 				{
 					errcallback(err);
@@ -507,10 +505,13 @@ Tile.prototype =
 			self.trace('Requesting data...');
 			client.query(self.getDatabaseQuery(bbox_p), function(err, results)
 			{
-				var content = new Object();
-
 				self.trace('All database queries finished, generating JSON data object.');
+				done();
+
+				var content = new Object();
 				content.features = self.getJSONFeatures(results);
+				content.granularity = configuration.intscalefactor;
+				content.bbox = bbox;
 
 				// catch tiles without data
 				if (content.features.length === 0)
@@ -518,11 +519,9 @@ Tile.prototype =
 					self.debug('Vector tile contains no data.');
 				}
 
-				content.granularity = configuration.intscalefactor;
-				content.bbox = bbox;
-				client.end();
 				self.invertYAxe(content);
 				self.data = content;
+
 				self.debug('Generated vector data.');
 				return process.nextTick(function()
 				{

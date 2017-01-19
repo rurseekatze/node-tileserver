@@ -21,6 +21,7 @@ var events = require('events');
 var log4js = require('log4js');
 var fs = require('graceful-fs');
 var pgPass = require('pgpass');
+var Pool = require('pg-pool');
 
 // load configuraion file
 configuration = require('./config.json');
@@ -68,10 +69,14 @@ http.globalAgent.maxSockets = configuration.maxsockets;
 // request password from pgpass only once at startup, not for each process or even each request
 var connectionDetails =
 {
-	'host' : 'localhost' ,
+	'host' : 'localhost',
+	'port': configuration.port,
 	'database': configuration.database,
-	'user' : configuration.username
+	'user' : configuration.username,
+	'max': parseInt(configuration.maxPoolSize / cpus),
+	'idleTimeoutMillis': 10000
 };
+
 pgPass(connectionDetails, function(password)
 {
 	if (typeof password == 'undefined')
@@ -108,6 +113,12 @@ pgPass(connectionDetails, function(password)
 
 		// rendering queue for expired tiles
 		queue = new Tilequeue();
+
+		pool = new Pool(connectionDetails);
+		pool.on('error', function (err, client)
+		{
+			logger.error('Idle database client error: ' + err.message)
+		});
 
 		function onRequest(request, response)
 		{
