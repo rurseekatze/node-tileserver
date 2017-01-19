@@ -1,14 +1,18 @@
 Installation Instructions
 =========================
 
- First install all the dependencies. Depending on your operating system and environment, you may use another command like apt-get.
+## Dependencies
+
+ First install all the dependencies. Depending on your operating system and environment, you may use another command like `apt-get`.
 
     $ yum update
     $ yum install gzip zlib zlib-devel postgresql-server postgresql-libs postgresql postgresql-common postgresql-devel postgis unzip librsvg2 gnome-python2-rsvg pygobject2 pygobject2-devel librsvg2 librsvg2-devel cairo cairo-devel cairomm-devel libjpeg-turbo-devel pango pango-devel pangomm pangomm-devel giflib-devel npm nodejs git python
 
  For system-specific installation of Cairo view the [node-canvas Wiki](https://github.com/LearnBoost/node-canvas/wiki/_pages).
 
- Then move to your favorite directory and clone this repository:
+## Installation
+
+ Move to your favorite directory and clone this repository:
 
     $ git clone https://github.com/rurseekatze/node-tileserver.git
     $ cd node-tileserver
