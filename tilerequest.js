@@ -46,7 +46,6 @@ Tilerequest = function(request, response)
 
 	if (this.params.length < 5 || this.params.length > 6)
 	{
-		logger.info('Request for '+this.pathname+' received.');
 		logger.info('URL format of '+this.pathname+' not valid. Aborting.');
 		this.response.writeHead(400, {'Content-Type': 'text/plain'});
 		this.response.end();
