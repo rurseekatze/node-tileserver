@@ -154,15 +154,22 @@ __Note:__ For some parameters it is also necessary to change the modify the opti
 
 ## Run the server
 
- Start the tileserver and the proxy in a screen session:
+ In case your system uses systemd you can install the unit file for the API server:
 
-    $ screen -R tileserver
-    $ node tileserver.js
-    $ [Ctrl][A][D]
+    $ cd api
+    $ sudo make install-systemd
 
- Jump back to the session to see log output or to restart the processes:
+ The user and group the service will run defaults to "openrailwaymap", you can change this in the makefile or by passing the ORM_USER or ORM_GROUP variables to make.
 
-    $ screen -r tileserver
+ If you are not using systemd either write an init script or start the server in a screen session.
+
+ Start the API server:
+
+    $ sudo systemctl start orm-tileserver.service
+
+ Optionally enable autostart:
+
+    $ sudo systemctl enable orm-tileserver.service
 
  Before the tileserver is being used for delivering tiles, you should start the initial rendering of tiles. This will take some time, so it is recommended to start the script in a screen session:
 
