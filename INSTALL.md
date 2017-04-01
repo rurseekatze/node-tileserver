@@ -36,11 +36,11 @@ Installation Instructions
 
  Set up the PostgreSQL database with PostGIS and hstore extensions:
 
-    $ sudo -u postgres createuser railmap
-    $ sudo -u postgres createdb -E UTF8 -O railmap railmap
+    $ sudo -u postgres createuser openrailwaymap
+    $ sudo -u postgres createdb -E UTF8 -O openrailwaymap openrailwaymap
 
-    $ sudo -u postgres psql -d railmap -c "CREATE EXTENSION postgis;"
-    $ sudo -u postgres psql -d railmap -c "CREATE EXTENSION hstore;"
+    $ sudo -u postgres psql -d openrailwaymap -c "CREATE EXTENSION postgis;"
+    $ sudo -u postgres psql -d openrailwaymap -c "CREATE EXTENSION hstore;"
 
     $ sudo service postgresql-9.5 initdb
     $ sudo service postgresql-9.5 start
@@ -58,7 +58,7 @@ Installation Instructions
 
  in this example (replace `YOURPASSWORD` by the password you entered in the `createuser` command):
 
-    localhost:5432:railmap:railmap:YOURPASSWORD
+    localhost:5432:openrailwaymap:openrailwaymap:YOURPASSWORD
 
  Then set the correct file permissions:
 
@@ -66,7 +66,7 @@ Installation Instructions
 
  Now you can load some data into your database. All tags which are used by the MapCSS style sheet have to be in a hstore column called "tags".
 
-    $ osm2pgsql --create --database railmap --username railmap --prefix railmap --slim --style railmap.style --hstore-all --hstore-add-index railways.osm
+    $ osm2pgsql --create --database openrailwaymap --username openrailwaymap --prefix openrailwaymap --slim --style railmap.style --hstore-all --hstore-add-index railways.osm
 
  Have a look at an [example toolchain](https://github.com/rurseekatze/OpenRailwayMap/blob/master/import/import.sh) for an example of using osm2pgsql with filtered data.
 
@@ -110,11 +110,11 @@ You can set various options to configure your tileserver:
 
  * `tileSize` Size of tiles in pixels. Usually it is not necessary to change this value, but you can increase or decrease it for higher rendering performance or faster map generation. Consider that the bitmap tiles are rendered in "retina" quality, so the actual tile size is twice as high ([Supersampling](https://en.wikipedia.org/wiki/Supersampling)). _Default: `256`_
 
- * `prefix` The prefix used for osm2pgsql tables. Depends on the parameters you are using in osm2pgsql. _Default: `railmap`_
+ * `prefix` The prefix used for osm2pgsql tables. Depends on the parameters you are using in osm2pgsql. _Default: `openrailwaymap`_
 
- * `database` The name of the used database. Depends on the parameters you are using in osm2pgsql. _Default: `railmap`_
+ * `database` The name of the used database. Depends on the parameters you are using in osm2pgsql. _Default: `openrailwaymap`_
 
- * `username` The username to be used for database requests. Depends on the parameters you are using in osm2pgsql. _Default: `railmap`_
+ * `username` The username to be used for database requests. Depends on the parameters you are using in osm2pgsql. _Default: `openrailwaymap`_
 
  * `tiledir` Relative or absolute path to the directory where bitmap and vector tiles are stored in separate directories. _Default: `/var/www/orm/OpenRailwayMap`_
 
@@ -261,7 +261,7 @@ __Note:__ For some parameters it is also necessary to change the modify the opti
 
  Use osm2pgsql to update your database. To rerender all expired tiles, you need a file that contains a list of expired tiles. Such a command could look like this:
 
-    $ osm2pgsql --database railmap --username railmap --append --prefix railmap --slim --style railmap.style --hstore --cache 512 --expire-tiles 0-15 --expire-output expired_tiles changes.osc
+    $ osm2pgsql --database openrailwaymap --username openrailwaymap --append --prefix openrailwaymap --slim --style railmap.style --hstore --cache 512 --expire-tiles 0-15 --expire-output expired_tiles changes.osc
 
  Note that the value of the parameter `--expire-tiles` should have the format `minZoom-(maxCached minus 2)`.
 
