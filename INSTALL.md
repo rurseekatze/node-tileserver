@@ -3,12 +3,26 @@ Installation Instructions
 
 ## Dependencies
 
- First install all the dependencies. Depending on your operating system and environment, you may use another command like `apt-get`.
+Required versions:
+
+* PostgreSQL >= 9.3
+* osm2pgsql >= 0.90.0
+
+CentOS:
 
     $ yum update
-    $ yum install gzip zlib zlib-devel postgresql-server postgresql-libs postgresql postgresql-common postgresql-devel postgis unzip librsvg2 gnome-python2-rsvg pygobject2 pygobject2-devel librsvg2 librsvg2-devel cairo cairo-devel cairomm-devel libjpeg-turbo-devel pango pango-devel pangomm pangomm-devel giflib-devel npm nodejs git python
+    $ yum install gzip zlib zlib-devel bzip2-devel zip postgresql postgresql-server postgresql-libs postgresql-contrib postgresql-common postgresql-devel postgis unzip librsvg2 librsvg2-devel gnome-python2-rsvg pygobject2 pygobject2-devel cairo cairo-devel cairomm-devel libjpeg-turbo-devel pango pango-devel pangomm pangomm-devel giflib-devel npm nodejs git python wget python-ply python-imaging pycairo python-cairosvg pygtk2 pygtk2-devel make cmake boost-devel expat-devel geos-devel proj-devel proj-epsg lua-devel gcc-c++ libjpeg-turbo-devel giflib-devel
 
- For system-specific installation of Cairo view the [node-canvas Wiki](https://github.com/LearnBoost/node-canvas/wiki/_pages).
+ Debian/Ubuntu:
+
+    $ apt-get install --no-install-recommends postgresql-9.5-postgis-2.2
+    $ apt-get install gzip postgresql-common libgeoip1 geoip-database geoip-bin php5-geoip php-gettext unzip python-ply python-imaging python-cairo python-cairosvg librsvg2-2 librsvg2-dev libpango1.0-dev libcairo2-dev libcairomm-1.0-dev libjpeg-turbo8-dev libpangomm-1.4-1 libpangomm-1.4-dev npm nodejs wget zlib1g-dev osm2pgsql php5-pgsql
+    $ apt-get install git libgif-dev build-essential g++ make zip
+    $ apt-get install nodejs-legacy # see https://stackoverflow.com/questions/21168141/can-not-install-packages-using-node-package-manager-in-ubuntu for the reason
+    # in case you want to build osm2pgsql from sources
+    $ apt-get install cmake
+
+ For system-specific installation of Cairo also have a look at the [node-canvas Wiki](https://github.com/LearnBoost/node-canvas/wiki/_pages).
 
 ## Installation
 
