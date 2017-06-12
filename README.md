@@ -36,7 +36,7 @@
 
  Want to contribute to node-tileserver? Patches for new features, bug fixes, documentation, examples and others are welcome. Take also a look at the [issues](https://github.com/rurseekatze/node-tileserver/issues).
 
- You can honor this project also by a donation with [Flattr](https://flattr.com/submit/auto?user_id=rurseekatze&url=https://github.com/rurseekatze/node-tileserver&title=node-tileserver&description=A%20lightweight%20tileserver%20using%20NodeJS.%20It%20can%20serve%20bitmap%20and%20vector%20tiles%20and%20is%20intended%20as%20an%20fast%20and%20easy-to-install%20tileserver%20for%20rendering%20OpenStreetMap%20data.&tags=js,javascript,nodejs,tileserver,openstreetmap,osm,map,rendering,renderer&category=software) or [Paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=58H4UKT35KLLA). This project is operated by the developers in their spare time and has no commercial goals. By making a donation you can show that you appreciate the voluntary work of the developers and can motivate them to continue the project in the future.
+ You can honor this project also by a donation with [Paypal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=58H4UKT35KLLA). This project is operated by the developers in their spare time and has no commercial goals. By making a donation you can show that you appreciate the voluntary work of the developers and can motivate them to continue the project in the future.
 
 ## License
 
