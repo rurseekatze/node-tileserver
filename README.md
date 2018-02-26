@@ -30,7 +30,7 @@
 
 ## References
 
-* [OpenRailwayMap] (http://www.openrailwaymap.org/) - a map of the global railway network based on OpenStreetMap. Provides a client-rendered canvas and a standard bitmap tile version of the map.
+* [OpenRailwayMap](http://www.openrailwaymap.org/) - a map of the global railway network based on OpenStreetMap. Provides a client-rendered canvas and a standard bitmap tile version of the map.
 
 ## Contribute
 
