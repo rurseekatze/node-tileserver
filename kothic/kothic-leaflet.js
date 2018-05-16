@@ -91,7 +91,7 @@ L.TileLayer.Kothic = L.TileLayer.Canvas.extend({
 					replace('{y}',tilePoint.y).
 					replace('{z}',rzoom);
 		this._canvases[key] = canvas;
-		if (url.endsWith('.json'))
+		if (url.slice(-5) === '.json')
 			this._loadJSON(url, rzoom, tilePoint.x, tilePoint.y);
 		else
 			this._scripts[key] = this._loadScript(url);
