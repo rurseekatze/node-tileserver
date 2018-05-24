@@ -88,8 +88,8 @@ CentOS:
 
  * [JOSM MapCSS Implementation](https://josm.openstreetmap.de/wiki/Help/Styles/MapCSSImplementation)
  * [JOSM MapCSS Tutorial](https://josm.openstreetmap.de/wiki/Help/Styles/MapCSSTutorial)
- * [MapCSS Website](http://www.mapcss.org/)
- * [MapCSS in OSM Wiki](http://wiki.openstreetmap.org/wiki/MapCSS)
+ * [MapCSS Website](https://www.mapcss.org/)
+ * [MapCSS in OSM Wiki](https://wiki.openstreetmap.org/wiki/MapCSS)
 
 You need MapCSS converter to compile your MapCSS styles to JavaScript. Go to your styles directory and compile all your MapCSS styles in one run (you have to do this after every change of your stylesheets):
 

@@ -34,10 +34,10 @@
 	{
 		"name": "Alexander Matheisen",
 		"email": "info@matheisen.org",
-		"url": "http://www.matheisen.org/"
+		"url": "https://www.matheisen.org/"
 	},
-	"url": "http://github.com/rurseekatze/node-tileserver",
-	"homepage": "http://github.com/rurseekatze/node-tileserver",
+	"url": "https://github.com/rurseekatze/node-tileserver",
+	"homepage": "https://github.com/rurseekatze/node-tileserver",
 	"license": "GPLv3+",
 	"bugs":
 	{

@@ -1,7 +1,7 @@
 # node-tileserver testcases
 
 Running the tests is simple. All you need is the usual node-tileserver dependencies
-and a not too old version of [CMake](http://www.cmake.org).
+and a not too old version of [CMake](https://www.cmake.org).
 
 The commands to run the testcases are:
 

@@ -32,8 +32,8 @@ L.TileLayer.Kothic = L.TileLayer.Canvas.extend({
 		maxZoom: 19,
 		updateWhenIdle: true,
 		unloadInvisibleTiles: true,
-		attribution: 'Map data &copy; 2013 <a href="http://osm.org/copyright">OpenStreetMap</a> contributors,' +
-					 ' Rendering by <a href="http://github.com/kothic/kothic-js">Kothic JS</a>',
+		attribution: 'Map data &copy; 2013 <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors,' +
+					 ' Rendering by <a href="https://github.com/kothic/kothic-js">Kothic JS</a>',
 		async: true,
 		buffered: false,
 		styles: MapCSS.availableStyles

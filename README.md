@@ -1,8 +1,8 @@
 # node-tileserver
 
- node-tileserver is a lightweight tileserver using [NodeJS](http://nodejs.org/). It can serve bitmap and vector tiles and is designed as a fast and easy-to-install tileserver for rendering OpenStreetMap data. It works perfectly with an osm2pgsql database and Leaflet and KothicJS on the client side.
+ node-tileserver is a lightweight tileserver using [NodeJS](https://www.nodejs.org/). It can serve bitmap and vector tiles and is designed as a fast and easy-to-install tileserver for rendering OpenStreetMap data. It works perfectly with an osm2pgsql database and Leaflet and KothicJS on the client side.
 
- See the [OpenStreetMap Wiki](http://wiki.openstreetmap.org/wiki/Node-tileserver) or the [Github repository](https://github.com/rurseekatze/node-tileserver) for more information.
+ See the [OpenStreetMap Wiki](https://wiki.openstreetmap.org/wiki/Node-tileserver) or the [Github repository](https://github.com/rurseekatze/node-tileserver) for more information.
 
 ## Features
 
@@ -21,8 +21,8 @@
 
 ## Authors
 
- * Alexander Matheisen [@rurseekatze](http://github.com/rurseekatze)
- * Rolf Eike Beer [@DerDakon](http://github.com/DerDakon)
+ * Alexander Matheisen [@rurseekatze](https://github.com/rurseekatze)
+ * Rolf Eike Beer [@DerDakon](https://github.com/DerDakon)
 
 ## Installation
 
@@ -30,7 +30,7 @@
 
 ## References
 
-* [OpenRailwayMap](http://www.openrailwaymap.org/) - a map of the global railway network based on OpenStreetMap. Provides a client-rendered canvas and a standard bitmap tile version of the map.
+* [OpenRailwayMap](https://www.openrailwaymap.org/) - a map of the global railway network based on OpenStreetMap. Provides a client-rendered canvas and a standard bitmap tile version of the map.
 
 ## Contribute
 
@@ -46,6 +46,6 @@ This program is free software: you can redistribute it and/or modify it under th
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program. If not, see http://www.gnu.org/licenses/.
+You should have received a copy of the GNU General Public License along with this program. If not, see https://www.gnu.org/licenses/.
 
 __The file `mapcss_converter.py` and the files in the `mapcss_parser` and `kothic` directories are published under other licenses. See the header of each file for more information.__
